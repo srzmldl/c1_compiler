@@ -5,6 +5,9 @@
 | src/       | source(*.h, *.c, Makefile)         |
 | doc/       | designing decument of this project |
 | bin/       | shell                              |
-| test/      | store test program                 |
+| test/      | test programs                      |
 
-* 
+* Notes 
+
+** C1
+

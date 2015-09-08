@@ -1,0 +1,10 @@
+* Files and directorys
+| Name       | Description                        |
+|------------+------------------------------------|
+| README.org | this file                          |
+| src/       | source(*.h, *.c, Makefile)         |
+| doc/       | designing decument of this project |
+| bin/       | shell                              |
+| test/      | store test program                 |
+
+* 

@@ -1,13 +1,10 @@
-SRCS = $(wildcard /src/*.c)
-OBJS = $(SRCS:.c = .o)
-CC = gcc
-CCFLAGS = -g -Wall -O0
-
-my_app : $(OBJS)
-$(CC) $^ -o $@
-
-%.o : %.c
-$(CC) -c $< $(CCFLAGS)
+VPATH = src
+CODE := calcSum pickMax bubleSort factorial generatePermutation
+all: $(CODE)
+%:%.o
+	gcc $< -o $@
+%.o:%.c
+	gcc -c $< -o $@
+.PHONY: clean
 clean:
-rm *.o
-.PHONY:clean
+	rm -f *.o

@@ -5,4 +5,5 @@ do
     echo $name
     ./$name
     echo -e '\n'
+    rm $name
 done 

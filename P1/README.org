@@ -2,10 +2,39 @@
 | Name       | Description                        |
 |------------+------------------------------------|
 | README.org | this file                          |
-| src/       | source(*.h, *.c, Makefile)         |
+| README.md  | exported frome README.org          |
+| src/       | source(*.h, *.c)                   |
 | doc/       | designing decument of this project |
 | bin/       | shell                              |
 | test/      | test programs                      |
 
-* Notes 
-
+* Tips
+  - 检查时请直接运行bin下的bash.sh,可以自动编译,运行所有程序.并且输出带有提示的检查信息
+  - 请根据编辑器情况自行选择README.org与README.md,后者由插件转码,体验较差.请尽量看org文档
+* 脚本使用说明
+  - 脚本在"bin/bash.sh".
+  - 在终端中输入"bash bash.sh"即可
+  - 运行之后会编译所有程序,并输出检查信息.检查十分便利
+  - 实现方法:简单粗暴,遍历/src文件夹下的所有.c后缀文件.取出名字,再和删掉后缀名后的中间变量一起
+作为gcc的两个参数
+* 程序功能
+** calcSum.c
+   - 计算数组中每一个元素和.
+   - 测试gcc,clang中对const数组的不同要求.
+   - 写一下简陋的循环
+** pickMax.c
+   - 找出按一定规则生成的数组中的最大值
+   - 测试加减乘除模这些运算
+   - 测试溢出int时的情况
+** bubleSort.c
+   - 对数组元素从小到大排序,最后自行检验是否有序,体现在flag中
+   - 测试循环嵌套
+   - 写较长的c1程序
+** factorial.c
+   - 输出n的阶乘,程序中为10
+   - 测试无参函数调用以及递归
+** genereatePermutatioon.c
+   - 生成1-n组成的排列,按照字典序输出
+   - 测试递归
+   - 测试无参数传递的回溯
+   - 测试局部变量,全局变量作用域

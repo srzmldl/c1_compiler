@@ -1,0 +1,42 @@
+* 学习内容
+  - LLVM,Flex,Bison从头构造C1编译器
+  - 阅读Clang源码
+* 理解kaleidoscope的词法分析过程
+** 教程笔记
+*** 语言基础
+   - 定义:这是一种能用条件,数学等定义函数的语言.
+   - 唯一数据类型:64-bit 浮点数.所以无需定义
+   - 可调用标准库函数,需要先extern声明
+*** Lexer
+   - 返回值
+     + tok_eof 文末中止符
+     + tok_def, tok_extern命令
+     + tok_identifier 标识符
+     + tok_number 数字
+     + [0-255]未知字符
+   - lexer实现就是一个gettok函数,如下几个部份
+     + 过滤空白符号
+     + 识别标识符和关键字
+     + 识别数字:注意多个小数点全读完
+     + 注释部份
+     + 其他未知字符
+** 要做的题
+*** 解释gettok()函数参数传递
+   返回值为int,表示token类别或者未知字符.语义值通过全局变量传递.有如下几种返回值
+   - 匹配到"def"或者"extern",则返回tok_def或,tok_extern
+   - 除了上面的情况匹配到别的字符串,返回tok_identifier表明是标识符, 并通过全局变量IdentifierStr传递token语义值.
+   - 匹配到数字(不考虑多个小数点不合法),用字符串类型NumStr暂存,将其转化成数字后利用全局变量NumVal传递语义值,并且函数返回值为tok_number表示是数字token
+   - 如果是注释则递归调用找到下一个token作为返回值
+   - 其余情况即匹配到表示未知字符,实际上就是ASCII值,返回值就是该字符
+*** 拓展词法分析器
+    
+*** 拓展修改后的词法分析去,识别token
+* 学习使用Flex
+** 学习笔记
+* Flex生成C1词法分析器
+** 为C1语言单词写词法规则
+** 用Flex生成C1词法分析器
+* 阅读clang词法分析文件
+** Clang - Token.h
+** Clang - Lexer.h, Lexer.cpp
+** Clang - Diagnostic.h, Diagnostic.cpp

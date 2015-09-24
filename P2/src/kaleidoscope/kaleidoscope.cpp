@@ -23,7 +23,8 @@ enum Token {
 
 static std::string IdentifierStr;  // Filled in if tok_identifier
 static double NumVal;              // Filled in if tok_number
-
+static int intNumVal;
+static int baseToken;
 /// gettok - Return the next token from standard input.
 static int gettok() {
   static int LastChar = ' ';
@@ -41,15 +42,29 @@ static int gettok() {
     if (IdentifierStr == "extern") return tok_extern;
     return tok_identifier;
   }
-
+  
   if (isdigit(LastChar) || LastChar == '.') {   // Number: [0-9.]+
     std::string NumStr;
+    int base = 10;
+    char firChar = LastChar;
+    char secChar = ' ';
+    int flag = 0;
+    if (LastChar)
     do {
       NumStr += LastChar;
       LastChar = getchar();
-    } while (isdigit(LastChar) || LastChar == '.');
+      flag++;
+      if (flag == 1) secChar = LastChar;
+    } while (isdigit(LastChar) || LastChar == '.' || ((LastChar == 'x' || LastChar == 'X') && (flag == 1) && (firChar == '0')));
+    
+    if (firChar == '0' && (secChar == 'x' || secChar == 'X')) base = 16;
+    else if (firChar == '0' && isdigit(secChar)) base = 8;
+    else base = 10;
 
-    NumVal = strtod(NumStr.c_str(), 0);
+    if (base == 10)
+        NumVal = strtod(NumStr.c_str(), 0);
+    else NumVal = strtol(NumStr.c_str(), 0, base);
+    baseToken = base;
     return tok_number;
   }
 
@@ -61,12 +76,31 @@ static int gettok() {
     if (LastChar != EOF)
       return gettok();
   }
+
+  // /*sddgdfkghjdfh*/
+  if (LastChar == '/') {
+      char tmpChar = getchar();
+      if (tmpChar == '*') {
+          //deal with multi line comment.
+          LastChar = getchar();
+          for (int sta = 0; sta != 2 && LastChar != EOF; LastChar = getchar())
+          {
+              if (LastChar == '*') sta = 1;
+              else if (LastChar == '/' && sta == 1) sta = 2;
+          }
+          if (LastChar != EOF)
+              return gettok();
+      }
+      // send back to the buffer, '/' is an ascii value
+      else ungetc(tmpChar, stdin);
+  }
   
   // Check for end of file.  Don't eat the EOF.
   if (LastChar == EOF)
     return tok_eof;
 
   // Otherwise, just return the character as its ascii value.
+  
   int ThisChar = LastChar;
   LastChar = getchar();
   return ThisChar;
@@ -138,7 +172,21 @@ public:
 /// lexer and updates CurTok with its results.
 static int CurTok;
 static int getNextToken() {
-  return CurTok = gettok();
+  CurTok = gettok();
+  
+  switch (CurTok) {
+  case tok_identifier:    fprintf(stderr, "<identifier, %s>\n", IdentifierStr.c_str()); break;
+  case tok_number:
+      if (baseToken == 10) fprintf(stderr, "<digit, %f>\n", NumVal);
+      else fprintf(stderr, "<digit, %d>\n", intNumVal);
+      break;
+  case tok_def:  fprintf(stderr, "<def>\n"); break;
+  case tok_extern: fprintf(stderr, "<extern>\n"); break;
+  case tok_eof: fprintf(stderr, "<eof>\n"); break;
+  default: fprintf(stderr, "<unknown, %c>\n", CurTok); break;
+      
+  }
+  return CurTok;
 }
 
 /// BinopPrecedence - This holds the precedence for each binary operator that is
@@ -271,7 +319,7 @@ static ExprAST *ParseExpression() {
   return ParseBinOpRHS(0, LHS);
 }
 
-/// prototype
+/// prototypes
 ///   ::= id '(' id* ')'
 static PrototypeAST *ParsePrototype() {
   if (CurTok != tok_identifier)
@@ -285,7 +333,7 @@ static PrototypeAST *ParsePrototype() {
   
   std::vector<std::string> ArgNames;
   while (getNextToken() == tok_identifier)
-    ArgNames.push_back(IdentifierStr);
+  ArgNames.push_back(IdentifierStr);
   if (CurTok != ')')
     return ErrorP("Expected ')' in prototype");
   
@@ -363,6 +411,7 @@ static void MainLoop() {
     case ';':        getNextToken(); break;  // ignore top-level semicolons.
     case tok_def:    HandleDefinition(); break;
     case tok_extern: HandleExtern(); break;
+        
     default:         HandleTopLevelExpression(); break;
     }
   }
@@ -386,6 +435,5 @@ int main() {
 
   // Run the main "interpreter loop" now.
   MainLoop();
-
   return 0;
 }

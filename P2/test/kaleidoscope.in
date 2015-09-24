@@ -1,0 +1,37 @@
+# Compute the x'th fibonacci number.
+def fib(x)
+/*dklasgjlkdfgj
+sdkgjd
+dsgkdfh
+dkgfjdhl*/
+  if x < /*sdkjgflkd
+  dsfkdhj
+  dasklgfjdl
+  /**/3 then
+    1
+  else
+    fib(x-1)/*dskgjdklfhj*/+fib(x-2)
+
+# This expression will compute the 40th number.
+
+fib(40)/**/
+extern sin(arg);
+extern cos(arg);
+extern /*dsljgkld
+daskgdjflhss
+kasdfjghl*/
+atan2(arg1 arg2);
+
+atan2(sin(.4), cos(42))
+
+
+.
+.012
+123
+123.4
+123.4.5
+0.001
+00.23
+0x123.4
+012.9
+0X21

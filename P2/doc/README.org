@@ -114,3 +114,50 @@
 ** Clang - Token.h
 ** Clang - Lexer.h, Lexer.cpp
 ** Clang - Diagnostic.h, Diagnostic.cpp
+* 阅读clang词法分析文件
+** Clang-Token.h
+- Loc: token的位置
+- UnitData: 当是正常的token的时候,是token文本长度.注解token的时候指向末尾
+- *PtrData: 四个不同指针的集合,因token类型而异
+  + identifiers, keywords, etc: 内容指针
+  + Literals: 文本缓冲区首指针
+  + Annotations: 指向sema-specific data
+  + Eof: 指向Decl
+  + Other: null
+- Kind: token类型
+- Flags: 二进制位标记,01表示是否再当前集合中
+- 大致理解method的功能: 这个代码可读性很好啊.把每个单词翻译一下就大致懂了.这么多就不一一说了.随机抽几个
+  + isLiteral() 判断是否位Literal
+  + getIdentifierInfo() 或者identifier的信息,返回指针
+  + clearFlag() 标记清零
+
+** clang-Lexer.h, Lexer.cpp
+*** 处理各类token
+**** 数字(LexNumericConstant)
+     - 先处理数字前缀
+     - 再处理'e/E'+符号的指数情况.海妖判断是不是Microsoft模式的特殊情况
+     - 然后处理FP类型数字'P/p'+符号的情况
+     - 处理数字分隔符
+     - 处理UCN或者UTF-8
+     - 最后再更新token的位置和缓冲区指针
+**** 标识符(LexIdentifier)
+     - 进入函数时已经匹配一个非数字的合法字符
+     - 先把无$,\,?的简单特殊情况处理完
+     - 处理有上述特殊字符的情形:
+       + 有$, 根据是否支持这个符号决定是否结束
+       + 有\\, 转义字符
+       + 否则时正常的字母
+**** 处理"="和'=="
+     找到一个'='的时候再找下一个,如果下一个仍然是'=',则还得处理三个等号的情况,交给HandleEndOfConflictMarker去处理.没有冲突就得到了equalequal的token了.下一个是别的字符那么得到equal的token.
+**** 跳过注释
+     同时读到'/'和'*'后,开始找啊找,找到了"*/"后注释结束.以及define里用了一点黑科技快速跳.
+*** goto语句
+    - 这么多case,不用goto代码结构会很复杂,嵌套if之类的会特别深
+    - 更好的描述正规式,goto式不错的选择.可能case中很多处的某些情况的下一步跳到的是与之并行的case中.这种情况一多就只好用goto咯.
+    - 用这么多goto是因词法分析特性决定的.我们说要避免goto是为了防止逻辑混乱.但此处的goto让逻辑更明确.可以想像成在一个状态,输入一条边(一个if之类的),跳转到下一个状态.
+*** 如何记录位置信息的(一个例子)
+    比如LexAngledStringLiteral()中,我们有当前指针位置,有得到的token信息,长度等.然后调用FromTokenWithChars(TokStart指向BufferPtr,用这个函数得到BufferPtr).最后用setLiteralData传入TokStart更改token中的PtrData为TokStart.都是这样的.
+*** 字符串转化token
+    对于字符串,*prtdata记的是token在text buffer中的起始位置.比如需要的到字符串数据时有getLiteralData()函数,返回了text buffer的起始位置指针. 每次确认字符串token时setLiteralData存储PtrData.所以需要用时通过prtData去text buffer取.
+** Clang-Diagnostic.h, Diagnostic.cpp
+   

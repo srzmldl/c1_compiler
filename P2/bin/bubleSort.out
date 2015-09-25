@@ -1,0 +1,41 @@
+please input source program file name: < ident, void >< ident, main >< brace, ( >< brace, ) >
+Illegal character
+< const >< int >< ident, n >< assign >< number, 10 >< semicolon >
+< int >< ident, a >< bracket, [ >< number, 10 >< bracket, ] >< assign >Illegal character< number, 10 >< comma >< number, 7 >< comma >< number, 5 >< comma >< number, 100 >< comma >< number, 1 >< comma >< number, 7 >< comma >< number, 67 >< comma >< number, 4 >< comma >< number, 99 >< comma >< number, 6 >Illegal character< semicolon >
+< int >< ident, i >< assign >< number, 0 >< semicolon >
+
+< while >< brace, ( >< ident, i >< comp, <= >< ident, n >< op, - >< number, 1 >< brace, ) >
+Illegal character
+< ident, i >< assign >< ident, i >< op, + >< number, 1 >< semicolon >
+Illegal character
+
+< ident, i >< assign >< number, 0 >< semicolon >
+< while >< brace, ( >< ident, i >< comp, < >< ident, n >< op, - >< number, 1 >< brace, ) >
+Illegal character
+< int >< ident, j >< assign >< number, 0 >< semicolon >
+< while >< brace, ( >< ident, j >< comp, < >< ident, n >< op, - >< number, 1 >< op, - >< ident, i >< brace, ) >
+Illegal character
+< if >< brace, ( >< ident, a >< bracket, [ >< ident, j >< op, + >< number, 1 >< bracket, ] >< comp, < >< ident, a >< bracket, [ >< ident, j >< bracket, ] >< brace, ) >
+Illegal character
+< int >< ident, t >< assign >< ident, a >< bracket, [ >< ident, j >< bracket, ] >< semicolon >
+< ident, a >< bracket, [ >< ident, j >< bracket, ] >< assign >< ident, a >< bracket, [ >< ident, j >< op, + >< number, 1 >< bracket, ] >< semicolon >
+< ident, a >< bracket, [ >< ident, j >< op, + >< number, 1 >< bracket, ] >< assign >< ident, t >< semicolon >
+Illegal character
+< ident, j >< assign >< ident, j >< op, + >< number, 1 >< semicolon >
+Illegal character
+< ident, i >< assign >< ident, i >< op, + >< number, 1 >< semicolon >
+Illegal character
+< int >< ident, flag >< assign >< number, 1 >< semicolon >
+< ident, i >< assign >< number, 0 >< semicolon >
+< while >< brace, ( >< ident, i >< comp, < >< ident, n >< op, - >< number, 1 >< brace, ) >
+Illegal character
+< if >< brace, ( >< ident, a >< bracket, [ >< ident, i >< bracket, ] >< comp, > >< ident, a >< bracket, [ >< ident, i >< op, + >< number, 1 >< bracket, ] >< brace, ) >< ident, flag >< assign >< number, 0 >< semicolon >
+< ident, i >< assign >< ident, i >< op, + >< number, 1 >< semicolon >
+Illegal character
+
+< ident, i >< assign >< number, 0 >< semicolon >
+< while >< brace, ( >< ident, i >< comp, <= >< ident, n >< op, - >< number, 1 >< brace, ) >
+Illegal character
+< ident, i >< assign >< ident, i >< op, + >< number, 1 >< semicolon >
+Illegal character
+Illegal character

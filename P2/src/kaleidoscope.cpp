@@ -63,7 +63,7 @@ static int gettok() {
 
     if (base == 10)
         NumVal = strtod(NumStr.c_str(), 0);
-    else NumVal = strtol(NumStr.c_str(), 0, base);
+    else intNumVal = strtol(NumStr.c_str(), 0, base);
     baseToken = base;
     return tok_number;
   }
@@ -183,8 +183,14 @@ static int getNextToken() {
   case tok_def:  fprintf(stderr, "<def>\n"); break;
   case tok_extern: fprintf(stderr, "<extern>\n"); break;
   case tok_eof: fprintf(stderr, "<eof>\n"); break;
-  default: fprintf(stderr, "<unknown, %c>\n", CurTok); break;
-      
+  default: {
+      char st0[] = "unknown";
+      char st1[] = "op";
+      char *st = st0;
+      if (CurTok == '+' || CurTok == '-' || CurTok == '*'
+          || CurTok == '/' || CurTok == '%') st = st1;
+      fprintf(stderr, "<%s, %c>\n", st, CurTok); break;
+  }
   }
   return CurTok;
 }

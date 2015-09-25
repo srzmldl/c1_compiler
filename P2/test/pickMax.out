@@ -1,0 +1,34 @@
+Illegal character< ident, include >< comp, < >< ident, stdio >Illegal character< ident, h >< comp, > >
+
+< void >< ident, main >< parenth, ( >< parenth, ) >
+< brace, { >
+< const >< int >< ident, n >< assign >< number, 10 >< semicolon >
+< int >< ident, a >< bracket, [ >< number, 10 >< bracket, ] >< semicolon >
+< const >< ident, c1 >< assign >< number, 31313 >< comma >< ident, c2 >< assign >< number, 38457894 >< comma >< ident, c3 >< assign >< number, 1000000007 >< semicolon >
+
+< ident, a >< bracket, [ >< number, 0 >< bracket, ] >< assign >< number, 123 >< semicolon >
+< int >< ident, i >< assign >< number, 1 >< semicolon >
+< while >< parenth, ( >< ident, i >< comp, < >< ident, n >< parenth, ) >
+< brace, { >
+< ident, a >< bracket, [ >< ident, i >< bracket, ] >< assign >< parenth, ( >< ident, a >< bracket, [ >< ident, i >< op, - >< number, 1 >< bracket, ] >< op, * >< ident, c1 >< op, + >< ident, c2 >< parenth, ) >< op, % >< ident, c3 >< semicolon >
+< ident, i >< assign >< ident, i >< op, + >< number, 1 >< semicolon >
+< brace, } >
+
+< int >< ident, max >< assign >< ident, a >< bracket, [ >< number, 0 >< bracket, ] >< semicolon >
+< ident, i >< assign >< number, 1 >< semicolon >
+< while >< parenth, ( >< ident, i >< comp, < >< ident, n >< parenth, ) >
+< brace, { >
+< if >< parenth, ( >< ident, a >< bracket, [ >< ident, i >< bracket, ] >< comp, > >< ident, max >< parenth, ) >< ident, max >< assign >< ident, a >< bracket, [ >< ident, i >< bracket, ] >< semicolon >
+< ident, i >< assign >< ident, i >< op, + >< number, 1 >< semicolon >
+< brace, } >
+
+< ident, i >< assign >< number, 0 >< semicolon >
+< ident, printf >< parenth, ( >Illegal character< ident, Array >< ident, generated >Illegal characterIllegal character< ident, n >Illegal character< parenth, ) >< semicolon >
+< while >< parenth, ( >< ident, i >< comp, < >< ident, n >< parenth, ) >
+< brace, { >
+< ident, printf >< parenth, ( >Illegal character< op, % >< ident, d >Illegal character< comma >< ident, a >< bracket, [ >< ident, i >< bracket, ] >< parenth, ) >< semicolon >
+< ident, i >< assign >< ident, i >< op, + >< number, 1 >< semicolon >
+< brace, } >
+< ident, printf >< parenth, ( >Illegal characterIllegal character< ident, n >Illegal character< parenth, ) >< semicolon >
+< ident, printf >< parenth, ( >Illegal character< ident, max >< ident, of >< ident, them >Illegal character< op, % >< ident, d >Illegal character< ident, n >Illegal character< comma >< ident, max >< parenth, ) >< semicolon >
+< brace, } >

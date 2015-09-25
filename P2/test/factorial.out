@@ -1,0 +1,25 @@
+Illegal character< ident, include >< comp, < >< ident, stdio >Illegal character< ident, h >< comp, > >
+
+< int >< ident, n >< comma >< ident, ans >< semicolon >
+
+< void >< ident, factorial >< parenth, ( >< parenth, ) >
+< brace, { >
+< if >< parenth, ( >< ident, n >< comp, != >< number, 1 >< parenth, ) >
+< brace, { >
+< ident, ans >< assign >< ident, ans >< op, * >< ident, n >< semicolon >
+< ident, n >< assign >< ident, n >< op, - >< number, 1 >< semicolon >
+< ident, factorial >< parenth, ( >< parenth, ) >< semicolon >
+< brace, } >< else >
+< brace, { >
+< op, / >< op, / >< ident, violate >< ident, c1 >< ident, to >< ident, print >
+< ident, printf >< parenth, ( >Illegal character< op, % >< ident, d >Illegal character< ident, n >Illegal character< comma >< ident, ans >< parenth, ) >< semicolon >
+< brace, } >
+< brace, } >
+
+< void >< ident, main >< parenth, ( >< parenth, ) >
+< brace, { >
+< ident, n >< assign >< number, 10 >< semicolon >
+< ident, ans >< assign >< number, 1 >< semicolon >
+< ident, printf >< parenth, ( >Illegal character< op, % >< ident, d >Illegal character< assign >Illegal character< comma >< ident, n >< parenth, ) >< semicolon >
+< ident, factorial >< parenth, ( >< parenth, ) >< semicolon >
+< brace, } >

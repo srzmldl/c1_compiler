@@ -1,0 +1,26 @@
+Illegal character< ident, include >< comp, < >< ident, stdio >Illegal character< ident, h >< comp, > >
+
+
+< void >< ident, main >< parenth, ( >< parenth, ) >
+< brace, { >
+
+< const >< int >< ident, n >< assign >< number, 10 >< semicolon >
+< const >< int >< ident, a >< bracket, [ >< number, 10 >< bracket, ] >< assign >< brace, { >< number, 10 >< comma >< number, 7 >< comma >< number, 5 >< comma >< number, 100 >< comma >< number, 1 >< comma >< number, 7 >< comma >< number, 67 >< comma >< number, 4 >< comma >< number, 99 >< comma >< number, 6 >< brace, } >< semicolon >
+< int >< ident, i >< assign >< number, 0 >< semicolon >
+< int >< ident, sum >< assign >< number, 0 >< semicolon >
+< while >< parenth, ( >< ident, i >< comp, < >< ident, n >< parenth, ) >
+< brace, { >
+< ident, sum >< assign >< ident, sum >< op, + >< ident, a >< bracket, [ >< ident, i >< bracket, ] >< semicolon >
+< ident, i >< assign >< ident, i >< op, + >< number, 1 >< semicolon >
+< brace, } >
+
+< ident, printf >< parenth, ( >Illegal character< op, % >< ident, d >Illegal character< comma >< ident, a >< bracket, [ >< number, 0 >< bracket, ] >< parenth, ) >< semicolon >
+< ident, i >< assign >< number, 0 >< semicolon >
+< while >< parenth, ( >< ident, i >< comp, < >< ident, n >< parenth, ) >
+< brace, { >
+< ident, printf >< parenth, ( >Illegal character< op, + >< op, % >< ident, d >Illegal character< comma >< ident, a >< bracket, [ >< ident, i >< bracket, ] >< parenth, ) >< semicolon >
+< ident, i >< assign >< ident, i >< op, + >< number, 1 >< semicolon >
+< brace, } >
+< ident, printf >< parenth, ( >Illegal character< assign >< op, % >< ident, d >Illegal character< ident, n >Illegal character< comma >< ident, sum >< parenth, ) >< semicolon >
+
+< brace, } >

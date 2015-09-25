@@ -1,4 +1,15 @@
 * 主要提交内容一览
+| file                 | description    |
+|----------------------+----------------|
+| README.org           | this file      |
+| Makefile             | 编译用         |
+| include/tok.h        | 头文件         |
+| doc/README.org       | 设计文档       |
+| bin/check.sh         | 方便检查的脚本 |
+| config/lexer.lex     | 词法文件       |
+| src/*.cpp            | 三个源文件     |
+| test/*.c             | P1中的测试程序 |
+| test/kaleidoscope.in | partI测试用       |
 * 测试说明
 ** Bash说明
    当前P2/输入'bash bin/check.sh' 即可(没有绑定路径,所以不能cd到bin里边去输).检测方式下面有说明.shell按列举顺序输出.(编译之后为了节省您的空间,我的脚本会将可执行文件删除)
@@ -10,6 +21,7 @@
 *** 识别token输出
     按照教程的分类,token分为def, extern, unknown,再加上识别digital和op.
 ** flex c1
+   - 为了方便写shell,命令行第一个参数是文件名.
    - shell会扫描test下所有*.c程序,然后运行之后输出到*.out,因为比较长,所以没有屏幕输出
    - 因为还是违反了c1语法做的,所以include和print那些语句识别为非法串(比如字符串等等)
    - /bin/a 文件是各种奇奇怪怪的情况,并不是完整c1程序,仅用来测试

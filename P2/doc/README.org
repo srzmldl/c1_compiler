@@ -160,4 +160,36 @@
 *** 字符串转化token
     对于字符串,*prtdata记的是token在text buffer中的起始位置.比如需要的到字符串数据时有getLiteralData()函数,返回了text buffer的起始位置指针. 每次确认字符串token时setLiteralData存储PtrData.所以需要用时通过prtData去text buffer取.
 ** Clang-Diagnostic.h, Diagnostic.cpp
-   
+   测试程序见src/diagnostic.
+   该程序报错如下:
+   - main返回值非int,有警告: 
+     + warning: return type of 'main' is not 'int' [-Wmain-return-type]   
+     + void main()
+   - 又来一个  
+     + note: change return type to 'int'   
+     + void main()
+   - 浮点常数非法,非法后缀,在检测数字常量的过程中查出: 
+     + error: invalid suffix '.3' on floating constant  
+     + int a = 1.2.3;
+   - 未定义变量
+     + error: use of undeclared identifier 'y'
+     + int x = y;
+     + error: use of undeclared identifier 'abc'
+     abc =;
+     ^
+     + abc =;
+     + error: use of undeclared identifier 'b'
+     + b = f(8) + f(10);
+   - 变量检查之后还有表达式检查
+     + error: expected expression
+     + abc =;
+   - 非法赋值,兵部是表达式不合法
+     + error: expression is not assignable
+     + a = f(5)++f(6);
+   - 函数返回值匹配
+     + error: void function 'main' should not return a value [-Wreturn-type]
+     + return 0;
+   - 除0检验,最后的警告,并不报错
+     + warning: division by zero is undefined [-Wdivision-by-zero]
+     + x = a / 0;
+      

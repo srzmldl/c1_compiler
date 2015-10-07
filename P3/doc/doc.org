@@ -8,9 +8,9 @@
     因为ExprAST类是抽象基类,所以其析构函数也必须有virtual关键字.如果抽象基类不是虚析构函数,当我们用delete来释放基类指针(它其实指向的是派生类的对象实例)占用的内存的时候，只有基类的析构函数被调用，而派生类的析构函数不会被调用，这就可能引起内存泄露。如果基类的析构函数是虚析构，那么在delete基类指针时，继承树上的析构函数会被自低向上依次调用，即最底层派生类的析构函数会被首先调用，然后一层一层向上直到该指针声明的类型。
 
 *** vtable
-    当继承一个含有虚函数的基类时，编译器会对新类创建一个新的VTABLE，并且插入新函数地址，如果没有重写基类的虚函数，则使用基类的虚函数地址。虚函数机制通过VTABLE实现，编译器对每个包含虚函数的类创建一个表（称为VTABLE表），在这个VTABLE表中，编译器存放每个特定类的虚函数地址。这个表不是类的成员之一，而是将这个表的地址存放在类中，即类中有一个成为VPTR的地址，存放着虚函数列表的的地址。这个VPTR通常是被隐藏的。
+    当继承一个含有虚函数的基类时，编译器会对新类创建一个新的VTABLE，并且插入新函数地址，如果没有重写基类的虚函数，则使用基类的虚函数地址。虚函数机制通过VTABLE实现，编译器对每个包含虚函数的类创建一个表（称为VTABLE表），在这个VTABLE表中，编译器存放每个特定类的虚函数地址。这个表不是类的成员之一，而是将这个表的地址存放在类中，即类中有一个成为VPTR的地址，存放着虚函数列表的的地址.这个VPTR通常是被隐藏的。
 
-** 本次实验主要关注src/toy.cpp中的MainLoop及其调用的函数。阅读HandleDefinition和HandleTopLevelExpression，忽略Codegen部分，说明两者对应的AST结构
+** MainLoop,HandleDefinition, HandleTopLevelExpression，AST结构
 *** MainLoop
     - 不断循环询问ready>
     - 根据取得token(存储在CurTok中)分情况讨论
@@ -22,8 +22,40 @@
 *** HandleDefinition
     这个函数用来处理函数定义,调用parsedefinition看能否正确匹配一个函数定义,匹配成功则输出成功信息.否则为了方便错误恢复直接跳过已读token取下一个token.
 
-    抽象语法树如下
-|   |   |   |   |   |
-|---+---+---+---+---|
-|   |   |   |   |   |
+    对应抽象语法树FunctionAST如下: 
+    - function --> def -- > def --> identifier
+    - --> '(' -- >'(' --> ArgNames --> ')'
 *** HandleTopLevelExpression
+    这个函数用来处理顶层表达式,先调用ParseTopLevelExpr看能否匹配一个顶层表达式,能匹配输出成功信息.否则直接读取下一个token
+    
+    对应抽象语法树TopLevelExpAST如下:
+    - topLevelExpr --> identifier, '(', number, if, for
+    - 之后的省略(情况太多,体现AST结构即可)
+** Kaleidoscope在Lexer和Parser间传递信息（token、语义值、用什么函数和变量）
+   - parser调用ast命名空间中的getNextToken间接调用gettok(),得到token存在Curtok中
+   - 枚举类型Token中定义了各种类型的token,区别结束符,def,extern,标识符,数字等.
+     + 负数标识特殊涵意
+     + 非负数为未知字符
+   - gettok返回值为token类型,如果不是特殊token就直接返回相应字符
+   - 通过全局变量NumVal, IdentifierStr等记录数字值以及标识符字符串来传递语义值
+** Kaleidoscope处理算符优先级
+*** 解释ParseBinOpRHS以及优先级处理方式
+**** 基本原理
+    - 用STL的map做hash(BinopPrecedence)),value值越高,代表优先级越高
+    - ExprPrec参数为算式优先级,LHS为算式.可以理解成算式最后一次运算当成整体为算式优先级.如果当前算符优先级比这个低,那么为该递归的中止条件
+    - 递归计算运算符左部,右部.计算完成之后中间插入这个运算符拼起来通过指针LHS将参数传出去
+   
+**** 步骤
+    - 在需要解析表达式时调用这个函数.
+    - 先调用GetTokPrecedence确保是一个运算符,如果不是返回-1,否则返回map中这个key对应的value
+    - 上一步已经将字符key转化成value,所以现在比较优先级直接比value即可
+    - 下面的TokPrec < ExprPrec为递归中止条件,上小节已经解释
+    - 没有中止,则标识现在的运算符生效.此时CurTok为操作数,然后取下一个运算符
+    - 此时RHS存这个操作符后的子式,为空的话处理完毕,return 0
+    - 否则NextPrec得到下一个运算符优先级
+    - 比较当前算符和NextPrec优先级,如果更低,则递归调用,得右部(NextPrec应该先算)),同时当前算符优先级变位TokPrec+1,加1得原因式处理同算符左结合
+    - 最后大功告成,将左部,运算符,右部拼起来变成BinaryExprAST即可.
+*** 分析a*b*c、a*b+c、a+b*c分别如何处理
+**** a*b*c
+**** a*b+c
+**** a+b*c

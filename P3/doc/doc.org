@@ -43,19 +43,51 @@
 **** 基本原理
     - 用STL的map做hash(BinopPrecedence)),value值越高,代表优先级越高
     - ExprPrec参数为算式优先级,LHS为算式.可以理解成算式最后一次运算当成整体为算式优先级.如果当前算符优先级比这个低,那么为该递归的中止条件
-    - 递归计算运算符左部,右部.计算完成之后中间插入这个运算符拼起来通过指针LHS将参数传出去
+    - 递归计算运算符左部,右部.计算完成之后将运算符,左部,右部拼起来通过指针LHS将参数传出去
    
 **** 步骤
     - 在需要解析表达式时调用这个函数.
     - 先调用GetTokPrecedence确保是一个运算符,如果不是返回-1,否则返回map中这个key对应的value
     - 上一步已经将字符key转化成value,所以现在比较优先级直接比value即可
     - 下面的TokPrec < ExprPrec为递归中止条件,上小节已经解释
-    - 没有中止,则标识现在的运算符生效.此时CurTok为操作数,然后取下一个运算符
-    - 此时RHS存这个操作符后的子式,为空的话处理完毕,return 0
+    - 没有中止,则标识现在的运算符生效.BinOp存当前运算符,吃掉下一个标识符token
+    - 此时RHS右部子式由ParsePrimary产生.为空的话处理完毕,return 0
     - 否则NextPrec得到下一个运算符优先级
     - 比较当前算符和NextPrec优先级,如果更低,则递归调用,得右部(NextPrec应该先算)),同时当前算符优先级变位TokPrec+1,加1得原因式处理同算符左结合
-    - 最后大功告成,将左部,运算符,右部拼起来变成BinaryExprAST即可.
-*** 分析a*b*c、a*b+c、a+b*c分别如何处理
-**** a*b*c
+    - 最后大功告成,将运算符,左部,右部拼起来变成BinaryExprAST即可.
+*** 分析a*b*c、a*b+c、a+b*c分别如何处理(对象不好表示,意会一下)
+**** a*b*c 
+     1. TokPrec = 40, ExprPrec = 0, NextPrec = 40. 同一优先级.继续循环,第一个乘法
+     2. TokPrec = 40, ExprPrec = 0, NextPrec = 无. 中止,第二个乘法
+     所以先算第一个,后算第二个乘法.
 **** a*b+c
+     1. TokPrec = 40, ExprPrec = 0, NextPrec = 20, 优先级高于NextPrec,继续循环,乘法
+     2. TokPrec = 20, ExprPrec = 0, NextPrec = 无, 中止,加法
+     所以先算乘法,后算加法
 **** a+b*c
+     1. TokPrec = 20, ExprPrec = 0, NextPrec = 40, 优先级低于NextPrec,递归调用ParseBinOpRHS(21, RHS)
+     2. TokPrec = 40, ExprPrec = 21, 中止此层递归,回溯. 算乘法
+     3. 回溯回第一层,算加法
+     所以先算乘法,再算加法
+** 解释Error, ErrorP, ErrorF的作用，举例说明它们在语法分析中应用
+    用来最后输出错误信息,可以理解为最低层得过程. 所有错误输出都通过传入Str参数调用此函数.而后面得两个error虽然实现得功能完全一致,但是为了方便调用函数return,所以ErrorP为返回值PrototypeAST时调用,ErrorF是返回值FunctionAST时调用.
+    
+    在语法分析中,它们用来输出错误信息,方便修正语法错误. 而ErrorP和ErrorF仅仅得存在仅仅时为了满足调用它得函数得返回值类型要求.
+** Kaleidoscope不支持声明变量，给变量赋值，那么变量的作用是什么？
+   函数传参(人家长得好像函数式语言,基本思想就该这样)
+** 为什么不需要{...}或begin...end？
+   因为没有复合语句块,自然不许要begin和end.可以测试if(x<0) then之后输入两个表达式会报错,说期望有else.
+** Kaleidoscope是如何避免if/then/else语句的二义性的？
+   我们来看ParseIfExpr()函数即可.
+    - 先抹掉if
+    - 读条件句,无条件句return 0
+    - 读then,无then return0
+    - 读then的执行语句,无return0
+    - 读else,无else时return 0
+    - 读else的执行语句,无时return0
+   可以见得严格规定了if <*Cond> then <*then> else <*else> 的格式,少了任何一部分都算错误.不会出现我们c语言中的无else这种情况. 在这个严格规定下,加上没有复合语句,当然就没有二义性咯
+** Kaleidoscope只有一种数据类型double，那么if/then/else的分支条件是如何实现的？
+   - BinaryExpr::Codegen中将条件式转化成Builder类型
+   - IfExprAST::Codegen中把浮点数经过与0.0的比较转化成了布尔型,这个过程通过Builder.CreateFCmpONE实现
+   - 变成了bool型就可以愉快地判断啦.
+* 拓展while循环

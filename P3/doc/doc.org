@@ -1,0 +1,29 @@
+* 理解Kaleidoscope的语法分析和AST
+** 解释include/ast.h中ExprAST里的virtual的作用，在继承时的原理
+*** virtual解释
+    ExprAST中函数前加virtual关键字标识这是虚拟函数. 这样在其派生的类(如NumberExprAST, VariableExprAST等)中通过重写相应函数来实现对基类这些虚拟函数的覆盖. 当基类的指针pt  派生类的对象时,pt调用虚拟函数时调用的时派生类中重写的函数.
+    
+    这里的ExprAST中有两个纯虚函数,表明ExprAST是一个抽象基类,不能创建抽象基类的独立对象,只能用来被继承.
+
+    因为ExprAST类是抽象基类,所以其析构函数也必须有virtual关键字.如果抽象基类不是虚析构函数,当我们用delete来释放基类指针(它其实指向的是派生类的对象实例)占用的内存的时候，只有基类的析构函数被调用，而派生类的析构函数不会被调用，这就可能引起内存泄露。如果基类的析构函数是虚析构，那么在delete基类指针时，继承树上的析构函数会被自低向上依次调用，即最底层派生类的析构函数会被首先调用，然后一层一层向上直到该指针声明的类型。
+
+*** vtable
+    当继承一个含有虚函数的基类时，编译器会对新类创建一个新的VTABLE，并且插入新函数地址，如果没有重写基类的虚函数，则使用基类的虚函数地址。虚函数机制通过VTABLE实现，编译器对每个包含虚函数的类创建一个表（称为VTABLE表），在这个VTABLE表中，编译器存放每个特定类的虚函数地址。这个表不是类的成员之一，而是将这个表的地址存放在类中，即类中有一个成为VPTR的地址，存放着虚函数列表的的地址。这个VPTR通常是被隐藏的。
+
+** 本次实验主要关注src/toy.cpp中的MainLoop及其调用的函数。阅读HandleDefinition和HandleTopLevelExpression，忽略Codegen部分，说明两者对应的AST结构
+*** MainLoop
+    - 不断循环询问ready>
+    - 根据取得token(存储在CurTok中)分情况讨论
+      + eof符号: 输入完成,退出循环
+      + 分号: 取下一个token
+      + def定义: 调用HandleDefinition处理定义
+      + extern声明: 调用HandleExtern处理声明
+      + 其他情况: 调用HandleTopLevelExpression处理顶层表达式
+*** HandleDefinition
+    这个函数用来处理函数定义,调用parsedefinition看能否正确匹配一个函数定义,匹配成功则输出成功信息.否则为了方便错误恢复直接跳过已读token取下一个token.
+
+    抽象语法树如下
+|   |   |   |   |   |
+|---+---+---+---+---|
+|   |   |   |   |   |
+*** HandleTopLevelExpression

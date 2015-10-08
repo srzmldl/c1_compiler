@@ -137,6 +137,15 @@ int IfExprAST::dumpdot(DumpDOT *dumper) {
     return nThis;
 }
 
+int WhileExprAST::dumpdot(DumpDOT *dumper) {
+    int nThis = dumper->newNode(2, "while-cond", "while-do");
+    int nCond = CondWhile->dumpdot(dumper);
+    int ndo = DoWhile->dumpdot(dumper);
+    dumper->drawLine(nThis, 0, nCond);
+    dumper->drawLine(nThis, 1, ndo);
+    return nThis;
+}
+
 int ForExprAST::dumpdot(DumpDOT *dumper) {
     int nThis = dumper->newNode(5, VarName.c_str(), "start", "end", "step", "body");
     int nStart = Start->dumpdot(dumper);

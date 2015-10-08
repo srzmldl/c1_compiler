@@ -44,7 +44,8 @@ enum Token {
     tok_then = -7,
     tok_else = -8,
     tok_for = -9,
-    tok_in = -10
+    tok_in = -10,
+    tok_while = -11
 };
 
 static std::string IdentifierStr; // Filled in if tok_identifier
@@ -77,6 +78,8 @@ static int gettok() {
             return tok_for;
         if (IdentifierStr == "in")
             return tok_in;
+        if (IdentifierStr == "while")
+            return tok_while;
         return tok_identifier;
     }
 
@@ -239,6 +242,19 @@ static ExprAST *ParseIfExpr() {
     return new IfExprAST(Cond, Then, Else);
 }
 
+/// whileexpr ::= 'while' expr expr
+static ExprAST *ParseWhileExpr() {
+    getNextToken(); // eat the while.
+
+    ExprAST *CondWhile = ParseExpression();
+    if (CondWhile == 0) return 0;
+
+    ExprAST *DoWhile = ParseExpression();
+    if (DoWhile == 0) return 0;
+
+    return new WhileExprAST(CondWhile, DoWhile);
+}
+
 /// forexpr ::= 'for' identifier '=' expr ',' expr (',' expr)? 'in' expression
 static ExprAST *ParseForExpr() {
     getNextToken(); // eat the for.
@@ -304,6 +320,8 @@ static ExprAST *ParsePrimary() {
             return ParseIfExpr();
         case tok_for:
             return ParseForExpr();
+        case tok_while :
+            return ParseWhileExpr();
     }
 }
 
@@ -526,6 +544,33 @@ Value *IfExprAST::Codegen() {
     return PN;
 }
 
+Value *WhileExprAST::Codegen() {
+
+    return 0;
+    /*Value *CondV = CondWhile->Codegen();
+    if (CondV == 0)
+        return 0;
+    
+     // Convert condition to a bool by comparing equal to 0.0.
+    CondV = Builder.CreateFCmpONE(
+            CondV, ConstantFP::get(getGlobalContext(), APFloat(0.0)), "Whilecond");
+    
+    // Make the new basic block for the loop header, inserting after current
+    // block.
+    return CondV;
+    Function *TheFunction = Builder.GetInsertBlock()->getParent();
+    BasicBlock *PreheaderBB = Builder.GetInsertBlock();
+    BasicBlock *LoopBB =
+        BasicBlock::Create(getGlobalContext(), "loop", TheFunction);
+
+    
+    // Insert an explicit fall through from the current block to the LoopBB.
+    Builder.CreateBr(LoopBB);
+
+    // Start insertion in LoopBB.
+    Builder.SetInsertPoint(LoopBB);
+*/
+} 
 Value *ForExprAST::Codegen() {
     // Output this as:
     //   ...
@@ -786,6 +831,11 @@ static void MainLoop() {
 extern "C" double putchard(double X) {
     putchar((char)X);
     return 0;
+}
+
+/// randd - return a number between 0 ~ (int)n - 1.
+extern "C" double randd(double n) {
+    return (double)(rand() % (int)n);
 }
 
 //===----------------------------------------------------------------------===//

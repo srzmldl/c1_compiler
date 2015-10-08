@@ -1,0 +1,2 @@
+extern randd(n);
+while (randd(10)<8) 1+1;

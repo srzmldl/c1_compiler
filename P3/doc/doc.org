@@ -22,15 +22,15 @@
 *** HandleDefinition
     这个函数用来处理函数定义,调用parsedefinition看能否正确匹配一个函数定义,匹配成功则输出成功信息.否则为了方便错误恢复直接跳过已读token取下一个token.
 
-    对应抽象语法树FunctionAST如下: 
-    - function --> def -- > def --> identifier
-    - --> '(' -- >'(' --> ArgNames --> ')'
+    对应抽象语法树FunctionAST如下: (结构简单就直接用文本了)
+    - 括号拼起来表示表示一整个节点,逗号分隔不同儿子(括号中地逗号仅表示分隔关系).
+    - proto --> def --> (FnName, '(', ArgNames, ')'), expression
 *** HandleTopLevelExpression
     这个函数用来处理顶层表达式,先调用ParseTopLevelExpr看能否匹配一个顶层表达式,能匹配输出成功信息.否则直接读取下一个token
     
     对应抽象语法树TopLevelExpAST如下:
-    - topLevelExpr --> identifier, '(', number, if, for
-    - 之后的省略(情况太多,体现AST结构即可)
+    - proto --> identifier, '(', number, if, for
+    - 之后的省略(情况太多,体现topLevelExp地AST结构即可)
 ** Kaleidoscope在Lexer和Parser间传递信息（token、语义值、用什么函数和变量）
    - parser调用ast命名空间中的getNextToken间接调用gettok(),得到token存在Curtok中
    - 枚举类型Token中定义了各种类型的token,区别结束符,def,extern,标识符,数字等.
@@ -90,7 +90,16 @@
    - BinaryExpr::Codegen中将条件式转化成Builder类型
    - IfExprAST::Codegen中把浮点数经过与0.0的比较转化成了布尔型,这个过程通过Builder.CreateFCmpONE实现
    - 变成了bool型就可以愉快地判断啦.
-* 拓展while循环
-** 拓展while循环
+* 拓展while循环     
+  while和if与for最为相似,所以只需要在所有函数中找到if和for,在中间照着写一个while即可(实际上就是化简版for).添加了如下内容 (本实验只要求输出dot图,所以WhileExprAST::Codegen直接return0)
+** toy.cpp
+   - enum Token 中添加tok_while = -11
+   - gettok 中添加while地case
+   - ParsePrimary中添加tok_while地case调用ParseWhileExpr
+   - 仿照ParseForExpr写ParseWhileExpr
+   - 仿照*ForExprAST::Codegen()写*WhileExprAST::Codegen()
+** dumpdot.cpp
+    - 仿照 ForExprAST::dumpdot写WhileExprAST
+** ash.h
+    - 仿照ForExprAST定义WhileExprAST类
    
-** graphviz语法仿写

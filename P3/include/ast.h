@@ -78,6 +78,16 @@ public:
     int dumpdot(DumpDOT *dumper);
 };
 
+/// WhileExprAST - Expression class for while expr expr
+class WhileExprAST : public ExprAST {
+    ExprAST *CondWhile, *DoWhile;
+public:
+    WhileExprAST(ExprAST *CondWhile, ExprAST *DoWhile)
+        :CondWhile(CondWhile), DoWhile(DoWhile) {}
+    virtual Value *Codegen();
+    int dumpdot(DumpDOT *dumper);
+};
+
 /// ForExprAST - Expression class for for/in.
 class ForExprAST : public ExprAST {
     std::string VarName;

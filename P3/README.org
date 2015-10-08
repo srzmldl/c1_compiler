@@ -1,2 +1,27 @@
-* 理解Kaleidoscope的语法分析和AST
-* 
+* Files
+| Name            | Description                         |
+|-----------------+-------------------------------------|
+| README.org      | this file                           |
+| Makefile        | for compile                         |
+| trans.sh        | transfer *.dot to *.png             |
+| bin/bash.sh     | shell for check                     |
+| doc/doc.org     | document of org version             |
+| doc/doc.md      | document of markdown version        |
+| include/*.h     | include file after add *while*      |
+| src/toy.cpp     | kaleidoscope with *while* extension |
+| src/dumpdot.cpp | *.dot generator with *while*        |
+| test/b.k        | a piece of complex test code        |
+
+* 测试程序b.k
+  这个测试程序较为复杂.测试了全部kaleiscope语句,并且多层多样化嵌套.能较充分地证明程序的正确性. 最后得到的png图是完全正确的
+  - extern的测试,函数定义
+  - while的条件语句里套两个函数调用
+  - while套if,if再套for,for再套while,while再套各种函数调用
+  - while套if,if再套while,while再套if,里面再各种函数调用
+    
+* shell脚本检查
+  请再P3根目录下输入 'bash bin/bash.sh'将做如下事情,
+  - make 编译
+  - 以test/b.k 作为输入运行程序(感觉b.k构造得够复杂就只有一个)
+  - 运行trans.sh生成图片
+  - 没有自动删除,所以请检查完watch.png之后运行make clean删除不必要的文件

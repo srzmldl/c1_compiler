@@ -1,6 +1,0 @@
-extern randd(n);
-extern putchard(ch);
-def haha(x y)
-if (1) then for i=0, i<10, 1.0 in putchard(42)
-else while (randd(8)<y) 
-if (x < y) putchard(x) else 

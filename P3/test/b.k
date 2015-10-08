@@ -9,4 +9,4 @@ def haha(x y)
     else
         while (randd(8)<y)   
            if (x < y) then putchard(x)
-           else putchard(y);
+           else putchard(y)

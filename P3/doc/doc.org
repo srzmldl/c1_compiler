@@ -91,7 +91,7 @@
    - IfExprAST::Codegen中把浮点数经过与0.0的比较转化成了布尔型,这个过程通过Builder.CreateFCmpONE实现
    - 变成了bool型就可以愉快地判断啦.
 * 拓展while循环     
-  while和if与for最为相似,所以只需要在所有函数中找到if和for,在中间照着写一个while即可(实际上就是化简版for).添加了如下内容 (本实验只要求输出dot图,所以WhileExprAST::Codegen直接return0)
+ while和if与for最为相似,所以只需要在所有函数中找到if和for,在中间照着写一个while即可(实际上就是化简版for).添加了如下内容 (本实验只要求输出dot图,所以WhileExprAST::Codegen直接return0)
 ** toy.cpp
    - enum Token 中添加tok_while = -11
    - gettok 中添加while地case

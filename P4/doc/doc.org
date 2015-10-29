@@ -1,0 +1,25 @@
+* 学习Bison
+** Bison理解
+   
+** 回答问题
+*** makefile中expr编译任务
+   #+begin_src makefile
+	$(YACC) -b $@ -o $(SRC)/$@.tab.c $(CONF)/$@.y
+	$(LEX) -o$(SRC)/$@.lex.c $(CONF)/expr.lex
+	$(CC) -o $(BIN)/$@ $(SRC)/$@.lex.c $(SRC)/$@.tab.c -ll -lm
+   #+end_src
+#+begin_src bash
+bison -d -y -b expr -o src/expr.tab.c config/expr.y
+flex -i -I  -osrc/expr.lex.c config/expr.lex
+gcc -g -Iinclude -o bin/expr src/expr.lex.c src/expr.tab.c -ll -lm
+
+bison -d -y -b expr1 -o src/expr1.tab.c config/expr1.y
+flex -i -I  -osrc/expr1.lex.c config/expr.lex
+gcc -g -Iinclude -o bin/expr1 src/expr1.lex.c src/expr1.tab.c -ll -lm
+#+end_src
+*** bison
+   - d also produce a header file likewise but cannot specify FILE (for POSIX Yacc)
+   - y --yacc emulate POSIX Yacc 模拟yacc
+   - b  specify a PREFIX for output files  指定输出前缀
+
+* lex+bison,为C1语言构造能识别正确C1程序的分析器 

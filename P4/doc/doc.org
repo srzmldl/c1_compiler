@@ -3,23 +3,65 @@
    
 ** 回答问题
 *** makefile中expr编译任务
-   #+begin_src makefile
-	$(YACC) -b $@ -o $(SRC)/$@.tab.c $(CONF)/$@.y
+expr,expr1,exprL, exprL1的命令如下:
+#+begin_src makefile
+    $(YACC) -b $@ -o $(SRC)/$@.tab.c $(CONF)/$@.y
 	$(LEX) -o$(SRC)/$@.lex.c $(CONF)/expr.lex
 	$(CC) -o $(BIN)/$@ $(SRC)/$@.lex.c $(SRC)/$@.tab.c -ll -lm
-   #+end_src
-#+begin_src bash
+#+end_src
+可以尝试用`make expr`得到具体执行命令
+#+begin_src #!/bin/bash
 bison -d -y -b expr -o src/expr.tab.c config/expr.y
 flex -i -I  -osrc/expr.lex.c config/expr.lex
 gcc -g -Iinclude -o bin/expr src/expr.lex.c src/expr.tab.c -ll -lm
-
-bison -d -y -b expr1 -o src/expr1.tab.c config/expr1.y
-flex -i -I  -osrc/expr1.lex.c config/expr.lex
-gcc -g -Iinclude -o bin/expr1 src/expr1.lex.c src/expr1.tab.c -ll -lm
 #+end_src
-*** bison
-   - d also produce a header file likewise but cannot specify FILE (for POSIX Yacc)
-   - y --yacc emulate POSIX Yacc 模拟yacc
-   - b  specify a PREFIX for output files  指定输出前缀
+然后man一下bison,flex,gcc的
+**** 第一条bison命令
+     作用就是用bison将expr.y将类yacc翻译成c语言文件expr.tab.c
+     + -d 产生头文件,但是不能指定文件(for POSIX Yacc)
+     + -y 模拟POSIX Yacc
+     + -b 指定输出文件前缀
+     + -o 输出到文件
+**** 第二条flex指令
+     作用就是用flex将expr.lex中的正规式以及匹配动作等翻译到expr.lex.c中去
+     + -i ignore case in patterns
+     + -I 生成交互式的 scanner (与-B相对)
+     + -o 指定输出文件名
+**** 第三条gcc指令
+     作用是用gcc
+     + -o 指定输出的可执行文件名称
+     + -g 生成调试信息,方便gdb等调试
+     + -I 指定头文件查找目录
+     + -lm link math库
+     + -ll link了某个库吧.我木有用过这个.
+*** 描述Yacc输入文法规范文件的格式,消化语法制导的翻译方案
+**** 综述
+yacc语法规范由三部份组成
+声明
+%%
+翻译规则
+%%
+C语言编写的支持例程
+**** 声明
+声明部份由两节,均为可选. 
+- 第一节'%{'和'%}'包起来,就是普通C语言的声明,如expr1.y和expr.y中都include了stdio.h.
+- 第二节声明一些文法终结符,比如NUMBER,EOL等.
+**** 翻译规则
+每条规则由一个文法产生式以及和它联系的语义动作组成.没有加引号的字母数字串,若未声明成token,则式非终结符;加引号的单个字符,看城这个字符代表的记号.右部各个选择机器语义动作之间竖线隔开,最后一个选择后面用分号,表示产生式集合的结束.第一个左部非终结符式开始符号.
 
+右部大括号括起来的语义动作终$$表示引用左部非终结符的属性值,$i表示引用右部第i个文法符号的属性值.
+
+例如exp-->exp PLUS exp {$$ = $1 + $3;}就是把右部的两个exp值相加,结果赋值给左部的exp. 应该注意到语义动作是可以省略的.右部只有一个文法符号时,默认动作是{$$=$1}.
+**** C语言例程
+ - 词法分析器yylex()返回记号,这里由flex产生
+ - yyerror() 输出错误信息
+     
+**** 语法制导的翻译方案
+     expr.y为简单的表达式二义文法,通过指定优先级消除二义性. 包括加减乘除指数,负号,小括号.按照顺序指定了优先级,在规约规约冲突时选择先出现的表达式. 取负号的%prec标签强制优先级和结合性MINUS一样. 这个翻译反感根据对应token进行相应加减乘除操作即可,十分简单.
+
+     expr1.y是非二义文法,翻译方案也是简单的在规约时根据规约式确定运算. 引入了fact和term消除二义性.
+*** expr.tab.c和expr1.tab.c的异同; expr.y和expr1.y对expr.tab.c和expr1.tab.c影响
+**** 异同
+     - 终结符一样,对应枚举值也一样. 二者的*.h文件完全一样
+     - 
 * lex+bison,为C1语言构造能识别正确C1程序的分析器 

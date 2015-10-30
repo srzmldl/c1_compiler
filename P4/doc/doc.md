@@ -1,0 +1,276 @@
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. 学习Bison</a>
+<ul>
+<li><a href="#sec-1-1">1.1. 回答问题</a>
+<ul>
+<li><a href="#sec-1-1-1">1.1.1. makefile中expr编译任务</a></li>
+<li><a href="#sec-1-1-2">1.1.2. 描述Yacc输入文法规范文件的格式,消化语法制导的翻译方案</a></li>
+<li><a href="#sec-1-1-3">1.1.3. expr.tab.c和expr1.tab.c的异同; expr.y和expr1.y对expr.tab.c和expr1.tab.c影响</a></li>
+<li><a href="#sec-1-1-4">1.1.4. 了解L-asgn分析器的构成方法，简述.tab.c和.lex.c文件的结构</a></li>
+</ul>
+</li>
+<li><a href="#sec-1-2">1.2. Bison理解</a>
+<ul>
+<li><a href="#sec-1-2-1">1.2.1. 规范格式</a></li>
+<li><a href="#sec-1-2-2">1.2.2. 与flex的协作</a></li>
+<li><a href="#sec-1-2-3">1.2.3. 接口</a></li>
+<li><a href="#sec-1-2-4">1.2.4. 文法对状态空间影响</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-2">2. C1程序的分析器</a>
+<ul>
+<li><a href="#sec-2-1">2.1. reduce/reduce冲突</a>
+<ul>
+<li><a href="#sec-2-1-1">2.1.1. 单目运算符和双目运算符冲突</a></li>
+</ul>
+</li>
+<li><a href="#sec-2-2">2.2. shift/reduce冲突</a>
+<ul>
+<li><a href="#sec-2-2-1">2.2.1. 综述</a></li>
+<li><a href="#sec-2-2-2">2.2.2. State 122 conflicts: 1</a></li>
+<li><a href="#sec-2-2-3">2.2.3. State 82 conflicts: 8</a></li>
+<li><a href="#sec-2-2-4">2.2.4. State 66, 67, 68, 69, 70, 71 conflicts: 11</a></li>
+<li><a href="#sec-2-2-5">2.2.5. State 63 conflicts: 4</a></li>
+<li><a href="#sec-2-2-6">2.2.6. State 60 conflicts: 7</a></li>
+<li><a href="#sec-2-2-7">2.2.7. State 49, 48 conflicts: 2</a></li>
+<li><a href="#sec-2-2-8">2.2.8. State 29 conflicts: 1</a></li>
+</ul>
+</li>
+<li><a href="#sec-2-3">2.3. 碰上的其他问题以及解决方案</a>
+<ul>
+<li><a href="#sec-2-3-1">2.3.1. 位置</a></li>
+<li><a href="#sec-2-3-2">2.3.2. cond无效</a></li>
+<li><a href="#sec-2-3-3">2.3.3. 模仿clang输出</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+# 学习Bison<a id="sec-1" name="sec-1"></a>
+
+## 回答问题<a id="sec-1-1" name="sec-1-1"></a>
+
+### makefile中expr编译任务<a id="sec-1-1-1" name="sec-1-1-1"></a>
+
+expr,expr1,exprL, exprL1的命令如下:
+
+    $(YACC) -b $@ -o $(SRC)/$@.tab.c $(CONF)/$@.y
+    $(LEX) -o$(SRC)/$@.lex.c $(CONF)/expr.lex
+    $(CC) -o $(BIN)/$@ $(SRC)/$@.lex.c $(SRC)/$@.tab.c -ll -lm
+
+可以尝试用\`make expr\`得到具体执行命令
+
+    bison -d -y -b expr -o src/expr.tab.c config/expr.y
+    flex -i -I  -osrc/expr.lex.c config/expr.lex
+    gcc -g -Iinclude -o bin/expr src/expr.lex.c src/expr.tab.c -ll -lm
+
+然后man一下bison,flex,gcc的
+
+1.  第一条bison命令
+
+    作用就是用bison将expr.y将类yacc翻译成c语言文件expr.tab.c
+    -   -d 产生头文件,但是不能指定文件(for POSIX Yacc)
+    -   -y 模拟POSIX Yacc
+    -   -b 指定输出文件前缀
+    -   -o 输出到文件
+
+2.  第二条flex指令
+
+    作用就是用flex将expr.lex中的正规式以及匹配动作等翻译到expr.lex.c中去
+    -   -i ignore case in patterns
+    -   -I 生成交互式的 scanner (与-B相对)
+    -   -o 指定输出文件名
+
+3.  第三条gcc指令
+
+    作用是用gcc编译expr.lex.c和expr.tab.c,生成可执行文件expr.
+    -   -o 指定输出的可执行文件名称
+    -   -g 生成调试信息,方便gdb等调试
+    -   -I 指定头文件查找目录
+    -   -lm link math库
+    -   -ll link了某个库吧.我木有用过这个.
+
+### 描述Yacc输入文法规范文件的格式,消化语法制导的翻译方案<a id="sec-1-1-2" name="sec-1-1-2"></a>
+
+1.  综述
+
+    yacc语法规范由三部份组成
+    声明
+    %%
+    翻译规则
+    %%
+    C语言编写的支持例程
+
+2.  声明
+
+    声明部份由两节,均为可选. 
+    -   第一节'%{'和'%}'包起来,就是普通C语言的声明,如expr1.y和expr.y中都include了stdio.h.
+    -   第二节声明一些文法终结符,比如NUMBER,EOL等.
+
+3.  翻译规则
+
+    每条规则由一个文法产生式以及和它联系的语义动作组成.没有加引号的字母数字串,若未声明成token,则式非终结符;加引号的单个字符,看城这个字符代表的记号.右部各个选择机器语义动作之间竖线隔开,最后一个选择后面用分号,表示产生式集合的结束.第一个左部非终结符式开始符号.
+    
+    右部大括号括起来的语义动作终$$表示引用左部非终结符的属性值,$i表示引用右部第i个文法符号的属性值.
+    
+    例如exp&#x2013;>exp PLUS exp {$$ = $1 + $3;}就是把右部的两个exp值相加,结果赋值给左部的exp. 应该注意到语义动作是可以省略的.右部只有一个文法符号时,默认动作是{$$=$1}.
+
+4.  C语言例程
+
+    -   词法分析器yylex()返回记号,这里由flex产生
+    -   yyerror() 输出错误信息
+
+5.  语法制导的翻译方案
+
+    expr.y为简单的表达式二义文法,通过指定优先级消除二义性. 包括加减乘除指数,负号,小括号.按照顺序指定了优先级,在规约规约冲突时选择先出现的表达式. 取负号的%prec标签强制优先级和结合性MINUS一样. 这个翻译反感根据对应token进行相应加减乘除操作即可,十分简单.
+    
+    expr1.y是非二义文法,翻译方案也是简单的在规约时根据规约式确定运算. 引入了fact和term消除二义性.
+
+### expr.tab.c和expr1.tab.c的异同; expr.y和expr1.y对expr.tab.c和expr1.tab.c影响<a id="sec-1-1-3" name="sec-1-1-3"></a>
+
+1.  异同
+
+    -   二者最后实现的功能完全一致,只是expr.y主要利用yacc对优先级和左右结合的处理,以及%prec标签比较暴力地解决二义性;但是expr1.y通过修改文法来消除二义性.最终殊途同归,都正确的计算表达式的值
+    -   有一大段共享代码,主要差别在一些常量和宏定义,以及状态机,以及动作.
+    -   修改文法之后expr1的YYNNTS变成了6个,用来消除二义性;语法规则也变成15条,变得更多;YYNSTATES状态数expr1为25,expr为23,状态数更多;YYLAST为YYTABLE的最后一个索引,expr为42,expr1为25;终结符这些当然是一样的,都是12个.
+    -   除了上面这点描述状态机相关的变量或常量的差别之外,还有1220行左右的case中的动作根据文法中的规定而异
+    -   除了上述两个差别,以及一些line中中行号的改编,其他部份基本一致
+
+2.  影响
+
+    -   由异同可见主要代码结构没变,对状态机的利用方式没变.
+    -   因为文法不同,构造的状态机自然不同.那么就会影响yytokennum,yypact等和状态机有关的变量以及YYLAST, YYNTOKENS等这类和状态机有关的宏定义;expr.tab.h中的一大堆define也因文法而变
+    -   1220多行附近yyreduce标签里yyn的switch里的动作也因翻译规则而异
+
+### 了解L-asgn分析器的构成方法，简述.tab.c和.lex.c文件的结构<a id="sec-1-1-4" name="sec-1-1-4"></a>
+
+asgn和asgn1基本一样,只是asgn1中用'op'代替了所有中缀运算符.所以这里只讲解更为复杂的asgn1.
+
+1.  L-asgn分析器的构成方法
+
+    -   先把文法写到asgn1.y中,通过bison翻译成C语言文件asgn1.tab.c
+    -   写好asgn1.lex词法分析,通过flex翻译成C语言文件asgn1.lex.c
+    -   gcc编译成L-asgn分析器.输入是L-asgn语法文件,输出结果.
+
+2.  asgn1.tab.c结构
+
+    -   大量宏定义,定义了Bison版本信息,终结符的枚举值,描述状态机需要的状态,转移边以及相应动作. 如 yystos
+    -   然后是打印位置,符号,数值等信息的函数.如YY<sub>SYMBOL</sub><sub>PRINT</sub>
+    -   接下来是一些错误处理函数,如yysyntax<sub>error</sub>
+    -   然后空间释放函数yydestruct
+    -   然后是转化函数 yyparse,其中包括规约,各种错误处理,接收等程序段,可以剪刀很多用来goto的标签,从命名上可以看出意义.如
+    
+    yyacceptlab,yyreduce等     
+    -   最后是错误信息输出函数以及main函数,这是asgn1.y中定义的函数.
+
+3.  asgn1.lex.c结构
+
+    -   大量宏定义,定义了flex版本信息,一些常用的小函数,常量等.
+    -   定义正规式匹配的状态机相关的信息,如状态,转移矩阵等
+    -   然后是scanner函数,包含了匹配段,动作段等,从goto标签yy<sub>match</sub>,do<sub>actio等可以区分各段</sub>
+    -   然后是一些状态机上要用的函数的实现,比如找前趋状态的函数yy<sub>get</sub><sub>previous</sub><sub>state等</sub>
+    -   接下来是缓冲区各种操作函数的实现,如create,delete等操作.
+    -   然后是一些yyset<sub>in</sub>,yyset<sub>out之类接口的实现</sub>
+    -   最后是空间操作,如yyalloc,yyfree等
+
+## Bison理解<a id="sec-1-2" name="sec-1-2"></a>
+
+### 规范格式<a id="sec-1-2-1" name="sec-1-2-1"></a>
+
+见问题2.
+
+### 与flex的协作<a id="sec-1-2-2" name="sec-1-2-2"></a>
+
+-   lex文件中的头文件不再是自己显式定义,而是include "expr.tab.h",由bison生成,flex使用.该头文件包含了各种记号的定义,yylval的声明等
+-   词法分析器的第三部份函数被删除.事实上语法分析器会调用词法分析器. 可以在expr.tab.c看到很多的yylex()调用词法分析器取token
+-   我们在gcc编译的时候把expr.tab.c和expr.lex.c链接到了一起
+
+### 接口<a id="sec-1-2-3" name="sec-1-2-3"></a>
+
+-   main函数调用yyparse()对输入文本进行分析,看是否符合语言规范
+-   语法分析器会不断调用yylex()通过词法分析器取token,并且二者共享符号表.
+
+### 文法对状态空间影响<a id="sec-1-2-4" name="sec-1-2-4"></a>
+
+通过上一部份问题中expr,expr1的比较,二者虽然实现的功能完全一致,但是文法不同.一个是二义文法,通过优先级与定义左右结合来消除冲突;另一个将文法改成无二义文法. 二者状态数不一样,转移表也发生了很大的变化. 由于产生式发生变化,规约动作等也出现了差异. 所以即使接受同样的语言规范,不同文法的状态空间可以由很大差异.
+
+# C1程序的分析器<a id="sec-2" name="sec-2"></a>
+
+## reduce/reduce冲突<a id="sec-2-1" name="sec-2-1"></a>
+
+### 单目运算符和双目运算符冲突<a id="sec-2-1-1" name="sec-2-1-1"></a>
+
+一开始直接老师给的文法,实际上是需要把单目运算符单独放到产生式里边就行了.
+-   exp &#x2013;> '+' Exp
+-   exp &#x2013;> '-' Exp
+-   用%prec标签规定下优先级
+
+## shift/reduce冲突<a id="sec-2-2" name="sec-2-2"></a>
+
+### 综述<a id="sec-2-2-1" name="sec-2-2-1"></a>
+
+总共34个冲突,除了if else这类,其他基本是由于括号匹配需要优先移进最后去找失配括号.bison再shift/reduce冲突时优先shift,这证实我们所希望的.
+
+### State 122 conflicts: 1<a id="sec-2-2-2" name="sec-2-2-2"></a>
+
+-   if else 的冲突
+-   移进规约冲突的时候默认移进,所以不用具体处理啦.
+-   优先移进正好满足就近匹配的规则,无需处理
+
+### State 82 conflicts: 8<a id="sec-2-2-3" name="sec-2-2-3"></a>
+
+-   在MultiBlock(这是我自己定义的)中碰上保留字之类的终结符时出现移进规约冲突
+-   此时优先移进,与if else冲突一样的道理
+-   优先正好满足我们的语言需求,无需处理.
+
+### State 66, 67, 68, 69, 70, 71 conflicts: 11<a id="sec-2-2-4" name="sec-2-2-4"></a>
+
+-   这几个冲突原因一样.表达式括号匹配的时候,Exp.error')' 中error的移进规约冲突
+-   优先移进,实际上式默认error是修正过括号之后的表达式.再多一个右括号即触发修正程序
+-   正好满足语言需求,无需处理
+
+### State 63 conflicts: 4<a id="sec-2-2-5" name="sec-2-2-5"></a>
+
+-   error, ')', '+', '-' 的移进规约冲突
+-   看到规约都是用的57式,即error之后导致需要规约
+-   此时需要移进来查找expr expr这类缺少运算符的错误
+-   优先移进正好满足需求,无需处理.
+
+### State 60 conflicts: 7<a id="sec-2-2-6" name="sec-2-2-6"></a>
+
+-   全都是移进27式时的冲突,由blockItem右部可以为空引起
+-   这种可以是0到多个重复的当然直接优先移进就行咯
+
+### State 49, 48 conflicts: 2<a id="sec-2-2-7" name="sec-2-2-7"></a>
+
+-   由单目运算符引起, 单目运算符,Exp排起来碰伤 Error的时候出现冲突
+-   因为error可能是要加括号的,我们流到后面再决定,用来匹配那些括号缺失的情况.所以这里先移进
+-   这里优先移进正好是我们需要的.
+
+### State 29 conflicts: 1<a id="sec-2-2-8" name="sec-2-2-8"></a>
+
+-   又是和error相关
+-   这里如果又括号,则可能纠正(按照要求纠正三种错误),当然优先移进.
+-   规约是最后迫不得已,三种方式都不能纠正就按要求中止分析.
+
+## 碰上的其他问题以及解决方案<a id="sec-2-3" name="sec-2-3"></a>
+
+### 位置<a id="sec-2-3-1" name="sec-2-3-1"></a>
+
+parser.y里如果不用位置信息不会在tok.hh里自动生成结构体.尝试的时候一直编译错误找了半天.
+
+### cond无效<a id="sec-2-3-2" name="sec-2-3-2"></a>
+
+文法设计不当可能造成了状态机上的孤立节点. 这时候需要小心检查文法. 报了某表达式无效的warning一定要好好检查
+
+### 模仿clang输出<a id="sec-2-3-3" name="sec-2-3-3"></a>
+
+简单粗暴地把文件先全部读进去存到vector,记好位置之后去掉多余重复的空白字符,用一个尖尖指到要加的位置.

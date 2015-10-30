@@ -189,15 +189,15 @@ Exp:    num_tok  {
             sprintf(buffer, "expect '(' before Exp at (%d, %d) ", @1.first_line, @1.first_column);
             yyerror(buffer);
             draw(@1.first_line, @1.first_column - 1);
-            debug("(%d,%d)Exp :: = Exp )", @$.first_line, @$.first_column);
+            debug("(%d,%d)Exp :: = Exp )\n", @$.first_line, @$.first_column);
         }
 | error ')' {
     sprintf(buffer, "expect '(' before ')' at (%d, %d)\n", @1.first_line, @1.first_column);
     yyerror(buffer);
     draw(@1.first_line, @1.first_column - 1);
-    debug("(%d, %d)Exp :: = )", @$.first_line, @$.first_column);
+    debug("(%d, %d)Exp :: = )\n", @$.first_line, @$.first_column);
   }
-| error {yyerror("bye! You are really foolish"); return 0;}
+| error {yyerror("bye! You are really foolish\n"); return 0;}
         ;
         
          

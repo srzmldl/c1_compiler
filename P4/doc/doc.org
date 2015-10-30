@@ -111,63 +111,41 @@ yyacceptlab,yyreduce等
     - exp --> '-' Exp
     - 用%prec标签规定下优先级
 ** shift/reduce冲突
-*** if else 
-移进规约冲突的时候默认移进,所以不用具体处理啦.
-*** 
-** 别的问题
-*
+*** 综述
+    总共34个冲突,除了if else这类,其他基本是由于括号匹配需要优先移进最后去找失配括号.bison再shift/reduce冲突时优先shift,这证实我们所希望的.
+*** State 122 conflicts: 1 
+    - if else 的冲突
+    - 移进规约冲突的时候默认移进,所以不用具体处理啦.
+    - 优先移进正好满足就近匹配的规则,无需处理
+*** State 82 conflicts: 8
+    - 在MultiBlock(这是我自己定义的)中碰上保留字之类的终结符时出现移进规约冲突
+    - 此时优先移进,与if else冲突一样的道理
+    - 优先正好满足我们的语言需求,无需处理.
+*** State 66, 67, 68, 69, 70, 71 conflicts: 11
+    - 这几个冲突原因一样.表达式括号匹配的时候,Exp.error')' 中error的移进规约冲突
+    - 优先移进,实际上式默认error是修正过括号之后的表达式.再多一个右括号即触发修正程序
+    - 正好满足语言需求,无需处理
+*** State 63 conflicts: 4 
+    - error, ')', '+', '-' 的移进规约冲突
+    - 看到规约都是用的57式,即error之后导致需要规约
+    - 此时需要移进来查找expr expr这类缺少运算符的错误
+    - 优先移进正好满足需求,无需处理.
+*** State 60 conflicts: 7 
+    - 全都是移进27式时的冲突,由blockItem右部可以为空引起
+    - 这种可以是0到多个重复的当然直接优先移进就行咯
+*** State 49, 48 conflicts: 2
+    - 由单目运算符引起, 单目运算符,Exp排起来碰伤 Error的时候出现冲突
+    - 因为error可能是要加括号的,我们流到后面再决定,用来匹配那些括号缺失的情况.所以这里先移进
+    - 这里优先移进正好是我们需要的.
+*** State 29 conflicts: 1
+    - 又是和error相关
+    - 这里如果又括号,则可能纠正(按照要求纠正三种错误),当然优先移进.
+    - 规约是最后迫不得已,三种方式都不能纠正就按要求中止分析.
+    
+** 碰上的其他问题以及解决方案
 *** 位置
     parser.y里如果不用位置信息不会在tok.hh里自动生成结构体.尝试的时候一直编译错误找了半天.
-
 *** cond无效
-** lexer
-  - const
-  - int
-  - void
-  - if
-  - else
-  - while
-  - number
-  - ident
-  - ';'
-  - ','
-  - '='
-  - '[]'
-  - '{}'
-  - '()'
-  - '==', '!=', 
-  - '<','>', '<=', '>='
-  - BinOp: '+', '-', '*', '/', '%'
-  - UnaryOp '+', '-'
-** parser.y
-CompUnit    → [ CompUnit ] (Decl | FuncDef ) 
-                CompUnit代表一个C1程序文件，其中必须包含一个名为main的函数定义FuncDef
-                这里假设一个C1程序只存放在一个C1程序文件中
-Decl        → ConstDecl | VarDecl
-ConstDecl   → const int ConstDef MultiConstDef ';'
-MultiConstDef -> | , ConstDef MultiConstDef
-ConstDef    → ident '=' Exp | ident '[' [ Exp ] ']' '=' '{' multiExp '}'
-                ConstDecl常量声明：可以声明一个或多个整型常量、整型常量数组，如：
-                const int a[]={2,3};
-                声明了长度为2的常量数组a，a[0]、a[1]的值分别为2和3；
-                数组在声明时若未指明长度，则长度为初始化表达式中值的个数。
-                在程序中，不能对常量重新赋值。
-                [注1]
-VarDecl     → int Var{, Var}';'
-Var         → ident | ident '[' Exp ']' | ident '=' Exp
-            | ident '[' [ Exp ] ']' '=' '{' Exp { ',' Exp } '}'
-                VarDecl 变量声明：可以声明整型和一维整型数组变量。
-                [注2]
-FuncDef     → void ident '(' ')' Block
-                FuncDef 函数定义：无参函数，且必须有一个名字为main 的函数
-Block       →'{' { BlockItem } '}'
-BlockItem   → Decl | Stmt
-                Block语句块：表示函数体或者复合语句，其中可以包含0个或多个声明或语句
-Stmt        → LVal '=' Exp ';' | ident '(' ')' ';' | Block 
-            | if '( Cond ')' Stmt [else Stmt ] | while '(' Cond ')' Stmt | ';'
-LVal        → ident| ident '[' Exp ']'
-Cond        → Exp RelOp Exp
-RelOp       →'==' | '!=' | '<' | '>' | '<=' | '>='
-Exp         → Exp BinOp Exp | UnaryOp Exp | '(' Exp ')' | LVal | number
-BinOp       → '+' | '−' | '*' | '/' | '%'
-UnaryOp     → '+' | '−'
+    文法设计不当可能造成了状态机上的孤立节点. 这时候需要小心检查文法. 报了某表达式无效的warning一定要好好检查
+*** 模仿clang输出
+   简单粗暴地把文件先全部读进去存到vector,记好位置之后去掉多余重复的空白字符,用一个尖尖指到要加的位置.

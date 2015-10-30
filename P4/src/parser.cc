@@ -1901,7 +1901,7 @@ yyreduce:
             sprintf(buffer, "expect '(' before Exp at (%d, %d) ", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
             yyerror(buffer);
             draw((yylsp[-2]).first_line, (yylsp[-2]).first_column - 1);
-            debug("(%d,%d)Exp :: = Exp )", (yyloc).first_line, (yyloc).first_column);
+            debug("(%d,%d)Exp :: = Exp )\n", (yyloc).first_line, (yyloc).first_column);
         }
 #line 1907 "src/parser.cc" /* yacc.c:1646  */
     break;
@@ -1912,14 +1912,14 @@ yyreduce:
     sprintf(buffer, "expect '(' before ')' at (%d, %d)\n", (yylsp[-1]).first_line, (yylsp[-1]).first_column);
     yyerror(buffer);
     draw((yylsp[-1]).first_line, (yylsp[-1]).first_column - 1);
-    debug("(%d, %d)Exp :: = )", (yyloc).first_line, (yyloc).first_column);
+    debug("(%d, %d)Exp :: = )\n", (yyloc).first_line, (yyloc).first_column);
   }
 #line 1918 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 61:
 #line 200 "config/parser.y" /* yacc.c:1646  */
-    {yyerror("bye! You are really foolish"); return 0;}
+    {yyerror("bye! You are really foolish\n"); return 0;}
 #line 1924 "src/parser.cc" /* yacc.c:1646  */
     break;
 

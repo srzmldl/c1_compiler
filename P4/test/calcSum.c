@@ -1,3 +1,6 @@
+/*#include <stdio.h>
+*/
+
 void main()
 {
     
@@ -11,9 +14,13 @@ void main()
         i = i + 1;
     }
 
+  /*  printf("%d", a[0]); */
     i = 0;
     while (i < n)
     {
-        i = -i  + 1;
+    /*    printf(" + %d", a[i]);
+ */        i = i + 1;
     }
+  /*  printf("= %d\n", sum); */
+    
 }

@@ -7,7 +7,12 @@
 #include "global.hh"
 extern int yylex ();
 extern void yyerror (const char *msg);
+extern void yywarning (const char *msg);
+/*extern int workBrackTwo(int u, int v);
+extern int workBrackOne(int u);
+extern int workBrackZero(int u);*/
 InputNode *root;
+char *buffer;
 %}
 
 %union
@@ -18,10 +23,10 @@ InputNode *root;
     std::string *ident;
 }
 
-%token num_tok const_tok int_tok void_tok
-%token if_tok else_tok while_tok ident_tok
-%token eol_tok err_tok
-%token ',' ';' '=' '{' '}' '[' ']' '(' ')'
+%token <num> num_tok const_tok int_tok void_tok
+%token <num> if_tok else_tok while_tok ident_tok
+%token <num> eol_tok err_tok
+%token <num> ',' ';' '=' '{' '}' '[' ']' '(' ')'
 
 %left equ_tok nequ_tok
 %left more_tok moreEqu_tok less_tok lessEqu_tok
@@ -29,109 +34,173 @@ InputNode *root;
 %left '*' '/' '%'
 %right ONEOP
 
-
+%type <num> Exp
 %%
 
 
-CompUnit :  {debug("Compunit ::= empty\n");}
-        | CompUnit Decl { debug("Compunit ::= CompUnit Decl\n");}
-        | CompUnit FuncDef {debug("Compunit ::= CompUnit FuncDef\n");}
+CompUnit :  {debug("(%d,%d)Compunit ::= empty\n", @$.first_line, @$.first_column);}
+        | CompUnit Decl { debug("(%d,%d)Compunit ::= CompUnit Decl\n", @$.first_line, @$.first_column);}
+        | CompUnit FuncDef {debug("(%d,%d)Compunit ::= CompUnit FuncDef\n", @$.first_line, @$.first_column);}
          ;        
 
-Decl : ConstDecl {debug("Decl ::= ConstDecl\n");}
-        | VarDecl {debug("Decl ::= VarDecl\n");}
+Decl : ConstDecl {debug("(%d,%d)Decl ::= ConstDecl\n", @$.first_line, @$.first_column);}
+        | VarDecl {debug("(%d,%d)Decl ::= VarDecl\n", @$.first_line, @$.first_column);}
         ;
         
-ConstDecl: const_tok int_tok MultiConstDef ';'{debug("ConstDecl ::= const int  MultiConstDef\n");}
+ConstDecl: const_tok int_tok MultiConstDef ';'{debug("(%d,%d)ConstDecl ::= const int  MultiConstDef\n", @$.first_line, @$.first_column);}
+           | const_tok MultiConstDef ';' {
+               sprintf(buffer, "lack int after const (%d, %d)", @1.last_line, @1.last_column);
+               yywarning(buffer);
+               debug("(%d,%d)ConstDecl ::= const MultiConstDef\n", @$.first_line, @$.first_column);
+             }
            ;         
            
-MultiConstDef:  ConstDef {debug("MultiConstDef :: = ConstDef\n");}
-        | MultiConstDef ',' ConstDef {debug("MultiConstDef :: = MultiConstDef, ConstDef\n");}
+MultiConstDef:  ConstDef {debug("(%d,%d)MultiConstDef :: = ConstDef\n", @$.first_line, @$.first_column);}
+        | MultiConstDef ',' ConstDef {debug("(%d,%d)MultiConstDef :: = MultiConstDef, ConstDef\n", @$.first_line, @$.first_column);}
           ;        
 
-ConstDef: ident_tok '=' Exp {debug("ConstDef ::= ident_tok = Exp\n");}
-        | ident_tok '[' Exp ']' '=' '{' MultiExp '}' {debug("ConstDef ::= ident_tok [ Exp ] = { MultiExp }\n");}
-        |  ident_tok '[' ']' '=' '{' MultiExp '}' {debug("ConstDef ::= ident_tok [ Exp ] = { MultiExp }\n");} 
+ConstDef: ident_tok '=' Exp {debug("(%d,%d)ConstDef ::= ident_tok = Exp\n", @$.first_line, @$.first_column);}
+        | ident_tok '[' Exp ']' '=' '{' MultiExp '}' {debug("(%d,%d)ConstDef ::= ident_tok [ Exp ] = { MultiExp }\n", @$.first_line, @$.first_column);}
+        |  ident_tok '[' ']' '=' '{' MultiExp '}' {debug("(%d,%d)ConstDef ::= ident_tok [ Exp ] = { MultiExp }\n", @$.first_line, @$.first_column);} 
         ;
             
-VarDecl: int_tok MultiVar ';' {debug("VarDecl::= int MultiVar ;\n");}
+VarDecl: int_tok MultiVar ';' {debug("(%d,%d)VarDecl::= int MultiVar ;\n", @$.first_line, @$.first_column);}
          ;        
         
-MultiVar: Var {debug("MultiVar :: = Var\n");}
-        | MultiVar ',' Var {debug("MultiVar ::= MultiVar, Var\n");}
+MultiVar: Var {debug("(%d,%d)MultiVar :: = Var\n", @$.first_line, @$.first_column);}
+        | MultiVar ',' Var {debug("(%d,%d)MultiVar ::= MultiVar, Var\n", @$.first_line, @$.first_column);}
         ;
 
-Var: ident_tok {debug("Var :: = ident_tok\n");}
-        | ident_tok '[' Exp ']' {debug("Var :: =  ident_tok [ Exp ]\n");}
-        |  ident_tok '=' Exp {debug("Var :: =  ident_tok = Exp\n");}
-        | ident_tok '[' Exp ']' '=' '{' MultiExp'}' {debug("Var :: =  ident_tok [ Exp ] = { MultiExp}\n");}
-        | ident_tok '[' ']' '=' '{' MultiExp'}' {debug("Var :: =  ident_tok [ ] = { MultiExp}\n");}
+Var: ident_tok {debug("(%d,%d)Var :: = ident_tok\n", @$.first_line, @$.first_column);}
+        | ident_tok '[' Exp ']' {debug("(%d,%d)Var :: =  ident_tok [ Exp ]\n", @$.first_line, @$.first_column);}
+        |  ident_tok '=' Exp {debug("(%d,%d)Var :: =  ident_tok = Exp\n", @$.first_line, @$.first_column);}
+        | ident_tok '[' Exp ']' '=' '{' MultiExp'}' {debug("(%d,%d)Var :: =  ident_tok [ Exp ] = { MultiExp}\n", @$.first_line, @$.first_column);}
+        | ident_tok '[' ']' '=' '{' MultiExp'}' {debug("(%d,%d)Var :: =  ident_tok [ ] = { MultiExp}\n", @$.first_line, @$.first_column);}
          ;
          
-MultiExp: Exp {debug("MultiExp :: = Exp\n");}
-        | MultiExp ',' Exp {debug("MultiExp ::= MultiExp, Exp\n");}
+MultiExp: Exp {debug("(%d,%d)MultiExp :: = Exp\n", @$.first_line, @$.first_column);}
+        | MultiExp ',' Exp {debug("(%d,%d)MultiExp ::= MultiExp, Exp\n", @$.first_line, @$.first_column);}
         ;
             
-FuncDef: void_tok ident_tok '(' ')'  Block {debug("FuncDef ::= void_tok ident_tok ( ) Block\n");}
+FuncDef: void_tok ident_tok '(' ')'  Block {debug("(%d,%d)FuncDef ::= void_tok ident_tok ( ) Block\n", @$.first_line, @$.first_column);}
          ;
          
-Block: '{' MultiBlock '}' {debug("Block ::= MultiBlock\n");}
+Block: '{' MultiBlock '}' {debug("(%d,%d)Block ::= MultiBlock\n", @$.first_line, @$.first_column);}
        ;
         
-MultiBlock: BlockItem {debug("MultiBlock :: = BlockItem\n");}
-        |  MultiBlock BlockItem {debug("MultiBlock ::= MultiBlock BlockItem\n");}
+MultiBlock: BlockItem {debug("(%d,%d)MultiBlock :: = BlockItem\n", @$.first_line, @$.first_column);}
+        |  MultiBlock BlockItem {debug("(%d,%d)MultiBlock ::= MultiBlock BlockItem\n", @$.first_line, @$.first_column);}
         ;
         
-BlockItem: {debug("BlockItem ::= empty\n");}
-        | Decl {debug("BlockItem ::= Decl\n");}
-        | Stmt {debug("BlockItem ::= Stmt\n");}
+BlockItem: {debug("(%d,%d)BlockItem ::= empty\n", @$.first_line, @$.first_column);}
+        | Decl { debug("(%d,%d)BlockItem ::= Decl\n", @$.first_line, @$.first_column);}
+        | Stmt {debug("(%d,%d)BlockItem ::= Stmt\n", @$.first_line, @$.first_column);}
         ;
         
-Stmt:  LVal '=' Exp ';' {debug("Stmt ::= LVal = Exp ;\n");}
-        | ident_tok '(' ')' ';' {debug("Stmt ::= ident_tok();\n");}
-        | Block {debug("Stmt ::= Block\n");}
-        | while_tok '(' Cond ')' Stmt {debug("Stmp ::= while ( Cond ) Stmt\n");}
-        | ';' {debug("Stmt ::= ;\n");}
-        | if_tok '(' Cond ')' Stmt {debug("Stmp :: = if (Cond) Stmt\n");}
-        | if_tok '(' Cond ')' Stmt else_tok Stmt {debug("Stmp :: = if (Cond) Stmt else Stmt\n");}
+Stmt:  LVal '=' Exp ';' {debug("(%d,%d)Stmt ::= LVal = Exp ;\n", @$.first_line, @$.first_column);}
+        | ident_tok '(' ')' ';' {debug("(%d,%d)Stmt ::= ident_tok();\n", @$.first_line, @$.first_column);}
+        | Block {debug("(%d,%d)Stmt ::= Block\n", @$.first_line, @$.first_column);}
+        | while_tok '(' Cond ')' Stmt {debug("(%d,%d)Stmp ::= while (Cond) Stmt\n", @$.first_line, @$.first_column);}
+        | ';' {debug("(%d,%d)Stmt ::= ;\n", @$.first_line, @$.first_column);}
+        | if_tok '(' Cond ')' Stmt {debug("(%d,%d)Stmp :: = if (Cond) Stmt\n", @$.first_line, @$.first_column);}
+        | if_tok '(' Cond ')' Stmt else_tok Stmt {debug("(%d,%d)Stmp :: = if (Cond) Stmt else Stmt\n", @$.first_line, @$.first_column);}
         ;
 
-LVal:   ident_tok {debug("LVal ::= ident\n");}
-        | ident_tok '[' Exp ']' {debug("LVal ::= ident[Exp]\n");}
+
+Cond:   Exp RelOp Exp {debug("(%d,%d)Cond ::= Exp RelOp Exp\n", @$.first_line, @$.first_column);}
+        ;
+
+LVal:   ident_tok {debug("(%d,%d)LVal ::= ident\n", @$.first_line, @$.first_column);}
+        | ident_tok '[' Exp ']' {debug("(%d,%d)LVal ::= ident[Exp]\n", @$.first_line, @$.first_column);}
+        ;
+  
+        
+RelOp:  equ_tok {debug("(%d,%d)RelOp ::= ==\n", @$.first_line, @$.first_column);}
+        | nequ_tok {debug("(%d,%d)RelOp ::= !=\n", @$.first_line, @$.first_column);}
+        | less_tok {debug("(%d,%d)RelOp ::= <\n", @$.first_line, @$.first_column);}
+        | more_tok {debug("(%d,%d)RelOp ::= >\n", @$.first_line, @$.first_column);}
+        | lessEqu_tok {debug("(%d,%d)RelOp ::= <=\n", @$.first_line, @$.first_column);}
+        | moreEqu_tok {debug("(%d,%d)RelOp ::= >=\n", @$.first_line, @$.first_column);}
         ;
         
-Cond:   Exp RelOp Exp {debug("Cond ::= Exp RelOp Exp\n");}
+Exp:    num_tok  {
+                //$$ = 0;
+                debug("(%d,%d)Exp ::= number\n", @$.first_line, @$.first_column);
+                }
+        | LVal  {
+                //$$ = 0;
+                debug("(%d,%d)Exp ::= LVal\n", @$.first_line, @$.first_column);
+                }
+        | Exp '+' Exp {
+              //$$ = workBrackTwo($1, $3);
+              debug("(%d,%d)Exp ::= Exp + Exp\n", @$.first_line, @$.first_column);
+              }
+        | Exp '-' Exp {
+              //$$ = workBrackTwo($1, $3);
+              debug("(%d,%d)Exp ::= Exp - Exp\n", @$.first_line, @$.first_column);
+              }
+        | Exp '*' Exp {
+              //$$ = workBrackTwo($1, $3);
+              debug("(%d,%d)Exp ::= Exp * Exp\n", @$.first_line, @$.first_column);
+              }
+        | Exp '/' Exp {
+              //$$ = workBrackTwo($1, $3);
+              debug("(%d,%d)Exp ::= Exp / Exp\n", @$.first_line, @$.first_column);
+              }
+        | Exp '%' Exp {
+              //$$ = workBrackTwo($1, $3);
+              debug("(%d,%d)Exp ::= Exp %% Exp\n", @$.first_line, @$.first_column);
+              }
+        | '-' Exp %prec ONEOP {
+              //$$ = workBrackOne($2);
+              debug("(%d,%d)Exp ::= - Exp\n", @$.first_line, @$.first_column);
+              }
+        | '+' Exp %prec ONEOP {
+              //$$ = workBrackOne($2);
+              debug("(%d,%d)Exp ::= + Exp\n", @$.first_line, @$.first_column);
+              }   
+        | '(' Exp ')'  {
+              //$$ = workBrackZero($2);
+              debug("(%d,%d)Exp ::= ( Exp )\n", @$.first_line, @$.first_column);
+              }  
+        | Exp Exp {
+          //$$ = workBrackTwo($1, $2);
+            sprintf(buffer, "lack BinOp after Exp (%d, %d)", @1.last_line, @1.last_column);
+            yyerror(buffer);
+            debug("(%d,%d)Exp ::= Exp Exp\n", @$.first_line, @$.first_column);
+          }
+        | '(' Exp {
+            sprintf(buffer, "lack ')' after Exp (%d, %d)", @2.last_line, @2.last_column);
+            yyerror(buffer);
+            debug("Exp :: = ( Exp");
+        }
+        | Exp error ')' {
+            sprintf(buffer, "lack '(' befor Exp (%d, %d)", @1.first_line, @1.first_column);
+            yyerror(buffer);
+            debug("Exp :: = Exp )");
+        } 
         ;
         
-RelOp:  equ_tok {debug("RelOp ::= ==\n");}
-        | nequ_tok {debug("RelOp ::= !=\n");}
-        | less_tok {debug("RelOp ::= <\n");}
-        | more_tok {debug("RelOp ::= >\n");}
-        | lessEqu_tok {debug("RelOp ::= <=\n");}
-        | moreEqu_tok {debug("RelOp ::= >=\n");}
-        ;
-        
-Exp:    Exp BinOp Exp {debug("Exp ::= Exp BinOp Exp\n");}
-        | '(' Exp ')'  {debug("Exp ::= ( Exp )\n");}
-        | UnaryOp Exp  %prec ONEOP {debug("Exp ::= UnaryOp Exp\n");}    
-        | LVal  {debug("Exp ::= LVal\n");}
-        | num_tok  {debug("Exp ::= number\n");}
-        ;
-        
-BinOp:   '+'  {debug("BinOp ::= +\n");}
-        | '-' {debug("BinOp ::= -\n");}
-        | '*' {debug("BinOp ::= *\n");}
-        | '/' {debug("BinOp ::= /\n");}
-        | '%' {debug("BinOp ::= %%\n");}
-        ;
-        
-UnaryOp: '+' {debug("UnaryOp ::= +\n");}
-         | '-' {debug("UnaryOp ::= -\n");}
-         ;
          
 %%
 
-void yyerror (const char *msg)
+/*int workBrackTwo(int u, int v) {
+    
+}
+
+int workBrackOne(int u) {
+    return 1;
+}
+
+int workBrackZero(int u) {
+    return 1;
+} */
+
+void yyerror(const char *msg)
 {
-    error ("%s", msg);
+    error("%s", msg);
+}
+
+void yywarning(const char *msg) {
+    warning("%s", msg);
 }

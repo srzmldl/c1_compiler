@@ -4,10 +4,18 @@ Terminals unused in grammar
    err_tok
 
 
-State 54 conflicts: 7 shift/reduce
-State 60 conflicts: 5 shift/reduce
-State 69 conflicts: 8 shift/reduce
-State 111 conflicts: 1 shift/reduce
+State 45 conflicts: 10 shift/reduce
+State 46 conflicts: 4 shift/reduce
+State 47 conflicts: 4 shift/reduce
+State 54 conflicts: 9 shift/reduce
+State 59 conflicts: 7 shift/reduce
+State 64 conflicts: 4 shift/reduce, 17 reduce/reduce
+State 65 conflicts: 4 shift/reduce, 17 reduce/reduce
+State 66 conflicts: 4 shift/reduce
+State 67 conflicts: 4 shift/reduce
+State 68 conflicts: 4 shift/reduce
+State 79 conflicts: 8 shift/reduce
+State 119 conflicts: 1 shift/reduce
 
 
 Grammar
@@ -22,109 +30,109 @@ Grammar
     5     | VarDecl
 
     6 ConstDecl: const_tok int_tok MultiConstDef ';'
+    7          | const_tok MultiConstDef ';'
 
-    7 MultiConstDef: ConstDef
-    8              | MultiConstDef ',' ConstDef
+    8 MultiConstDef: ConstDef
+    9              | MultiConstDef ',' ConstDef
 
-    9 ConstDef: ident_tok '=' Exp
-   10         | ident_tok '[' Exp ']' '=' '{' MultiExp '}'
-   11         | ident_tok '[' ']' '=' '{' MultiExp '}'
+   10 ConstDef: ident_tok '=' Exp
+   11         | ident_tok '[' Exp ']' '=' '{' MultiExp '}'
+   12         | ident_tok '[' ']' '=' '{' MultiExp '}'
 
-   12 VarDecl: int_tok MultiVar ';'
+   13 VarDecl: int_tok MultiVar ';'
 
-   13 MultiVar: Var
-   14         | MultiVar ',' Var
+   14 MultiVar: Var
+   15         | MultiVar ',' Var
 
-   15 Var: ident_tok
-   16    | ident_tok '[' Exp ']'
-   17    | ident_tok '=' Exp
-   18    | ident_tok '[' Exp ']' '=' '{' MultiExp '}'
-   19    | ident_tok '[' ']' '=' '{' MultiExp '}'
+   16 Var: ident_tok
+   17    | ident_tok '[' Exp ']'
+   18    | ident_tok '=' Exp
+   19    | ident_tok '[' Exp ']' '=' '{' MultiExp '}'
+   20    | ident_tok '[' ']' '=' '{' MultiExp '}'
 
-   20 MultiExp: Exp
-   21         | MultiExp ',' Exp
+   21 MultiExp: Exp
+   22         | MultiExp ',' Exp
 
-   22 FuncDef: void_tok ident_tok '(' ')' Block
+   23 FuncDef: void_tok ident_tok '(' ')' Block
 
-   23 Block: '{' MultiBlock '}'
+   24 Block: '{' MultiBlock '}'
 
-   24 MultiBlock: BlockItem
-   25           | MultiBlock BlockItem
+   25 MultiBlock: BlockItem
+   26           | MultiBlock BlockItem
 
-   26 BlockItem: %empty
-   27          | Decl
-   28          | Stmt
+   27 BlockItem: %empty
+   28          | Decl
+   29          | Stmt
 
-   29 Stmt: LVal '=' Exp ';'
-   30     | ident_tok '(' ')' ';'
-   31     | Block
-   32     | while_tok '(' Cond ')' Stmt
-   33     | ';'
-   34     | if_tok '(' Cond ')' Stmt
-   35     | if_tok '(' Cond ')' Stmt else_tok Stmt
+   30 Stmt: LVal '=' Exp ';'
+   31     | ident_tok '(' ')' ';'
+   32     | Block
+   33     | while_tok '(' Cond ')' Stmt
+   34     | ';'
+   35     | if_tok '(' Cond ')' Stmt
+   36     | if_tok '(' Cond ')' Stmt else_tok Stmt
 
-   36 LVal: ident_tok
-   37     | ident_tok '[' Exp ']'
+   37 Cond: Exp RelOp Exp
 
-   38 Cond: Exp RelOp Exp
+   38 LVal: ident_tok
+   39     | ident_tok '[' Exp ']'
 
-   39 RelOp: equ_tok
-   40      | nequ_tok
-   41      | less_tok
-   42      | more_tok
-   43      | lessEqu_tok
-   44      | moreEqu_tok
+   40 RelOp: equ_tok
+   41      | nequ_tok
+   42      | less_tok
+   43      | more_tok
+   44      | lessEqu_tok
+   45      | moreEqu_tok
 
-   45 Exp: Exp BinOp Exp
-   46    | '(' Exp ')'
-   47    | UnaryOp Exp
-   48    | LVal
-   49    | num_tok
-
-   50 BinOp: '+'
-   51      | '-'
-   52      | '*'
-   53      | '/'
-   54      | '%'
-
-   55 UnaryOp: '+'
-   56        | '-'
+   46 Exp: num_tok
+   47    | LVal
+   48    | Exp '+' Exp
+   49    | Exp '-' Exp
+   50    | Exp '*' Exp
+   51    | Exp '/' Exp
+   52    | Exp '%' Exp
+   53    | '-' Exp
+   54    | '+' Exp
+   55    | '(' Exp ')'
+   56    | Exp Exp
+   57    | '(' Exp
+   58    | Exp error ')'
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
-'%' (37) 54
-'(' (40) 22 30 32 34 35 46
-')' (41) 22 30 32 34 35 46
-'*' (42) 52
-'+' (43) 50 55
-',' (44) 8 14 21
-'-' (45) 51 56
-'/' (47) 53
-';' (59) 6 12 29 30 33
-'=' (61) 9 10 11 17 18 19 29
-'[' (91) 10 11 16 18 19 37
-']' (93) 10 11 16 18 19 37
-'{' (123) 10 11 18 19 23
-'}' (125) 10 11 18 19 23
-error (256)
-num_tok (258) 49
-const_tok (259) 6
-int_tok (260) 6 12
-void_tok (261) 22
-if_tok (262) 34 35
-else_tok (263) 35
-while_tok (264) 32
-ident_tok (265) 9 10 11 15 16 17 18 19 22 30 36 37
+'%' (37) 52
+'(' (40) 23 31 33 35 36 55 57
+')' (41) 23 31 33 35 36 55 58
+'*' (42) 50
+'+' (43) 48 54
+',' (44) 9 15 22
+'-' (45) 49 53
+'/' (47) 51
+';' (59) 6 7 13 30 31 34
+'=' (61) 10 11 12 18 19 20 30
+'[' (91) 11 12 17 19 20 39
+']' (93) 11 12 17 19 20 39
+'{' (123) 11 12 19 20 24
+'}' (125) 11 12 19 20 24
+error (256) 58
+num_tok (258) 46
+const_tok (259) 6 7
+int_tok (260) 6 13
+void_tok (261) 23
+if_tok (262) 35 36
+else_tok (263) 36
+while_tok (264) 33
+ident_tok (265) 10 11 12 16 17 18 19 20 23 31 38 39
 eol_tok (266)
 err_tok (267)
-equ_tok (268) 39
-nequ_tok (269) 40
-more_tok (270) 42
-moreEqu_tok (271) 44
-less_tok (272) 41
-lessEqu_tok (273) 43
+equ_tok (268) 40
+nequ_tok (269) 41
+more_tok (270) 43
+moreEqu_tok (271) 45
+less_tok (272) 42
+lessEqu_tok (273) 44
 ONEOP (274)
 
 
@@ -135,44 +143,40 @@ $accept (34)
 CompUnit (35)
     on left: 1 2 3, on right: 0 2 3
 Decl (36)
-    on left: 4 5, on right: 2 27
+    on left: 4 5, on right: 2 28
 ConstDecl (37)
-    on left: 6, on right: 4
+    on left: 6 7, on right: 4
 MultiConstDef (38)
-    on left: 7 8, on right: 6 8
+    on left: 8 9, on right: 6 7 9
 ConstDef (39)
-    on left: 9 10 11, on right: 7 8
+    on left: 10 11 12, on right: 8 9
 VarDecl (40)
-    on left: 12, on right: 5
+    on left: 13, on right: 5
 MultiVar (41)
-    on left: 13 14, on right: 12 14
+    on left: 14 15, on right: 13 15
 Var (42)
-    on left: 15 16 17 18 19, on right: 13 14
+    on left: 16 17 18 19 20, on right: 14 15
 MultiExp (43)
-    on left: 20 21, on right: 10 11 18 19 21
+    on left: 21 22, on right: 11 12 19 20 22
 FuncDef (44)
-    on left: 22, on right: 3
+    on left: 23, on right: 3
 Block (45)
-    on left: 23, on right: 22 31
+    on left: 24, on right: 23 32
 MultiBlock (46)
-    on left: 24 25, on right: 23 25
+    on left: 25 26, on right: 24 26
 BlockItem (47)
-    on left: 26 27 28, on right: 24 25
+    on left: 27 28 29, on right: 25 26
 Stmt (48)
-    on left: 29 30 31 32 33 34 35, on right: 28 32 34 35
-LVal (49)
-    on left: 36 37, on right: 29 48
-Cond (50)
-    on left: 38, on right: 32 34 35
+    on left: 30 31 32 33 34 35 36, on right: 29 33 35 36
+Cond (49)
+    on left: 37, on right: 33 35 36
+LVal (50)
+    on left: 38 39, on right: 30 47
 RelOp (51)
-    on left: 39 40 41 42 43 44, on right: 38
+    on left: 40 41 42 43 44 45, on right: 37
 Exp (52)
-    on left: 45 46 47 48 49, on right: 9 10 16 17 18 20 21 29 37 38
-    45 46 47
-BinOp (53)
-    on left: 50 51 52 53 54, on right: 45
-UnaryOp (54)
-    on left: 55 56, on right: 47
+    on left: 46 47 48 49 50 51 52 53 54 55 56 57 58, on right: 10 11
+    17 18 19 21 22 30 37 39 48 49 50 51 52 53 54 55 56 57 58
 
 
 State 0
@@ -211,25 +215,30 @@ State 2
 State 3
 
     6 ConstDecl: const_tok . int_tok MultiConstDef ';'
+    7          | const_tok . MultiConstDef ';'
 
-    int_tok  shift, and go to state 10
+    int_tok    shift, and go to state 10
+    ident_tok  shift, and go to state 11
+
+    MultiConstDef  go to state 12
+    ConstDef       go to state 13
 
 
 State 4
 
-   12 VarDecl: int_tok . MultiVar ';'
+   13 VarDecl: int_tok . MultiVar ';'
 
-    ident_tok  shift, and go to state 11
+    ident_tok  shift, and go to state 14
 
-    MultiVar  go to state 12
-    Var       go to state 13
+    MultiVar  go to state 15
+    Var       go to state 16
 
 
 State 5
 
-   22 FuncDef: void_tok . ident_tok '(' ')' Block
+   23 FuncDef: void_tok . ident_tok '(' ')' Block
 
-    ident_tok  shift, and go to state 14
+    ident_tok  shift, and go to state 17
 
 
 State 6
@@ -264,1126 +273,1648 @@ State 10
 
     6 ConstDecl: const_tok int_tok . MultiConstDef ';'
 
-    ident_tok  shift, and go to state 15
+    ident_tok  shift, and go to state 11
 
-    MultiConstDef  go to state 16
-    ConstDef       go to state 17
+    MultiConstDef  go to state 18
+    ConstDef       go to state 13
 
 
 State 11
 
-   15 Var: ident_tok .
-   16    | ident_tok . '[' Exp ']'
-   17    | ident_tok . '=' Exp
-   18    | ident_tok . '[' Exp ']' '=' '{' MultiExp '}'
-   19    | ident_tok . '[' ']' '=' '{' MultiExp '}'
+   10 ConstDef: ident_tok . '=' Exp
+   11         | ident_tok . '[' Exp ']' '=' '{' MultiExp '}'
+   12         | ident_tok . '[' ']' '=' '{' MultiExp '}'
 
-    '='  shift, and go to state 18
-    '['  shift, and go to state 19
-
-    $default  reduce using rule 15 (Var)
+    '='  shift, and go to state 19
+    '['  shift, and go to state 20
 
 
 State 12
 
-   12 VarDecl: int_tok MultiVar . ';'
-   14 MultiVar: MultiVar . ',' Var
+    7 ConstDecl: const_tok MultiConstDef . ';'
+    9 MultiConstDef: MultiConstDef . ',' ConstDef
 
-    ','  shift, and go to state 20
-    ';'  shift, and go to state 21
+    ','  shift, and go to state 21
+    ';'  shift, and go to state 22
 
 
 State 13
 
-   13 MultiVar: Var .
+    8 MultiConstDef: ConstDef .
 
-    $default  reduce using rule 13 (MultiVar)
+    $default  reduce using rule 8 (MultiConstDef)
 
 
 State 14
 
-   22 FuncDef: void_tok ident_tok . '(' ')' Block
-
-    '('  shift, and go to state 22
-
-
-State 15
-
-    9 ConstDef: ident_tok . '=' Exp
-   10         | ident_tok . '[' Exp ']' '=' '{' MultiExp '}'
-   11         | ident_tok . '[' ']' '=' '{' MultiExp '}'
+   16 Var: ident_tok .
+   17    | ident_tok . '[' Exp ']'
+   18    | ident_tok . '=' Exp
+   19    | ident_tok . '[' Exp ']' '=' '{' MultiExp '}'
+   20    | ident_tok . '[' ']' '=' '{' MultiExp '}'
 
     '='  shift, and go to state 23
     '['  shift, and go to state 24
 
+    $default  reduce using rule 16 (Var)
 
-State 16
 
-    6 ConstDecl: const_tok int_tok MultiConstDef . ';'
-    8 MultiConstDef: MultiConstDef . ',' ConstDef
+State 15
+
+   13 VarDecl: int_tok MultiVar . ';'
+   15 MultiVar: MultiVar . ',' Var
 
     ','  shift, and go to state 25
     ';'  shift, and go to state 26
 
 
+State 16
+
+   14 MultiVar: Var .
+
+    $default  reduce using rule 14 (MultiVar)
+
+
 State 17
 
-    7 MultiConstDef: ConstDef .
+   23 FuncDef: void_tok ident_tok . '(' ')' Block
 
-    $default  reduce using rule 7 (MultiConstDef)
+    '('  shift, and go to state 27
 
 
 State 18
 
-   17 Var: ident_tok '=' . Exp
+    6 ConstDecl: const_tok int_tok MultiConstDef . ';'
+    9 MultiConstDef: MultiConstDef . ',' ConstDef
 
-    num_tok    shift, and go to state 27
-    ident_tok  shift, and go to state 28
-    '('        shift, and go to state 29
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
-
-    LVal     go to state 32
-    Exp      go to state 33
-    UnaryOp  go to state 34
+    ','  shift, and go to state 21
+    ';'  shift, and go to state 28
 
 
 State 19
 
-   16 Var: ident_tok '[' . Exp ']'
-   18    | ident_tok '[' . Exp ']' '=' '{' MultiExp '}'
-   19    | ident_tok '[' . ']' '=' '{' MultiExp '}'
+   10 ConstDef: ident_tok '=' . Exp
 
-    num_tok    shift, and go to state 27
-    ident_tok  shift, and go to state 28
-    ']'        shift, and go to state 35
-    '('        shift, and go to state 29
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
 
-    LVal     go to state 32
-    Exp      go to state 36
-    UnaryOp  go to state 34
+    LVal  go to state 34
+    Exp   go to state 35
 
 
 State 20
 
-   14 MultiVar: MultiVar ',' . Var
+   11 ConstDef: ident_tok '[' . Exp ']' '=' '{' MultiExp '}'
+   12         | ident_tok '[' . ']' '=' '{' MultiExp '}'
 
-    ident_tok  shift, and go to state 11
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    ']'        shift, and go to state 36
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
 
-    Var  go to state 37
+    LVal  go to state 34
+    Exp   go to state 37
 
 
 State 21
 
-   12 VarDecl: int_tok MultiVar ';' .
+    9 MultiConstDef: MultiConstDef ',' . ConstDef
 
-    $default  reduce using rule 12 (VarDecl)
+    ident_tok  shift, and go to state 11
+
+    ConstDef  go to state 38
 
 
 State 22
 
-   22 FuncDef: void_tok ident_tok '(' . ')' Block
+    7 ConstDecl: const_tok MultiConstDef ';' .
 
-    ')'  shift, and go to state 38
+    $default  reduce using rule 7 (ConstDecl)
 
 
 State 23
 
-    9 ConstDef: ident_tok '=' . Exp
+   18 Var: ident_tok '=' . Exp
 
-    num_tok    shift, and go to state 27
-    ident_tok  shift, and go to state 28
-    '('        shift, and go to state 29
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
 
-    LVal     go to state 32
-    Exp      go to state 39
-    UnaryOp  go to state 34
+    LVal  go to state 34
+    Exp   go to state 39
 
 
 State 24
 
-   10 ConstDef: ident_tok '[' . Exp ']' '=' '{' MultiExp '}'
-   11         | ident_tok '[' . ']' '=' '{' MultiExp '}'
+   17 Var: ident_tok '[' . Exp ']'
+   19    | ident_tok '[' . Exp ']' '=' '{' MultiExp '}'
+   20    | ident_tok '[' . ']' '=' '{' MultiExp '}'
 
-    num_tok    shift, and go to state 27
-    ident_tok  shift, and go to state 28
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
     ']'        shift, and go to state 40
-    '('        shift, and go to state 29
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
 
-    LVal     go to state 32
-    Exp      go to state 41
-    UnaryOp  go to state 34
+    LVal  go to state 34
+    Exp   go to state 41
 
 
 State 25
 
-    8 MultiConstDef: MultiConstDef ',' . ConstDef
+   15 MultiVar: MultiVar ',' . Var
 
-    ident_tok  shift, and go to state 15
+    ident_tok  shift, and go to state 14
 
-    ConstDef  go to state 42
+    Var  go to state 42
 
 
 State 26
+
+   13 VarDecl: int_tok MultiVar ';' .
+
+    $default  reduce using rule 13 (VarDecl)
+
+
+State 27
+
+   23 FuncDef: void_tok ident_tok '(' . ')' Block
+
+    ')'  shift, and go to state 43
+
+
+State 28
 
     6 ConstDecl: const_tok int_tok MultiConstDef ';' .
 
     $default  reduce using rule 6 (ConstDecl)
 
 
-State 27
-
-   49 Exp: num_tok .
-
-    $default  reduce using rule 49 (Exp)
-
-
-State 28
-
-   36 LVal: ident_tok .
-   37     | ident_tok . '[' Exp ']'
-
-    '['  shift, and go to state 43
-
-    $default  reduce using rule 36 (LVal)
-
-
 State 29
 
-   46 Exp: '(' . Exp ')'
-
-    num_tok    shift, and go to state 27
-    ident_tok  shift, and go to state 28
-    '('        shift, and go to state 29
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
-
-    LVal     go to state 32
-    Exp      go to state 44
-    UnaryOp  go to state 34
-
-
-State 30
-
-   55 UnaryOp: '+' .
-
-    $default  reduce using rule 55 (UnaryOp)
-
-
-State 31
-
-   56 UnaryOp: '-' .
-
-    $default  reduce using rule 56 (UnaryOp)
-
-
-State 32
-
-   48 Exp: LVal .
-
-    $default  reduce using rule 48 (Exp)
-
-
-State 33
-
-   17 Var: ident_tok '=' Exp .
-   45 Exp: Exp . BinOp Exp
-
-    '+'  shift, and go to state 45
-    '-'  shift, and go to state 46
-    '*'  shift, and go to state 47
-    '/'  shift, and go to state 48
-    '%'  shift, and go to state 49
-
-    $default  reduce using rule 17 (Var)
-
-    BinOp  go to state 50
-
-
-State 34
-
-   47 Exp: UnaryOp . Exp
-
-    num_tok    shift, and go to state 27
-    ident_tok  shift, and go to state 28
-    '('        shift, and go to state 29
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
-
-    LVal     go to state 32
-    Exp      go to state 51
-    UnaryOp  go to state 34
-
-
-State 35
-
-   19 Var: ident_tok '[' ']' . '=' '{' MultiExp '}'
-
-    '='  shift, and go to state 52
-
-
-State 36
-
-   16 Var: ident_tok '[' Exp . ']'
-   18    | ident_tok '[' Exp . ']' '=' '{' MultiExp '}'
-   45 Exp: Exp . BinOp Exp
-
-    ']'  shift, and go to state 53
-    '+'  shift, and go to state 45
-    '-'  shift, and go to state 46
-    '*'  shift, and go to state 47
-    '/'  shift, and go to state 48
-    '%'  shift, and go to state 49
-
-    BinOp  go to state 50
-
-
-State 37
-
-   14 MultiVar: MultiVar ',' Var .
-
-    $default  reduce using rule 14 (MultiVar)
-
-
-State 38
-
-   22 FuncDef: void_tok ident_tok '(' ')' . Block
-
-    '{'  shift, and go to state 54
-
-    Block  go to state 55
-
-
-State 39
-
-    9 ConstDef: ident_tok '=' Exp .
-   45 Exp: Exp . BinOp Exp
-
-    '+'  shift, and go to state 45
-    '-'  shift, and go to state 46
-    '*'  shift, and go to state 47
-    '/'  shift, and go to state 48
-    '%'  shift, and go to state 49
-
-    $default  reduce using rule 9 (ConstDef)
-
-    BinOp  go to state 50
-
-
-State 40
-
-   11 ConstDef: ident_tok '[' ']' . '=' '{' MultiExp '}'
-
-    '='  shift, and go to state 56
-
-
-State 41
-
-   10 ConstDef: ident_tok '[' Exp . ']' '=' '{' MultiExp '}'
-   45 Exp: Exp . BinOp Exp
-
-    ']'  shift, and go to state 57
-    '+'  shift, and go to state 45
-    '-'  shift, and go to state 46
-    '*'  shift, and go to state 47
-    '/'  shift, and go to state 48
-    '%'  shift, and go to state 49
-
-    BinOp  go to state 50
-
-
-State 42
-
-    8 MultiConstDef: MultiConstDef ',' ConstDef .
-
-    $default  reduce using rule 8 (MultiConstDef)
-
-
-State 43
-
-   37 LVal: ident_tok '[' . Exp ']'
-
-    num_tok    shift, and go to state 27
-    ident_tok  shift, and go to state 28
-    '('        shift, and go to state 29
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
-
-    LVal     go to state 32
-    Exp      go to state 58
-    UnaryOp  go to state 34
-
-
-State 44
-
-   45 Exp: Exp . BinOp Exp
-   46    | '(' Exp . ')'
-
-    ')'  shift, and go to state 59
-    '+'  shift, and go to state 45
-    '-'  shift, and go to state 46
-    '*'  shift, and go to state 47
-    '/'  shift, and go to state 48
-    '%'  shift, and go to state 49
-
-    BinOp  go to state 50
-
-
-State 45
-
-   50 BinOp: '+' .
-
-    $default  reduce using rule 50 (BinOp)
-
-
-State 46
-
-   51 BinOp: '-' .
-
-    $default  reduce using rule 51 (BinOp)
-
-
-State 47
-
-   52 BinOp: '*' .
-
-    $default  reduce using rule 52 (BinOp)
-
-
-State 48
-
-   53 BinOp: '/' .
-
-    $default  reduce using rule 53 (BinOp)
-
-
-State 49
-
-   54 BinOp: '%' .
-
-    $default  reduce using rule 54 (BinOp)
-
-
-State 50
-
-   45 Exp: Exp BinOp . Exp
-
-    num_tok    shift, and go to state 27
-    ident_tok  shift, and go to state 28
-    '('        shift, and go to state 29
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
-
-    LVal     go to state 32
-    Exp      go to state 60
-    UnaryOp  go to state 34
-
-
-State 51
-
-   45 Exp: Exp . BinOp Exp
-   47    | UnaryOp Exp .
-
-    $default  reduce using rule 47 (Exp)
-
-    BinOp  go to state 50
-
-
-State 52
-
-   19 Var: ident_tok '[' ']' '=' . '{' MultiExp '}'
-
-    '{'  shift, and go to state 61
-
-
-State 53
-
-   16 Var: ident_tok '[' Exp ']' .
-   18    | ident_tok '[' Exp ']' . '=' '{' MultiExp '}'
-
-    '='  shift, and go to state 62
-
-    $default  reduce using rule 16 (Var)
-
-
-State 54
-
-   23 Block: '{' . MultiBlock '}'
-
-    const_tok  shift, and go to state 3
-    int_tok    shift, and go to state 4
-    if_tok     shift, and go to state 63
-    while_tok  shift, and go to state 64
-    ident_tok  shift, and go to state 65
-    ';'        shift, and go to state 66
-    '{'        shift, and go to state 54
-
-    const_tok  [reduce using rule 26 (BlockItem)]
-    int_tok    [reduce using rule 26 (BlockItem)]
-    if_tok     [reduce using rule 26 (BlockItem)]
-    while_tok  [reduce using rule 26 (BlockItem)]
-    ident_tok  [reduce using rule 26 (BlockItem)]
-    ';'        [reduce using rule 26 (BlockItem)]
-    '{'        [reduce using rule 26 (BlockItem)]
-    $default   reduce using rule 26 (BlockItem)
-
-    Decl        go to state 67
-    ConstDecl   go to state 7
-    VarDecl     go to state 8
-    Block       go to state 68
-    MultiBlock  go to state 69
-    BlockItem   go to state 70
-    Stmt        go to state 71
-    LVal        go to state 72
-
-
-State 55
-
-   22 FuncDef: void_tok ident_tok '(' ')' Block .
-
-    $default  reduce using rule 22 (FuncDef)
-
-
-State 56
-
-   11 ConstDef: ident_tok '[' ']' '=' . '{' MultiExp '}'
-
-    '{'  shift, and go to state 73
-
-
-State 57
-
-   10 ConstDef: ident_tok '[' Exp ']' . '=' '{' MultiExp '}'
-
-    '='  shift, and go to state 74
-
-
-State 58
-
-   37 LVal: ident_tok '[' Exp . ']'
-   45 Exp: Exp . BinOp Exp
-
-    ']'  shift, and go to state 75
-    '+'  shift, and go to state 45
-    '-'  shift, and go to state 46
-    '*'  shift, and go to state 47
-    '/'  shift, and go to state 48
-    '%'  shift, and go to state 49
-
-    BinOp  go to state 50
-
-
-State 59
-
-   46 Exp: '(' Exp ')' .
+   46 Exp: num_tok .
 
     $default  reduce using rule 46 (Exp)
 
 
+State 30
+
+   38 LVal: ident_tok .
+   39     | ident_tok . '[' Exp ']'
+
+    '['  shift, and go to state 44
+
+    $default  reduce using rule 38 (LVal)
+
+
+State 31
+
+   55 Exp: '(' . Exp ')'
+   57    | '(' . Exp
+
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+
+    LVal  go to state 34
+    Exp   go to state 45
+
+
+State 32
+
+   54 Exp: '+' . Exp
+
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+
+    LVal  go to state 34
+    Exp   go to state 46
+
+
+State 33
+
+   53 Exp: '-' . Exp
+
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+
+    LVal  go to state 34
+    Exp   go to state 47
+
+
+State 34
+
+   47 Exp: LVal .
+
+    $default  reduce using rule 47 (Exp)
+
+
+State 35
+
+   10 ConstDef: ident_tok '=' Exp .
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   56    | Exp . Exp
+   58    | Exp . error ')'
+
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 49
+    '-'        shift, and go to state 50
+    '*'        shift, and go to state 51
+    '/'        shift, and go to state 52
+    '%'        shift, and go to state 53
+
+    ','  reduce using rule 10 (ConstDef)
+    ';'  reduce using rule 10 (ConstDef)
+
+    LVal  go to state 34
+    Exp   go to state 54
+
+
+State 36
+
+   12 ConstDef: ident_tok '[' ']' . '=' '{' MultiExp '}'
+
+    '='  shift, and go to state 55
+
+
+State 37
+
+   11 ConstDef: ident_tok '[' Exp . ']' '=' '{' MultiExp '}'
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   56    | Exp . Exp
+   58    | Exp . error ')'
+
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    ']'        shift, and go to state 56
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 49
+    '-'        shift, and go to state 50
+    '*'        shift, and go to state 51
+    '/'        shift, and go to state 52
+    '%'        shift, and go to state 53
+
+    LVal  go to state 34
+    Exp   go to state 54
+
+
+State 38
+
+    9 MultiConstDef: MultiConstDef ',' ConstDef .
+
+    $default  reduce using rule 9 (MultiConstDef)
+
+
+State 39
+
+   18 Var: ident_tok '=' Exp .
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   56    | Exp . Exp
+   58    | Exp . error ')'
+
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 49
+    '-'        shift, and go to state 50
+    '*'        shift, and go to state 51
+    '/'        shift, and go to state 52
+    '%'        shift, and go to state 53
+
+    ','  reduce using rule 18 (Var)
+    ';'  reduce using rule 18 (Var)
+
+    LVal  go to state 34
+    Exp   go to state 54
+
+
+State 40
+
+   20 Var: ident_tok '[' ']' . '=' '{' MultiExp '}'
+
+    '='  shift, and go to state 57
+
+
+State 41
+
+   17 Var: ident_tok '[' Exp . ']'
+   19    | ident_tok '[' Exp . ']' '=' '{' MultiExp '}'
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   56    | Exp . Exp
+   58    | Exp . error ')'
+
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    ']'        shift, and go to state 58
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 49
+    '-'        shift, and go to state 50
+    '*'        shift, and go to state 51
+    '/'        shift, and go to state 52
+    '%'        shift, and go to state 53
+
+    LVal  go to state 34
+    Exp   go to state 54
+
+
+State 42
+
+   15 MultiVar: MultiVar ',' Var .
+
+    $default  reduce using rule 15 (MultiVar)
+
+
+State 43
+
+   23 FuncDef: void_tok ident_tok '(' ')' . Block
+
+    '{'  shift, and go to state 59
+
+    Block  go to state 60
+
+
+State 44
+
+   39 LVal: ident_tok '[' . Exp ']'
+
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+
+    LVal  go to state 34
+    Exp   go to state 61
+
+
+State 45
+
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   55    | '(' Exp . ')'
+   56    | Exp . Exp
+   57    | '(' Exp .
+   58    | Exp . error ')'
+
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    ')'        shift, and go to state 62
+    '+'        shift, and go to state 49
+    '-'        shift, and go to state 50
+    '*'        shift, and go to state 51
+    '/'        shift, and go to state 52
+    '%'        shift, and go to state 53
+
+    error        [reduce using rule 57 (Exp)]
+    num_tok      [reduce using rule 57 (Exp)]
+    ident_tok    [reduce using rule 57 (Exp)]
+    ','          reduce using rule 57 (Exp)
+    ';'          reduce using rule 57 (Exp)
+    '}'          reduce using rule 57 (Exp)
+    ']'          reduce using rule 57 (Exp)
+    '('          [reduce using rule 57 (Exp)]
+    ')'          [reduce using rule 57 (Exp)]
+    equ_tok      reduce using rule 57 (Exp)
+    nequ_tok     reduce using rule 57 (Exp)
+    more_tok     reduce using rule 57 (Exp)
+    moreEqu_tok  reduce using rule 57 (Exp)
+    less_tok     reduce using rule 57 (Exp)
+    lessEqu_tok  reduce using rule 57 (Exp)
+    '+'          [reduce using rule 57 (Exp)]
+    '-'          [reduce using rule 57 (Exp)]
+    '*'          [reduce using rule 57 (Exp)]
+    '/'          [reduce using rule 57 (Exp)]
+    '%'          [reduce using rule 57 (Exp)]
+
+    LVal  go to state 34
+    Exp   go to state 54
+
+
+State 46
+
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   54    | '+' Exp .
+   56    | Exp . Exp
+   58    | Exp . error ')'
+
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+
+    error        [reduce using rule 54 (Exp)]
+    num_tok      [reduce using rule 54 (Exp)]
+    ident_tok    [reduce using rule 54 (Exp)]
+    ','          reduce using rule 54 (Exp)
+    ';'          reduce using rule 54 (Exp)
+    '}'          reduce using rule 54 (Exp)
+    ']'          reduce using rule 54 (Exp)
+    '('          [reduce using rule 54 (Exp)]
+    ')'          reduce using rule 54 (Exp)
+    equ_tok      reduce using rule 54 (Exp)
+    nequ_tok     reduce using rule 54 (Exp)
+    more_tok     reduce using rule 54 (Exp)
+    moreEqu_tok  reduce using rule 54 (Exp)
+    less_tok     reduce using rule 54 (Exp)
+    lessEqu_tok  reduce using rule 54 (Exp)
+    '+'          reduce using rule 54 (Exp)
+    '-'          reduce using rule 54 (Exp)
+    '*'          reduce using rule 54 (Exp)
+    '/'          reduce using rule 54 (Exp)
+    '%'          reduce using rule 54 (Exp)
+
+    LVal  go to state 34
+    Exp   go to state 54
+
+
+State 47
+
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   53    | '-' Exp .
+   56    | Exp . Exp
+   58    | Exp . error ')'
+
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+
+    error        [reduce using rule 53 (Exp)]
+    num_tok      [reduce using rule 53 (Exp)]
+    ident_tok    [reduce using rule 53 (Exp)]
+    ','          reduce using rule 53 (Exp)
+    ';'          reduce using rule 53 (Exp)
+    '}'          reduce using rule 53 (Exp)
+    ']'          reduce using rule 53 (Exp)
+    '('          [reduce using rule 53 (Exp)]
+    ')'          reduce using rule 53 (Exp)
+    equ_tok      reduce using rule 53 (Exp)
+    nequ_tok     reduce using rule 53 (Exp)
+    more_tok     reduce using rule 53 (Exp)
+    moreEqu_tok  reduce using rule 53 (Exp)
+    less_tok     reduce using rule 53 (Exp)
+    lessEqu_tok  reduce using rule 53 (Exp)
+    '+'          reduce using rule 53 (Exp)
+    '-'          reduce using rule 53 (Exp)
+    '*'          reduce using rule 53 (Exp)
+    '/'          reduce using rule 53 (Exp)
+    '%'          reduce using rule 53 (Exp)
+
+    LVal  go to state 34
+    Exp   go to state 54
+
+
+State 48
+
+   58 Exp: Exp error . ')'
+
+    ')'  shift, and go to state 63
+
+
+State 49
+
+   48 Exp: Exp '+' . Exp
+   54    | '+' . Exp
+
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+
+    LVal  go to state 34
+    Exp   go to state 64
+
+
+State 50
+
+   49 Exp: Exp '-' . Exp
+   53    | '-' . Exp
+
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+
+    LVal  go to state 34
+    Exp   go to state 65
+
+
+State 51
+
+   50 Exp: Exp '*' . Exp
+
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+
+    LVal  go to state 34
+    Exp   go to state 66
+
+
+State 52
+
+   51 Exp: Exp '/' . Exp
+
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+
+    LVal  go to state 34
+    Exp   go to state 67
+
+
+State 53
+
+   52 Exp: Exp '%' . Exp
+
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+
+    LVal  go to state 34
+    Exp   go to state 68
+
+
+State 54
+
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   56    | Exp . Exp
+   56    | Exp Exp .
+   58    | Exp . error ')'
+
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 49
+    '-'        shift, and go to state 50
+    '*'        shift, and go to state 51
+    '/'        shift, and go to state 52
+    '%'        shift, and go to state 53
+
+    error        [reduce using rule 56 (Exp)]
+    num_tok      [reduce using rule 56 (Exp)]
+    ident_tok    [reduce using rule 56 (Exp)]
+    ','          reduce using rule 56 (Exp)
+    ';'          reduce using rule 56 (Exp)
+    '}'          reduce using rule 56 (Exp)
+    ']'          reduce using rule 56 (Exp)
+    '('          [reduce using rule 56 (Exp)]
+    ')'          reduce using rule 56 (Exp)
+    equ_tok      reduce using rule 56 (Exp)
+    nequ_tok     reduce using rule 56 (Exp)
+    more_tok     reduce using rule 56 (Exp)
+    moreEqu_tok  reduce using rule 56 (Exp)
+    less_tok     reduce using rule 56 (Exp)
+    lessEqu_tok  reduce using rule 56 (Exp)
+    '+'          [reduce using rule 56 (Exp)]
+    '-'          [reduce using rule 56 (Exp)]
+    '*'          [reduce using rule 56 (Exp)]
+    '/'          [reduce using rule 56 (Exp)]
+    '%'          [reduce using rule 56 (Exp)]
+
+    LVal  go to state 34
+    Exp   go to state 54
+
+
+State 55
+
+   12 ConstDef: ident_tok '[' ']' '=' . '{' MultiExp '}'
+
+    '{'  shift, and go to state 69
+
+
+State 56
+
+   11 ConstDef: ident_tok '[' Exp ']' . '=' '{' MultiExp '}'
+
+    '='  shift, and go to state 70
+
+
+State 57
+
+   20 Var: ident_tok '[' ']' '=' . '{' MultiExp '}'
+
+    '{'  shift, and go to state 71
+
+
+State 58
+
+   17 Var: ident_tok '[' Exp ']' .
+   19    | ident_tok '[' Exp ']' . '=' '{' MultiExp '}'
+
+    '='  shift, and go to state 72
+
+    $default  reduce using rule 17 (Var)
+
+
+State 59
+
+   24 Block: '{' . MultiBlock '}'
+
+    const_tok  shift, and go to state 3
+    int_tok    shift, and go to state 4
+    if_tok     shift, and go to state 73
+    while_tok  shift, and go to state 74
+    ident_tok  shift, and go to state 75
+    ';'        shift, and go to state 76
+    '{'        shift, and go to state 59
+
+    const_tok  [reduce using rule 27 (BlockItem)]
+    int_tok    [reduce using rule 27 (BlockItem)]
+    if_tok     [reduce using rule 27 (BlockItem)]
+    while_tok  [reduce using rule 27 (BlockItem)]
+    ident_tok  [reduce using rule 27 (BlockItem)]
+    ';'        [reduce using rule 27 (BlockItem)]
+    '{'        [reduce using rule 27 (BlockItem)]
+    $default   reduce using rule 27 (BlockItem)
+
+    Decl        go to state 77
+    ConstDecl   go to state 7
+    VarDecl     go to state 8
+    Block       go to state 78
+    MultiBlock  go to state 79
+    BlockItem   go to state 80
+    Stmt        go to state 81
+    LVal        go to state 82
+
+
 State 60
 
-   45 Exp: Exp . BinOp Exp
-   45    | Exp BinOp Exp .
+   23 FuncDef: void_tok ident_tok '(' ')' Block .
 
-    '+'  shift, and go to state 45
-    '-'  shift, and go to state 46
-    '*'  shift, and go to state 47
-    '/'  shift, and go to state 48
-    '%'  shift, and go to state 49
-
-    '+'       [reduce using rule 45 (Exp)]
-    '-'       [reduce using rule 45 (Exp)]
-    '*'       [reduce using rule 45 (Exp)]
-    '/'       [reduce using rule 45 (Exp)]
-    '%'       [reduce using rule 45 (Exp)]
-    $default  reduce using rule 45 (Exp)
-
-    BinOp  go to state 50
+    $default  reduce using rule 23 (FuncDef)
 
 
 State 61
 
-   19 Var: ident_tok '[' ']' '=' '{' . MultiExp '}'
+   39 LVal: ident_tok '[' Exp . ']'
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   56    | Exp . Exp
+   58    | Exp . error ')'
 
-    num_tok    shift, and go to state 27
-    ident_tok  shift, and go to state 28
-    '('        shift, and go to state 29
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    ']'        shift, and go to state 83
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 49
+    '-'        shift, and go to state 50
+    '*'        shift, and go to state 51
+    '/'        shift, and go to state 52
+    '%'        shift, and go to state 53
 
-    MultiExp  go to state 76
-    LVal      go to state 32
-    Exp       go to state 77
-    UnaryOp   go to state 34
+    LVal  go to state 34
+    Exp   go to state 54
 
 
 State 62
 
-   18 Var: ident_tok '[' Exp ']' '=' . '{' MultiExp '}'
+   55 Exp: '(' Exp ')' .
 
-    '{'  shift, and go to state 78
+    $default  reduce using rule 55 (Exp)
 
 
 State 63
 
-   34 Stmt: if_tok . '(' Cond ')' Stmt
-   35     | if_tok . '(' Cond ')' Stmt else_tok Stmt
+   58 Exp: Exp error ')' .
 
-    '('  shift, and go to state 79
+    $default  reduce using rule 58 (Exp)
 
 
 State 64
 
-   32 Stmt: while_tok . '(' Cond ')' Stmt
+   48 Exp: Exp . '+' Exp
+   48    | Exp '+' Exp .
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   54    | '+' Exp .
+   56    | Exp . Exp
+   58    | Exp . error ')'
 
-    '('  shift, and go to state 80
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+
+    error        [reduce using rule 48 (Exp)]
+    error        [reduce using rule 54 (Exp)]
+    num_tok      [reduce using rule 48 (Exp)]
+    num_tok      [reduce using rule 54 (Exp)]
+    ident_tok    [reduce using rule 48 (Exp)]
+    ident_tok    [reduce using rule 54 (Exp)]
+    ','          reduce using rule 48 (Exp)
+    ','          [reduce using rule 54 (Exp)]
+    ';'          reduce using rule 48 (Exp)
+    ';'          [reduce using rule 54 (Exp)]
+    '}'          reduce using rule 48 (Exp)
+    '}'          [reduce using rule 54 (Exp)]
+    ']'          reduce using rule 48 (Exp)
+    ']'          [reduce using rule 54 (Exp)]
+    '('          [reduce using rule 48 (Exp)]
+    '('          [reduce using rule 54 (Exp)]
+    ')'          reduce using rule 48 (Exp)
+    ')'          [reduce using rule 54 (Exp)]
+    equ_tok      reduce using rule 48 (Exp)
+    equ_tok      [reduce using rule 54 (Exp)]
+    nequ_tok     reduce using rule 48 (Exp)
+    nequ_tok     [reduce using rule 54 (Exp)]
+    more_tok     reduce using rule 48 (Exp)
+    more_tok     [reduce using rule 54 (Exp)]
+    moreEqu_tok  reduce using rule 48 (Exp)
+    moreEqu_tok  [reduce using rule 54 (Exp)]
+    less_tok     reduce using rule 48 (Exp)
+    less_tok     [reduce using rule 54 (Exp)]
+    lessEqu_tok  reduce using rule 48 (Exp)
+    lessEqu_tok  [reduce using rule 54 (Exp)]
+    '+'          reduce using rule 48 (Exp)
+    '+'          [reduce using rule 54 (Exp)]
+    '-'          reduce using rule 48 (Exp)
+    '-'          [reduce using rule 54 (Exp)]
+    '*'          reduce using rule 54 (Exp)
+    '/'          reduce using rule 54 (Exp)
+    '%'          reduce using rule 54 (Exp)
+
+    LVal  go to state 34
+    Exp   go to state 54
 
 
 State 65
 
-   30 Stmt: ident_tok . '(' ')' ';'
-   36 LVal: ident_tok .
-   37     | ident_tok . '[' Exp ']'
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   49    | Exp '-' Exp .
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   53    | '-' Exp .
+   56    | Exp . Exp
+   58    | Exp . error ')'
 
-    '['  shift, and go to state 43
-    '('  shift, and go to state 81
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
 
-    $default  reduce using rule 36 (LVal)
+    error        [reduce using rule 49 (Exp)]
+    error        [reduce using rule 53 (Exp)]
+    num_tok      [reduce using rule 49 (Exp)]
+    num_tok      [reduce using rule 53 (Exp)]
+    ident_tok    [reduce using rule 49 (Exp)]
+    ident_tok    [reduce using rule 53 (Exp)]
+    ','          reduce using rule 49 (Exp)
+    ','          [reduce using rule 53 (Exp)]
+    ';'          reduce using rule 49 (Exp)
+    ';'          [reduce using rule 53 (Exp)]
+    '}'          reduce using rule 49 (Exp)
+    '}'          [reduce using rule 53 (Exp)]
+    ']'          reduce using rule 49 (Exp)
+    ']'          [reduce using rule 53 (Exp)]
+    '('          [reduce using rule 49 (Exp)]
+    '('          [reduce using rule 53 (Exp)]
+    ')'          reduce using rule 49 (Exp)
+    ')'          [reduce using rule 53 (Exp)]
+    equ_tok      reduce using rule 49 (Exp)
+    equ_tok      [reduce using rule 53 (Exp)]
+    nequ_tok     reduce using rule 49 (Exp)
+    nequ_tok     [reduce using rule 53 (Exp)]
+    more_tok     reduce using rule 49 (Exp)
+    more_tok     [reduce using rule 53 (Exp)]
+    moreEqu_tok  reduce using rule 49 (Exp)
+    moreEqu_tok  [reduce using rule 53 (Exp)]
+    less_tok     reduce using rule 49 (Exp)
+    less_tok     [reduce using rule 53 (Exp)]
+    lessEqu_tok  reduce using rule 49 (Exp)
+    lessEqu_tok  [reduce using rule 53 (Exp)]
+    '+'          reduce using rule 49 (Exp)
+    '+'          [reduce using rule 53 (Exp)]
+    '-'          reduce using rule 49 (Exp)
+    '-'          [reduce using rule 53 (Exp)]
+    '*'          reduce using rule 53 (Exp)
+    '/'          reduce using rule 53 (Exp)
+    '%'          reduce using rule 53 (Exp)
+
+    LVal  go to state 34
+    Exp   go to state 54
 
 
 State 66
 
-   33 Stmt: ';' .
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   50    | Exp '*' Exp .
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   56    | Exp . Exp
+   58    | Exp . error ')'
 
-    $default  reduce using rule 33 (Stmt)
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+
+    error        [reduce using rule 50 (Exp)]
+    num_tok      [reduce using rule 50 (Exp)]
+    ident_tok    [reduce using rule 50 (Exp)]
+    ','          reduce using rule 50 (Exp)
+    ';'          reduce using rule 50 (Exp)
+    '}'          reduce using rule 50 (Exp)
+    ']'          reduce using rule 50 (Exp)
+    '('          [reduce using rule 50 (Exp)]
+    ')'          reduce using rule 50 (Exp)
+    equ_tok      reduce using rule 50 (Exp)
+    nequ_tok     reduce using rule 50 (Exp)
+    more_tok     reduce using rule 50 (Exp)
+    moreEqu_tok  reduce using rule 50 (Exp)
+    less_tok     reduce using rule 50 (Exp)
+    lessEqu_tok  reduce using rule 50 (Exp)
+    '+'          reduce using rule 50 (Exp)
+    '-'          reduce using rule 50 (Exp)
+    '*'          reduce using rule 50 (Exp)
+    '/'          reduce using rule 50 (Exp)
+    '%'          reduce using rule 50 (Exp)
+
+    LVal  go to state 34
+    Exp   go to state 54
 
 
 State 67
 
-   27 BlockItem: Decl .
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   51    | Exp '/' Exp .
+   52    | Exp . '%' Exp
+   56    | Exp . Exp
+   58    | Exp . error ')'
 
-    $default  reduce using rule 27 (BlockItem)
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+
+    error        [reduce using rule 51 (Exp)]
+    num_tok      [reduce using rule 51 (Exp)]
+    ident_tok    [reduce using rule 51 (Exp)]
+    ','          reduce using rule 51 (Exp)
+    ';'          reduce using rule 51 (Exp)
+    '}'          reduce using rule 51 (Exp)
+    ']'          reduce using rule 51 (Exp)
+    '('          [reduce using rule 51 (Exp)]
+    ')'          reduce using rule 51 (Exp)
+    equ_tok      reduce using rule 51 (Exp)
+    nequ_tok     reduce using rule 51 (Exp)
+    more_tok     reduce using rule 51 (Exp)
+    moreEqu_tok  reduce using rule 51 (Exp)
+    less_tok     reduce using rule 51 (Exp)
+    lessEqu_tok  reduce using rule 51 (Exp)
+    '+'          reduce using rule 51 (Exp)
+    '-'          reduce using rule 51 (Exp)
+    '*'          reduce using rule 51 (Exp)
+    '/'          reduce using rule 51 (Exp)
+    '%'          reduce using rule 51 (Exp)
+
+    LVal  go to state 34
+    Exp   go to state 54
 
 
 State 68
 
-   31 Stmt: Block .
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   52    | Exp '%' Exp .
+   56    | Exp . Exp
+   58    | Exp . error ')'
 
-    $default  reduce using rule 31 (Stmt)
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+
+    error        [reduce using rule 52 (Exp)]
+    num_tok      [reduce using rule 52 (Exp)]
+    ident_tok    [reduce using rule 52 (Exp)]
+    ','          reduce using rule 52 (Exp)
+    ';'          reduce using rule 52 (Exp)
+    '}'          reduce using rule 52 (Exp)
+    ']'          reduce using rule 52 (Exp)
+    '('          [reduce using rule 52 (Exp)]
+    ')'          reduce using rule 52 (Exp)
+    equ_tok      reduce using rule 52 (Exp)
+    nequ_tok     reduce using rule 52 (Exp)
+    more_tok     reduce using rule 52 (Exp)
+    moreEqu_tok  reduce using rule 52 (Exp)
+    less_tok     reduce using rule 52 (Exp)
+    lessEqu_tok  reduce using rule 52 (Exp)
+    '+'          reduce using rule 52 (Exp)
+    '-'          reduce using rule 52 (Exp)
+    '*'          reduce using rule 52 (Exp)
+    '/'          reduce using rule 52 (Exp)
+    '%'          reduce using rule 52 (Exp)
+
+    LVal  go to state 34
+    Exp   go to state 54
 
 
 State 69
 
-   23 Block: '{' MultiBlock . '}'
-   25 MultiBlock: MultiBlock . BlockItem
+   12 ConstDef: ident_tok '[' ']' '=' '{' . MultiExp '}'
 
-    const_tok  shift, and go to state 3
-    int_tok    shift, and go to state 4
-    if_tok     shift, and go to state 63
-    while_tok  shift, and go to state 64
-    ident_tok  shift, and go to state 65
-    ';'        shift, and go to state 66
-    '{'        shift, and go to state 54
-    '}'        shift, and go to state 82
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
 
-    const_tok  [reduce using rule 26 (BlockItem)]
-    int_tok    [reduce using rule 26 (BlockItem)]
-    if_tok     [reduce using rule 26 (BlockItem)]
-    while_tok  [reduce using rule 26 (BlockItem)]
-    ident_tok  [reduce using rule 26 (BlockItem)]
-    ';'        [reduce using rule 26 (BlockItem)]
-    '{'        [reduce using rule 26 (BlockItem)]
-    '}'        [reduce using rule 26 (BlockItem)]
-
-    Decl       go to state 67
-    ConstDecl  go to state 7
-    VarDecl    go to state 8
-    Block      go to state 68
-    BlockItem  go to state 83
-    Stmt       go to state 71
-    LVal       go to state 72
+    MultiExp  go to state 84
+    LVal      go to state 34
+    Exp       go to state 85
 
 
 State 70
 
-   24 MultiBlock: BlockItem .
-
-    $default  reduce using rule 24 (MultiBlock)
-
-
-State 71
-
-   28 BlockItem: Stmt .
-
-    $default  reduce using rule 28 (BlockItem)
-
-
-State 72
-
-   29 Stmt: LVal . '=' Exp ';'
-
-    '='  shift, and go to state 84
-
-
-State 73
-
-   11 ConstDef: ident_tok '[' ']' '=' '{' . MultiExp '}'
-
-    num_tok    shift, and go to state 27
-    ident_tok  shift, and go to state 28
-    '('        shift, and go to state 29
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
-
-    MultiExp  go to state 85
-    LVal      go to state 32
-    Exp       go to state 77
-    UnaryOp   go to state 34
-
-
-State 74
-
-   10 ConstDef: ident_tok '[' Exp ']' '=' . '{' MultiExp '}'
+   11 ConstDef: ident_tok '[' Exp ']' '=' . '{' MultiExp '}'
 
     '{'  shift, and go to state 86
 
 
+State 71
+
+   20 Var: ident_tok '[' ']' '=' '{' . MultiExp '}'
+
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+
+    MultiExp  go to state 87
+    LVal      go to state 34
+    Exp       go to state 85
+
+
+State 72
+
+   19 Var: ident_tok '[' Exp ']' '=' . '{' MultiExp '}'
+
+    '{'  shift, and go to state 88
+
+
+State 73
+
+   35 Stmt: if_tok . '(' Cond ')' Stmt
+   36     | if_tok . '(' Cond ')' Stmt else_tok Stmt
+
+    '('  shift, and go to state 89
+
+
+State 74
+
+   33 Stmt: while_tok . '(' Cond ')' Stmt
+
+    '('  shift, and go to state 90
+
+
 State 75
 
-   37 LVal: ident_tok '[' Exp ']' .
+   31 Stmt: ident_tok . '(' ')' ';'
+   38 LVal: ident_tok .
+   39     | ident_tok . '[' Exp ']'
 
-    $default  reduce using rule 37 (LVal)
+    '['  shift, and go to state 44
+    '('  shift, and go to state 91
+
+    $default  reduce using rule 38 (LVal)
 
 
 State 76
 
-   19 Var: ident_tok '[' ']' '=' '{' MultiExp . '}'
-   21 MultiExp: MultiExp . ',' Exp
+   34 Stmt: ';' .
 
-    ','  shift, and go to state 87
-    '}'  shift, and go to state 88
+    $default  reduce using rule 34 (Stmt)
 
 
 State 77
 
-   20 MultiExp: Exp .
-   45 Exp: Exp . BinOp Exp
+   28 BlockItem: Decl .
 
-    '+'  shift, and go to state 45
-    '-'  shift, and go to state 46
-    '*'  shift, and go to state 47
-    '/'  shift, and go to state 48
-    '%'  shift, and go to state 49
-
-    $default  reduce using rule 20 (MultiExp)
-
-    BinOp  go to state 50
+    $default  reduce using rule 28 (BlockItem)
 
 
 State 78
 
-   18 Var: ident_tok '[' Exp ']' '=' '{' . MultiExp '}'
-
-    num_tok    shift, and go to state 27
-    ident_tok  shift, and go to state 28
-    '('        shift, and go to state 29
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
-
-    MultiExp  go to state 89
-    LVal      go to state 32
-    Exp       go to state 77
-    UnaryOp   go to state 34
-
-
-State 79
-
-   34 Stmt: if_tok '(' . Cond ')' Stmt
-   35     | if_tok '(' . Cond ')' Stmt else_tok Stmt
-
-    num_tok    shift, and go to state 27
-    ident_tok  shift, and go to state 28
-    '('        shift, and go to state 29
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
-
-    LVal     go to state 32
-    Cond     go to state 90
-    Exp      go to state 91
-    UnaryOp  go to state 34
-
-
-State 80
-
-   32 Stmt: while_tok '(' . Cond ')' Stmt
-
-    num_tok    shift, and go to state 27
-    ident_tok  shift, and go to state 28
-    '('        shift, and go to state 29
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
-
-    LVal     go to state 32
-    Cond     go to state 92
-    Exp      go to state 91
-    UnaryOp  go to state 34
-
-
-State 81
-
-   30 Stmt: ident_tok '(' . ')' ';'
-
-    ')'  shift, and go to state 93
-
-
-State 82
-
-   23 Block: '{' MultiBlock '}' .
-
-    $default  reduce using rule 23 (Block)
-
-
-State 83
-
-   25 MultiBlock: MultiBlock BlockItem .
-
-    $default  reduce using rule 25 (MultiBlock)
-
-
-State 84
-
-   29 Stmt: LVal '=' . Exp ';'
-
-    num_tok    shift, and go to state 27
-    ident_tok  shift, and go to state 28
-    '('        shift, and go to state 29
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
-
-    LVal     go to state 32
-    Exp      go to state 94
-    UnaryOp  go to state 34
-
-
-State 85
-
-   11 ConstDef: ident_tok '[' ']' '=' '{' MultiExp . '}'
-   21 MultiExp: MultiExp . ',' Exp
-
-    ','  shift, and go to state 87
-    '}'  shift, and go to state 95
-
-
-State 86
-
-   10 ConstDef: ident_tok '[' Exp ']' '=' '{' . MultiExp '}'
-
-    num_tok    shift, and go to state 27
-    ident_tok  shift, and go to state 28
-    '('        shift, and go to state 29
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
-
-    MultiExp  go to state 96
-    LVal      go to state 32
-    Exp       go to state 77
-    UnaryOp   go to state 34
-
-
-State 87
-
-   21 MultiExp: MultiExp ',' . Exp
-
-    num_tok    shift, and go to state 27
-    ident_tok  shift, and go to state 28
-    '('        shift, and go to state 29
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
-
-    LVal     go to state 32
-    Exp      go to state 97
-    UnaryOp  go to state 34
-
-
-State 88
-
-   19 Var: ident_tok '[' ']' '=' '{' MultiExp '}' .
-
-    $default  reduce using rule 19 (Var)
-
-
-State 89
-
-   18 Var: ident_tok '[' Exp ']' '=' '{' MultiExp . '}'
-   21 MultiExp: MultiExp . ',' Exp
-
-    ','  shift, and go to state 87
-    '}'  shift, and go to state 98
-
-
-State 90
-
-   34 Stmt: if_tok '(' Cond . ')' Stmt
-   35     | if_tok '(' Cond . ')' Stmt else_tok Stmt
-
-    ')'  shift, and go to state 99
-
-
-State 91
-
-   38 Cond: Exp . RelOp Exp
-   45 Exp: Exp . BinOp Exp
-
-    equ_tok      shift, and go to state 100
-    nequ_tok     shift, and go to state 101
-    more_tok     shift, and go to state 102
-    moreEqu_tok  shift, and go to state 103
-    less_tok     shift, and go to state 104
-    lessEqu_tok  shift, and go to state 105
-    '+'          shift, and go to state 45
-    '-'          shift, and go to state 46
-    '*'          shift, and go to state 47
-    '/'          shift, and go to state 48
-    '%'          shift, and go to state 49
-
-    RelOp  go to state 106
-    BinOp  go to state 50
-
-
-State 92
-
-   32 Stmt: while_tok '(' Cond . ')' Stmt
-
-    ')'  shift, and go to state 107
-
-
-State 93
-
-   30 Stmt: ident_tok '(' ')' . ';'
-
-    ';'  shift, and go to state 108
-
-
-State 94
-
-   29 Stmt: LVal '=' Exp . ';'
-   45 Exp: Exp . BinOp Exp
-
-    ';'  shift, and go to state 109
-    '+'  shift, and go to state 45
-    '-'  shift, and go to state 46
-    '*'  shift, and go to state 47
-    '/'  shift, and go to state 48
-    '%'  shift, and go to state 49
-
-    BinOp  go to state 50
-
-
-State 95
-
-   11 ConstDef: ident_tok '[' ']' '=' '{' MultiExp '}' .
-
-    $default  reduce using rule 11 (ConstDef)
-
-
-State 96
-
-   10 ConstDef: ident_tok '[' Exp ']' '=' '{' MultiExp . '}'
-   21 MultiExp: MultiExp . ',' Exp
-
-    ','  shift, and go to state 87
-    '}'  shift, and go to state 110
-
-
-State 97
-
-   21 MultiExp: MultiExp ',' Exp .
-   45 Exp: Exp . BinOp Exp
-
-    '+'  shift, and go to state 45
-    '-'  shift, and go to state 46
-    '*'  shift, and go to state 47
-    '/'  shift, and go to state 48
-    '%'  shift, and go to state 49
-
-    $default  reduce using rule 21 (MultiExp)
-
-    BinOp  go to state 50
-
-
-State 98
-
-   18 Var: ident_tok '[' Exp ']' '=' '{' MultiExp '}' .
-
-    $default  reduce using rule 18 (Var)
-
-
-State 99
-
-   34 Stmt: if_tok '(' Cond ')' . Stmt
-   35     | if_tok '(' Cond ')' . Stmt else_tok Stmt
-
-    if_tok     shift, and go to state 63
-    while_tok  shift, and go to state 64
-    ident_tok  shift, and go to state 65
-    ';'        shift, and go to state 66
-    '{'        shift, and go to state 54
-
-    Block  go to state 68
-    Stmt   go to state 111
-    LVal   go to state 72
-
-
-State 100
-
-   39 RelOp: equ_tok .
-
-    $default  reduce using rule 39 (RelOp)
-
-
-State 101
-
-   40 RelOp: nequ_tok .
-
-    $default  reduce using rule 40 (RelOp)
-
-
-State 102
-
-   42 RelOp: more_tok .
-
-    $default  reduce using rule 42 (RelOp)
-
-
-State 103
-
-   44 RelOp: moreEqu_tok .
-
-    $default  reduce using rule 44 (RelOp)
-
-
-State 104
-
-   41 RelOp: less_tok .
-
-    $default  reduce using rule 41 (RelOp)
-
-
-State 105
-
-   43 RelOp: lessEqu_tok .
-
-    $default  reduce using rule 43 (RelOp)
-
-
-State 106
-
-   38 Cond: Exp RelOp . Exp
-
-    num_tok    shift, and go to state 27
-    ident_tok  shift, and go to state 28
-    '('        shift, and go to state 29
-    '+'        shift, and go to state 30
-    '-'        shift, and go to state 31
-
-    LVal     go to state 32
-    Exp      go to state 112
-    UnaryOp  go to state 34
-
-
-State 107
-
-   32 Stmt: while_tok '(' Cond ')' . Stmt
-
-    if_tok     shift, and go to state 63
-    while_tok  shift, and go to state 64
-    ident_tok  shift, and go to state 65
-    ';'        shift, and go to state 66
-    '{'        shift, and go to state 54
-
-    Block  go to state 68
-    Stmt   go to state 113
-    LVal   go to state 72
-
-
-State 108
-
-   30 Stmt: ident_tok '(' ')' ';' .
-
-    $default  reduce using rule 30 (Stmt)
-
-
-State 109
-
-   29 Stmt: LVal '=' Exp ';' .
-
-    $default  reduce using rule 29 (Stmt)
-
-
-State 110
-
-   10 ConstDef: ident_tok '[' Exp ']' '=' '{' MultiExp '}' .
-
-    $default  reduce using rule 10 (ConstDef)
-
-
-State 111
-
-   34 Stmt: if_tok '(' Cond ')' Stmt .
-   35     | if_tok '(' Cond ')' Stmt . else_tok Stmt
-
-    else_tok  shift, and go to state 114
-
-    else_tok  [reduce using rule 34 (Stmt)]
-    $default  reduce using rule 34 (Stmt)
-
-
-State 112
-
-   38 Cond: Exp RelOp Exp .
-   45 Exp: Exp . BinOp Exp
-
-    '+'  shift, and go to state 45
-    '-'  shift, and go to state 46
-    '*'  shift, and go to state 47
-    '/'  shift, and go to state 48
-    '%'  shift, and go to state 49
-
-    $default  reduce using rule 38 (Cond)
-
-    BinOp  go to state 50
-
-
-State 113
-
-   32 Stmt: while_tok '(' Cond ')' Stmt .
+   32 Stmt: Block .
 
     $default  reduce using rule 32 (Stmt)
 
 
+State 79
+
+   24 Block: '{' MultiBlock . '}'
+   26 MultiBlock: MultiBlock . BlockItem
+
+    const_tok  shift, and go to state 3
+    int_tok    shift, and go to state 4
+    if_tok     shift, and go to state 73
+    while_tok  shift, and go to state 74
+    ident_tok  shift, and go to state 75
+    ';'        shift, and go to state 76
+    '{'        shift, and go to state 59
+    '}'        shift, and go to state 92
+
+    const_tok  [reduce using rule 27 (BlockItem)]
+    int_tok    [reduce using rule 27 (BlockItem)]
+    if_tok     [reduce using rule 27 (BlockItem)]
+    while_tok  [reduce using rule 27 (BlockItem)]
+    ident_tok  [reduce using rule 27 (BlockItem)]
+    ';'        [reduce using rule 27 (BlockItem)]
+    '{'        [reduce using rule 27 (BlockItem)]
+    '}'        [reduce using rule 27 (BlockItem)]
+
+    Decl       go to state 77
+    ConstDecl  go to state 7
+    VarDecl    go to state 8
+    Block      go to state 78
+    BlockItem  go to state 93
+    Stmt       go to state 81
+    LVal       go to state 82
+
+
+State 80
+
+   25 MultiBlock: BlockItem .
+
+    $default  reduce using rule 25 (MultiBlock)
+
+
+State 81
+
+   29 BlockItem: Stmt .
+
+    $default  reduce using rule 29 (BlockItem)
+
+
+State 82
+
+   30 Stmt: LVal . '=' Exp ';'
+
+    '='  shift, and go to state 94
+
+
+State 83
+
+   39 LVal: ident_tok '[' Exp ']' .
+
+    $default  reduce using rule 39 (LVal)
+
+
+State 84
+
+   12 ConstDef: ident_tok '[' ']' '=' '{' MultiExp . '}'
+   22 MultiExp: MultiExp . ',' Exp
+
+    ','  shift, and go to state 95
+    '}'  shift, and go to state 96
+
+
+State 85
+
+   21 MultiExp: Exp .
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   56    | Exp . Exp
+   58    | Exp . error ')'
+
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 49
+    '-'        shift, and go to state 50
+    '*'        shift, and go to state 51
+    '/'        shift, and go to state 52
+    '%'        shift, and go to state 53
+
+    ','  reduce using rule 21 (MultiExp)
+    '}'  reduce using rule 21 (MultiExp)
+
+    LVal  go to state 34
+    Exp   go to state 54
+
+
+State 86
+
+   11 ConstDef: ident_tok '[' Exp ']' '=' '{' . MultiExp '}'
+
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+
+    MultiExp  go to state 97
+    LVal      go to state 34
+    Exp       go to state 85
+
+
+State 87
+
+   20 Var: ident_tok '[' ']' '=' '{' MultiExp . '}'
+   22 MultiExp: MultiExp . ',' Exp
+
+    ','  shift, and go to state 95
+    '}'  shift, and go to state 98
+
+
+State 88
+
+   19 Var: ident_tok '[' Exp ']' '=' '{' . MultiExp '}'
+
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+
+    MultiExp  go to state 99
+    LVal      go to state 34
+    Exp       go to state 85
+
+
+State 89
+
+   35 Stmt: if_tok '(' . Cond ')' Stmt
+   36     | if_tok '(' . Cond ')' Stmt else_tok Stmt
+
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+
+    Cond  go to state 100
+    LVal  go to state 34
+    Exp   go to state 101
+
+
+State 90
+
+   33 Stmt: while_tok '(' . Cond ')' Stmt
+
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+
+    Cond  go to state 102
+    LVal  go to state 34
+    Exp   go to state 101
+
+
+State 91
+
+   31 Stmt: ident_tok '(' . ')' ';'
+
+    ')'  shift, and go to state 103
+
+
+State 92
+
+   24 Block: '{' MultiBlock '}' .
+
+    $default  reduce using rule 24 (Block)
+
+
+State 93
+
+   26 MultiBlock: MultiBlock BlockItem .
+
+    $default  reduce using rule 26 (MultiBlock)
+
+
+State 94
+
+   30 Stmt: LVal '=' . Exp ';'
+
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+
+    LVal  go to state 34
+    Exp   go to state 104
+
+
+State 95
+
+   22 MultiExp: MultiExp ',' . Exp
+
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+
+    LVal  go to state 34
+    Exp   go to state 105
+
+
+State 96
+
+   12 ConstDef: ident_tok '[' ']' '=' '{' MultiExp '}' .
+
+    $default  reduce using rule 12 (ConstDef)
+
+
+State 97
+
+   11 ConstDef: ident_tok '[' Exp ']' '=' '{' MultiExp . '}'
+   22 MultiExp: MultiExp . ',' Exp
+
+    ','  shift, and go to state 95
+    '}'  shift, and go to state 106
+
+
+State 98
+
+   20 Var: ident_tok '[' ']' '=' '{' MultiExp '}' .
+
+    $default  reduce using rule 20 (Var)
+
+
+State 99
+
+   19 Var: ident_tok '[' Exp ']' '=' '{' MultiExp . '}'
+   22 MultiExp: MultiExp . ',' Exp
+
+    ','  shift, and go to state 95
+    '}'  shift, and go to state 107
+
+
+State 100
+
+   35 Stmt: if_tok '(' Cond . ')' Stmt
+   36     | if_tok '(' Cond . ')' Stmt else_tok Stmt
+
+    ')'  shift, and go to state 108
+
+
+State 101
+
+   37 Cond: Exp . RelOp Exp
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   56    | Exp . Exp
+   58    | Exp . error ')'
+
+    error        shift, and go to state 48
+    num_tok      shift, and go to state 29
+    ident_tok    shift, and go to state 30
+    '('          shift, and go to state 31
+    equ_tok      shift, and go to state 109
+    nequ_tok     shift, and go to state 110
+    more_tok     shift, and go to state 111
+    moreEqu_tok  shift, and go to state 112
+    less_tok     shift, and go to state 113
+    lessEqu_tok  shift, and go to state 114
+    '+'          shift, and go to state 49
+    '-'          shift, and go to state 50
+    '*'          shift, and go to state 51
+    '/'          shift, and go to state 52
+    '%'          shift, and go to state 53
+
+    LVal   go to state 34
+    RelOp  go to state 115
+    Exp    go to state 54
+
+
+State 102
+
+   33 Stmt: while_tok '(' Cond . ')' Stmt
+
+    ')'  shift, and go to state 116
+
+
+State 103
+
+   31 Stmt: ident_tok '(' ')' . ';'
+
+    ';'  shift, and go to state 117
+
+
+State 104
+
+   30 Stmt: LVal '=' Exp . ';'
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   56    | Exp . Exp
+   58    | Exp . error ')'
+
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    ';'        shift, and go to state 118
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 49
+    '-'        shift, and go to state 50
+    '*'        shift, and go to state 51
+    '/'        shift, and go to state 52
+    '%'        shift, and go to state 53
+
+    LVal  go to state 34
+    Exp   go to state 54
+
+
+State 105
+
+   22 MultiExp: MultiExp ',' Exp .
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   56    | Exp . Exp
+   58    | Exp . error ')'
+
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 49
+    '-'        shift, and go to state 50
+    '*'        shift, and go to state 51
+    '/'        shift, and go to state 52
+    '%'        shift, and go to state 53
+
+    ','  reduce using rule 22 (MultiExp)
+    '}'  reduce using rule 22 (MultiExp)
+
+    LVal  go to state 34
+    Exp   go to state 54
+
+
+State 106
+
+   11 ConstDef: ident_tok '[' Exp ']' '=' '{' MultiExp '}' .
+
+    $default  reduce using rule 11 (ConstDef)
+
+
+State 107
+
+   19 Var: ident_tok '[' Exp ']' '=' '{' MultiExp '}' .
+
+    $default  reduce using rule 19 (Var)
+
+
+State 108
+
+   35 Stmt: if_tok '(' Cond ')' . Stmt
+   36     | if_tok '(' Cond ')' . Stmt else_tok Stmt
+
+    if_tok     shift, and go to state 73
+    while_tok  shift, and go to state 74
+    ident_tok  shift, and go to state 75
+    ';'        shift, and go to state 76
+    '{'        shift, and go to state 59
+
+    Block  go to state 78
+    Stmt   go to state 119
+    LVal   go to state 82
+
+
+State 109
+
+   40 RelOp: equ_tok .
+
+    $default  reduce using rule 40 (RelOp)
+
+
+State 110
+
+   41 RelOp: nequ_tok .
+
+    $default  reduce using rule 41 (RelOp)
+
+
+State 111
+
+   43 RelOp: more_tok .
+
+    $default  reduce using rule 43 (RelOp)
+
+
+State 112
+
+   45 RelOp: moreEqu_tok .
+
+    $default  reduce using rule 45 (RelOp)
+
+
+State 113
+
+   42 RelOp: less_tok .
+
+    $default  reduce using rule 42 (RelOp)
+
+
 State 114
 
-   35 Stmt: if_tok '(' Cond ')' Stmt else_tok . Stmt
+   44 RelOp: lessEqu_tok .
 
-    if_tok     shift, and go to state 63
-    while_tok  shift, and go to state 64
-    ident_tok  shift, and go to state 65
-    ';'        shift, and go to state 66
-    '{'        shift, and go to state 54
-
-    Block  go to state 68
-    Stmt   go to state 115
-    LVal   go to state 72
+    $default  reduce using rule 44 (RelOp)
 
 
 State 115
 
-   35 Stmt: if_tok '(' Cond ')' Stmt else_tok Stmt .
+   37 Cond: Exp RelOp . Exp
 
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 32
+    '-'        shift, and go to state 33
+
+    LVal  go to state 34
+    Exp   go to state 120
+
+
+State 116
+
+   33 Stmt: while_tok '(' Cond ')' . Stmt
+
+    if_tok     shift, and go to state 73
+    while_tok  shift, and go to state 74
+    ident_tok  shift, and go to state 75
+    ';'        shift, and go to state 76
+    '{'        shift, and go to state 59
+
+    Block  go to state 78
+    Stmt   go to state 121
+    LVal   go to state 82
+
+
+State 117
+
+   31 Stmt: ident_tok '(' ')' ';' .
+
+    $default  reduce using rule 31 (Stmt)
+
+
+State 118
+
+   30 Stmt: LVal '=' Exp ';' .
+
+    $default  reduce using rule 30 (Stmt)
+
+
+State 119
+
+   35 Stmt: if_tok '(' Cond ')' Stmt .
+   36     | if_tok '(' Cond ')' Stmt . else_tok Stmt
+
+    else_tok  shift, and go to state 122
+
+    else_tok  [reduce using rule 35 (Stmt)]
     $default  reduce using rule 35 (Stmt)
+
+
+State 120
+
+   37 Cond: Exp RelOp Exp .
+   48 Exp: Exp . '+' Exp
+   49    | Exp . '-' Exp
+   50    | Exp . '*' Exp
+   51    | Exp . '/' Exp
+   52    | Exp . '%' Exp
+   56    | Exp . Exp
+   58    | Exp . error ')'
+
+    error      shift, and go to state 48
+    num_tok    shift, and go to state 29
+    ident_tok  shift, and go to state 30
+    '('        shift, and go to state 31
+    '+'        shift, and go to state 49
+    '-'        shift, and go to state 50
+    '*'        shift, and go to state 51
+    '/'        shift, and go to state 52
+    '%'        shift, and go to state 53
+
+    ')'  reduce using rule 37 (Cond)
+
+    LVal  go to state 34
+    Exp   go to state 54
+
+
+State 121
+
+   33 Stmt: while_tok '(' Cond ')' Stmt .
+
+    $default  reduce using rule 33 (Stmt)
+
+
+State 122
+
+   36 Stmt: if_tok '(' Cond ')' Stmt else_tok . Stmt
+
+    if_tok     shift, and go to state 73
+    while_tok  shift, and go to state 74
+    ident_tok  shift, and go to state 75
+    ';'        shift, and go to state 76
+    '{'        shift, and go to state 59
+
+    Block  go to state 78
+    Stmt   go to state 123
+    LVal   go to state 82
+
+
+State 123
+
+   36 Stmt: if_tok '(' Cond ')' Stmt else_tok Stmt .
+
+    $default  reduce using rule 36 (Stmt)

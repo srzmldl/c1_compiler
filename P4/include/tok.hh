@@ -70,7 +70,7 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 20 "config/parser.y" /* yacc.c:1909  */
+#line 22 "config/parser.y" /* yacc.c:1909  */
 
     int  num;
     std::string *var;

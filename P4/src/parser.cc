@@ -77,10 +77,12 @@ extern void yywarning (const char *msg);
 /*extern int workBrackTwo(int u, int v);
 extern int workBrackOne(int u);
 extern int workBrackZero(int u);*/
+extern void draw(int x, int y);
+extern std::vector < std::string > wholeFile;
 InputNode *root;
 char buffer[1024];
 
-#line 84 "src/parser.cc" /* yacc.c:339  */
+#line 86 "src/parser.cc" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -140,14 +142,14 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 20 "config/parser.y" /* yacc.c:355  */
+#line 22 "config/parser.y" /* yacc.c:355  */
 
     int  num;
     std::string *var;
     Node *node;
     std::string *ident;
 
-#line 151 "src/parser.cc" /* yacc.c:355  */
+#line 153 "src/parser.cc" /* yacc.c:355  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
@@ -176,7 +178,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 180 "src/parser.cc" /* yacc.c:358  */
+#line 182 "src/parser.cc" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -477,13 +479,13 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    42,    42,    43,    44,    47,    48,    51,    52,    59,
-      60,    63,    64,    65,    68,    71,    72,    75,    76,    77,
-      78,    79,    82,    83,    86,    89,    92,    93,    96,    97,
-      98,   101,   102,   103,   104,   105,   106,   107,   111,   114,
-     115,   119,   120,   121,   122,   123,   124,   127,   131,   135,
-     139,   145,   149,   154,   158,   162,   166,   170,   177,   182,
-     187
+       0,    44,    44,    45,    46,    49,    50,    53,    54,    62,
+      63,    66,    67,    68,    71,    74,    75,    78,    79,    80,
+      81,    82,    85,    86,    89,    92,    95,    96,    99,   100,
+     101,   104,   105,   106,   107,   108,   109,   110,   114,   117,
+     118,   122,   123,   124,   125,   126,   127,   130,   134,   138,
+     142,   148,   152,   157,   161,   165,   169,   173,   182,   188,
+     194
 };
 #endif
 
@@ -1503,408 +1505,413 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 42 "config/parser.y" /* yacc.c:1646  */
+#line 44 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Compunit ::= empty\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1509 "src/parser.cc" /* yacc.c:1646  */
+#line 1511 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 43 "config/parser.y" /* yacc.c:1646  */
+#line 45 "config/parser.y" /* yacc.c:1646  */
     { debug("(%d,%d)Compunit ::= CompUnit Decl\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1515 "src/parser.cc" /* yacc.c:1646  */
+#line 1517 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 44 "config/parser.y" /* yacc.c:1646  */
+#line 46 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Compunit ::= CompUnit FuncDef\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1521 "src/parser.cc" /* yacc.c:1646  */
+#line 1523 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 47 "config/parser.y" /* yacc.c:1646  */
+#line 49 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Decl ::= ConstDecl\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1527 "src/parser.cc" /* yacc.c:1646  */
+#line 1529 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 48 "config/parser.y" /* yacc.c:1646  */
+#line 50 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Decl ::= VarDecl\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1533 "src/parser.cc" /* yacc.c:1646  */
+#line 1535 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 51 "config/parser.y" /* yacc.c:1646  */
+#line 53 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)ConstDecl ::= const int  MultiConstDef\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1539 "src/parser.cc" /* yacc.c:1646  */
+#line 1541 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 52 "config/parser.y" /* yacc.c:1646  */
+#line 54 "config/parser.y" /* yacc.c:1646  */
     {
-               sprintf(buffer, "lack int after const (%d, %d)", (yylsp[-2]).last_line, (yylsp[-2]).last_column);
+               sprintf(buffer, "expect 'int' after const at (%d, %d)", (yylsp[-2]).last_line, (yylsp[-2]).last_column);
                yywarning(buffer);
+               draw((yylsp[-2]).last_line, (yylsp[-2]).last_column + 1);
                debug("(%d,%d)ConstDecl ::= const MultiConstDef\n", (yyloc).first_line, (yyloc).first_column);
              }
-#line 1549 "src/parser.cc" /* yacc.c:1646  */
+#line 1552 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 59 "config/parser.y" /* yacc.c:1646  */
+#line 62 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)MultiConstDef :: = ConstDef\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1555 "src/parser.cc" /* yacc.c:1646  */
+#line 1558 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 60 "config/parser.y" /* yacc.c:1646  */
+#line 63 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)MultiConstDef :: = MultiConstDef, ConstDef\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1561 "src/parser.cc" /* yacc.c:1646  */
+#line 1564 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 63 "config/parser.y" /* yacc.c:1646  */
+#line 66 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)ConstDef ::= ident_tok = Exp\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1567 "src/parser.cc" /* yacc.c:1646  */
+#line 1570 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 64 "config/parser.y" /* yacc.c:1646  */
+#line 67 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)ConstDef ::= ident_tok [ Exp ] = { MultiExp }\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1573 "src/parser.cc" /* yacc.c:1646  */
+#line 1576 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 65 "config/parser.y" /* yacc.c:1646  */
+#line 68 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)ConstDef ::= ident_tok [ Exp ] = { MultiExp }\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1579 "src/parser.cc" /* yacc.c:1646  */
+#line 1582 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 68 "config/parser.y" /* yacc.c:1646  */
+#line 71 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)VarDecl::= int MultiVar ;\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1585 "src/parser.cc" /* yacc.c:1646  */
+#line 1588 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 71 "config/parser.y" /* yacc.c:1646  */
+#line 74 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)MultiVar :: = Var\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1591 "src/parser.cc" /* yacc.c:1646  */
+#line 1594 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 72 "config/parser.y" /* yacc.c:1646  */
+#line 75 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)MultiVar ::= MultiVar, Var\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1597 "src/parser.cc" /* yacc.c:1646  */
+#line 1600 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 75 "config/parser.y" /* yacc.c:1646  */
+#line 78 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Var :: = ident_tok\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1603 "src/parser.cc" /* yacc.c:1646  */
+#line 1606 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 76 "config/parser.y" /* yacc.c:1646  */
+#line 79 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Var :: =  ident_tok [ Exp ]\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1609 "src/parser.cc" /* yacc.c:1646  */
+#line 1612 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 77 "config/parser.y" /* yacc.c:1646  */
+#line 80 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Var :: =  ident_tok = Exp\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1615 "src/parser.cc" /* yacc.c:1646  */
+#line 1618 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 78 "config/parser.y" /* yacc.c:1646  */
+#line 81 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Var :: =  ident_tok [ Exp ] = { MultiExp}\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1621 "src/parser.cc" /* yacc.c:1646  */
+#line 1624 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 79 "config/parser.y" /* yacc.c:1646  */
+#line 82 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Var :: =  ident_tok [ ] = { MultiExp}\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1627 "src/parser.cc" /* yacc.c:1646  */
+#line 1630 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 82 "config/parser.y" /* yacc.c:1646  */
+#line 85 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)MultiExp :: = Exp\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1633 "src/parser.cc" /* yacc.c:1646  */
+#line 1636 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 83 "config/parser.y" /* yacc.c:1646  */
+#line 86 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)MultiExp ::= MultiExp, Exp\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1639 "src/parser.cc" /* yacc.c:1646  */
+#line 1642 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 86 "config/parser.y" /* yacc.c:1646  */
+#line 89 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)FuncDef ::= void_tok ident_tok ( ) Block\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1645 "src/parser.cc" /* yacc.c:1646  */
+#line 1648 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 89 "config/parser.y" /* yacc.c:1646  */
+#line 92 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Block ::= MultiBlock\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1651 "src/parser.cc" /* yacc.c:1646  */
+#line 1654 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 92 "config/parser.y" /* yacc.c:1646  */
+#line 95 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)MultiBlock :: = BlockItem\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1657 "src/parser.cc" /* yacc.c:1646  */
+#line 1660 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 93 "config/parser.y" /* yacc.c:1646  */
+#line 96 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)MultiBlock ::= MultiBlock BlockItem\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1663 "src/parser.cc" /* yacc.c:1646  */
+#line 1666 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 96 "config/parser.y" /* yacc.c:1646  */
+#line 99 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)BlockItem ::= empty\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1669 "src/parser.cc" /* yacc.c:1646  */
+#line 1672 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 97 "config/parser.y" /* yacc.c:1646  */
+#line 100 "config/parser.y" /* yacc.c:1646  */
     { debug("(%d,%d)BlockItem ::= Decl\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1675 "src/parser.cc" /* yacc.c:1646  */
+#line 1678 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 98 "config/parser.y" /* yacc.c:1646  */
+#line 101 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)BlockItem ::= Stmt\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1681 "src/parser.cc" /* yacc.c:1646  */
+#line 1684 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 101 "config/parser.y" /* yacc.c:1646  */
+#line 104 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Stmt ::= LVal = Exp ;\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1687 "src/parser.cc" /* yacc.c:1646  */
+#line 1690 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 102 "config/parser.y" /* yacc.c:1646  */
+#line 105 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Stmt ::= ident_tok();\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1693 "src/parser.cc" /* yacc.c:1646  */
+#line 1696 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 103 "config/parser.y" /* yacc.c:1646  */
+#line 106 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Stmt ::= Block\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1699 "src/parser.cc" /* yacc.c:1646  */
+#line 1702 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 104 "config/parser.y" /* yacc.c:1646  */
+#line 107 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Stmp ::= while (Cond) Stmt\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1705 "src/parser.cc" /* yacc.c:1646  */
+#line 1708 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 105 "config/parser.y" /* yacc.c:1646  */
+#line 108 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Stmt ::= ;\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1711 "src/parser.cc" /* yacc.c:1646  */
+#line 1714 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 106 "config/parser.y" /* yacc.c:1646  */
+#line 109 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Stmp :: = if (Cond) Stmt\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1717 "src/parser.cc" /* yacc.c:1646  */
+#line 1720 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 37:
-#line 107 "config/parser.y" /* yacc.c:1646  */
+#line 110 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Stmp :: = if (Cond) Stmt else Stmt\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1723 "src/parser.cc" /* yacc.c:1646  */
+#line 1726 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 38:
-#line 111 "config/parser.y" /* yacc.c:1646  */
+#line 114 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)Cond ::= Exp RelOp Exp\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1729 "src/parser.cc" /* yacc.c:1646  */
+#line 1732 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 39:
-#line 114 "config/parser.y" /* yacc.c:1646  */
+#line 117 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)LVal ::= ident\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1735 "src/parser.cc" /* yacc.c:1646  */
+#line 1738 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 40:
-#line 115 "config/parser.y" /* yacc.c:1646  */
+#line 118 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)LVal ::= ident[Exp]\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1741 "src/parser.cc" /* yacc.c:1646  */
+#line 1744 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 41:
-#line 119 "config/parser.y" /* yacc.c:1646  */
+#line 122 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)RelOp ::= ==\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1747 "src/parser.cc" /* yacc.c:1646  */
+#line 1750 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 42:
-#line 120 "config/parser.y" /* yacc.c:1646  */
+#line 123 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)RelOp ::= !=\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1753 "src/parser.cc" /* yacc.c:1646  */
+#line 1756 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 121 "config/parser.y" /* yacc.c:1646  */
+#line 124 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)RelOp ::= <\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1759 "src/parser.cc" /* yacc.c:1646  */
+#line 1762 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 122 "config/parser.y" /* yacc.c:1646  */
+#line 125 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)RelOp ::= >\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1765 "src/parser.cc" /* yacc.c:1646  */
+#line 1768 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 45:
-#line 123 "config/parser.y" /* yacc.c:1646  */
+#line 126 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)RelOp ::= <=\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1771 "src/parser.cc" /* yacc.c:1646  */
+#line 1774 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 124 "config/parser.y" /* yacc.c:1646  */
+#line 127 "config/parser.y" /* yacc.c:1646  */
     {debug("(%d,%d)RelOp ::= >=\n", (yyloc).first_line, (yyloc).first_column);}
-#line 1777 "src/parser.cc" /* yacc.c:1646  */
+#line 1780 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 127 "config/parser.y" /* yacc.c:1646  */
+#line 130 "config/parser.y" /* yacc.c:1646  */
     {
                 //$$ = 0;
                 debug("(%d,%d)Exp ::= number\n", (yyloc).first_line, (yyloc).first_column);
                 }
-#line 1786 "src/parser.cc" /* yacc.c:1646  */
+#line 1789 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 48:
-#line 131 "config/parser.y" /* yacc.c:1646  */
+#line 134 "config/parser.y" /* yacc.c:1646  */
     {
                 //$$ = 0;
                 debug("(%d,%d)Exp ::= LVal\n", (yyloc).first_line, (yyloc).first_column);
                 }
-#line 1795 "src/parser.cc" /* yacc.c:1646  */
+#line 1798 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 49:
-#line 135 "config/parser.y" /* yacc.c:1646  */
+#line 138 "config/parser.y" /* yacc.c:1646  */
     {
               //$$ = workBrackTwo($1, $3);
               debug("(%d,%d)Exp ::= Exp + Exp\n", (yyloc).first_line, (yyloc).first_column);
               }
-#line 1804 "src/parser.cc" /* yacc.c:1646  */
+#line 1807 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 50:
-#line 139 "config/parser.y" /* yacc.c:1646  */
+#line 142 "config/parser.y" /* yacc.c:1646  */
     {
               //$$ = workBrackTwo($1, $3);
               debug("(%d,%d)Exp ::= Exp - Exp\n", (yyloc).first_line, (yyloc).first_column);
               }
-#line 1813 "src/parser.cc" /* yacc.c:1646  */
+#line 1816 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 145 "config/parser.y" /* yacc.c:1646  */
+#line 148 "config/parser.y" /* yacc.c:1646  */
     {
               //$$ = workBrackOne($2);
               debug("(%d,%d)Exp ::= - Exp\n", (yyloc).first_line, (yyloc).first_column);
               }
-#line 1822 "src/parser.cc" /* yacc.c:1646  */
+#line 1825 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 52:
-#line 149 "config/parser.y" /* yacc.c:1646  */
+#line 152 "config/parser.y" /* yacc.c:1646  */
     {
               //$$ = workBrackOne($2);
               debug("(%d,%d)Exp ::= + Exp\n", (yyloc).first_line, (yyloc).first_column);
               }
-#line 1831 "src/parser.cc" /* yacc.c:1646  */
+#line 1834 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 154 "config/parser.y" /* yacc.c:1646  */
+#line 157 "config/parser.y" /* yacc.c:1646  */
     {
               //$$ = workBrackTwo($1, $3);
               debug("(%d,%d)Exp ::= Exp * Exp\n", (yyloc).first_line, (yyloc).first_column);
               }
-#line 1840 "src/parser.cc" /* yacc.c:1646  */
+#line 1843 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 54:
-#line 158 "config/parser.y" /* yacc.c:1646  */
+#line 161 "config/parser.y" /* yacc.c:1646  */
     {
               //$$ = workBrackTwo($1, $3);
               debug("(%d,%d)Exp ::= Exp / Exp\n", (yyloc).first_line, (yyloc).first_column);
               }
-#line 1849 "src/parser.cc" /* yacc.c:1646  */
+#line 1852 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 162 "config/parser.y" /* yacc.c:1646  */
+#line 165 "config/parser.y" /* yacc.c:1646  */
     {
               //$$ = workBrackTwo($1, $3);
               debug("(%d,%d)Exp ::= Exp %% Exp\n", (yyloc).first_line, (yyloc).first_column);
               }
-#line 1858 "src/parser.cc" /* yacc.c:1646  */
+#line 1861 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 166 "config/parser.y" /* yacc.c:1646  */
+#line 169 "config/parser.y" /* yacc.c:1646  */
     {
               //$$ = workBrackZero($2);
               debug("(%d,%d)Exp ::= ( Exp )\n", (yyloc).first_line, (yyloc).first_column);
               }
-#line 1867 "src/parser.cc" /* yacc.c:1646  */
+#line 1870 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 57:
-#line 170 "config/parser.y" /* yacc.c:1646  */
+#line 173 "config/parser.y" /* yacc.c:1646  */
     {
           //$$ = workBrackTwo($1, $2);
-            sprintf(buffer, "lack BinOp after Exp (%d, %d)", (yylsp[-2]).last_line, (yylsp[-2]).last_column);
+            sprintf(buffer, "expect BinOp after Exp at (%d, %d)", (yylsp[-2]).last_line, (yylsp[-2]).last_column);
+            
             yyerror(buffer);
+            draw((yylsp[-2]).last_line, (yylsp[-2]).last_column + 1);
             debug("(%d,%d)Exp ::= Exp Exp\n", (yyloc).first_line, (yyloc).first_column);
           }
-#line 1878 "src/parser.cc" /* yacc.c:1646  */
+#line 1883 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 58:
-#line 177 "config/parser.y" /* yacc.c:1646  */
+#line 182 "config/parser.y" /* yacc.c:1646  */
     {
-            sprintf(buffer, "lack ')' after Exp (%d, %d)", (yylsp[0]).last_line, (yylsp[0]).last_column);
+            sprintf(buffer, "expect ')' after Exp at (%d, %d)", (yylsp[0]).last_line, (yylsp[0]).last_column);
             yyerror(buffer);
+            draw((yylsp[0]).last_line, (yylsp[0]).last_column + 1);
             debug("Exp :: = ( Exp");
         }
-#line 1888 "src/parser.cc" /* yacc.c:1646  */
+#line 1894 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 59:
-#line 182 "config/parser.y" /* yacc.c:1646  */
+#line 188 "config/parser.y" /* yacc.c:1646  */
     {
-            sprintf(buffer, "lack '(' befor Exp (%d, %d)", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+            sprintf(buffer, "expect '(' before Exp at (%d, %d) ", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
             yyerror(buffer);
+            draw((yylsp[-2]).first_line, (yylsp[-2]).first_column - 1);
             debug("Exp :: = Exp )");
         }
-#line 1898 "src/parser.cc" /* yacc.c:1646  */
+#line 1905 "src/parser.cc" /* yacc.c:1646  */
     break;
 
   case 60:
-#line 187 "config/parser.y" /* yacc.c:1646  */
+#line 194 "config/parser.y" /* yacc.c:1646  */
     {yyerror("bye!"); return 0;}
-#line 1904 "src/parser.cc" /* yacc.c:1646  */
+#line 1911 "src/parser.cc" /* yacc.c:1646  */
     break;
 
 
-#line 1908 "src/parser.cc" /* yacc.c:1646  */
+#line 1915 "src/parser.cc" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2139,7 +2146,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 191 "config/parser.y" /* yacc.c:1906  */
+#line 198 "config/parser.y" /* yacc.c:1906  */
 
 
 /*int workBrackTwo(int u, int v) {
@@ -2158,6 +2165,39 @@ void yyerror(const char *msg)
 {
     // if (strcmp(msg, "syntax error") != 0)
         error("%s", msg);
+}
+
+int checkBlank(char x) {
+    return (x == ' ' || x == '\t');
+}
+
+void draw(int line, int column) {
+    std::string tmp = wholeFile[line - 1];
+    if (column <= 0) {
+        column++;
+        tmp = " " + tmp;
+    }
+    if (column >= tmp.length()) {
+        tmp = tmp + " ";
+    }
+    int len = tmp.length();
+    column--;
+    int delta = 0;
+    for (int i = 0; i < len; ++i) {
+        if (checkBlank(tmp[i]) && i > 0 && checkBlank(tmp[i - 1])) {
+            if (i <= column) delta++;
+        } else {
+            printf("%c", tmp[i]);
+        }
+    }
+    printf("\n");
+    column -= delta;
+    for (int i = 0; i < column; ++i)
+        printf("-");
+    printf("^");
+    for (int i = column + 1; i < len - delta; ++i)
+        printf("-");
+    printf("\n");
 }
 
 void yywarning(const char *msg) {

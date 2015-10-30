@@ -12,6 +12,8 @@ extern void yywarning (const char *msg);
 /*extern int workBrackTwo(int u, int v);
 extern int workBrackOne(int u);
 extern int workBrackZero(int u);*/
+extern void draw(int x, int y);
+extern std::vector < std::string > wholeFile;
 InputNode *root;
 char buffer[1024];
 %}
@@ -51,8 +53,8 @@ Decl : ConstDecl {debug("(%d,%d)Decl ::= ConstDecl\n", @$.first_line, @$.first_c
 ConstDecl: const_tok int_tok MultiConstDef ';'{debug("(%d,%d)ConstDecl ::= const int  MultiConstDef\n", @$.first_line, @$.first_column);}
            | const_tok MultiConstDef ';' {
                sprintf(buffer, "expect 'int' after const at (%d, %d)", @1.last_line, @1.last_column);
-               draw(@1.last_line, @1.last_column + 1);
                yywarning(buffer);
+               draw(@1.last_line, @1.last_column + 1);
                debug("(%d,%d)ConstDecl ::= const MultiConstDef\n", @$.first_line, @$.first_column);
              }
            ;         
@@ -179,8 +181,8 @@ Exp:    num_tok  {
 
         | '(' Exp {
             sprintf(buffer, "expect ')' after Exp at (%d, %d)", @2.last_line, @2.last_column);
-            draw(@2.last_line, @2.last_column + 1);
             yyerror(buffer);
+            draw(@2.last_line, @2.last_column + 1);
             debug("Exp :: = ( Exp");
         }
         | Exp error ')' {
@@ -213,8 +215,37 @@ void yyerror(const char *msg)
         error("%s", msg);
 }
 
+int checkBlank(char x) {
+    return (x == ' ' || x == '\t');
+}
+
 void draw(int line, int column) {
-    
+    std::string tmp = wholeFile[line - 1];
+    if (column <= 0) {
+        column++;
+        tmp = " " + tmp;
+    }
+    if (column >= tmp.length()) {
+        tmp = tmp + " ";
+    }
+    int len = tmp.length();
+    column--;
+    int delta = 0;
+    for (int i = 0; i < len; ++i) {
+        if (checkBlank(tmp[i]) && i > 0 && checkBlank(tmp[i - 1])) {
+            if (i <= column) delta++;
+        } else {
+            printf("%c", tmp[i]);
+        }
+    }
+    printf("\n");
+    column -= delta;
+    for (int i = 0; i < column; ++i)
+        printf("-");
+    printf("^");
+    for (int i = column + 1; i < len - delta; ++i)
+        printf("-");
+    printf("\n");
 }
 
 void yywarning(const char *msg) {

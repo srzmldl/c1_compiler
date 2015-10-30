@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string>
 #include <string.h>
-//#define DEBUG
+#define DEBUG
 #include "node.hh"
 #include "util.hh"
 #include "global.hh"
@@ -179,19 +179,25 @@ Exp:    num_tok  {
             debug("(%d,%d)Exp ::= Exp Exp\n", @$.first_line, @$.first_column);
           }
 
-        | '(' Exp {
+        | '(' Exp error {
             sprintf(buffer, "expect ')' after Exp at (%d, %d)", @2.last_line, @2.last_column);
             yyerror(buffer);
             draw(@2.last_line, @2.last_column + 1);
-            debug("Exp :: = ( Exp");
+            debug("(%d,%d)Exp :: = ( Exp\n", @$.first_line, @$.first_column);
         }
         | Exp error ')' {
             sprintf(buffer, "expect '(' before Exp at (%d, %d) ", @1.first_line, @1.first_column);
             yyerror(buffer);
             draw(@1.first_line, @1.first_column - 1);
-            debug("Exp :: = Exp )");
+            debug("(%d,%d)Exp :: = Exp )", @$.first_line, @$.first_column);
         }
-| error {yyerror("bye!"); return 0;}
+| error ')' {
+    sprintf(buffer, "expect '(' before ')' at (%d, %d)\n", @1.first_line, @1.first_column);
+    yyerror(buffer);
+    draw(@1.first_line, @1.first_column - 1);
+    debug("(%d, %d)Exp :: = )", @$.first_line, @$.first_column);
+  }
+| error {yyerror("bye! You are really foolish"); return 0;}
         ;
         
          

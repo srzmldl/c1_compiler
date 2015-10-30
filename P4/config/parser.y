@@ -1,7 +1,8 @@
 %{
 #include <stdio.h>
 #include <string>
-#define DEBUG
+#include <string.h>
+//#define DEBUG
 #include "node.hh"
 #include "util.hh"
 #include "global.hh"
@@ -12,7 +13,7 @@ extern void yywarning (const char *msg);
 extern int workBrackOne(int u);
 extern int workBrackZero(int u);*/
 InputNode *root;
-char *buffer;
+char buffer[1024];
 %}
 
 %union
@@ -49,7 +50,8 @@ Decl : ConstDecl {debug("(%d,%d)Decl ::= ConstDecl\n", @$.first_line, @$.first_c
         
 ConstDecl: const_tok int_tok MultiConstDef ';'{debug("(%d,%d)ConstDecl ::= const int  MultiConstDef\n", @$.first_line, @$.first_column);}
            | const_tok MultiConstDef ';' {
-               sprintf(buffer, "lack int after const (%d, %d)", @1.last_line, @1.last_column);
+               sprintf(buffer, "expect 'int' after const at (%d, %d)", @1.last_line, @1.last_column);
+               draw(@1.last_line, @1.last_column + 1);
                yywarning(buffer);
                debug("(%d,%d)ConstDecl ::= const MultiConstDef\n", @$.first_line, @$.first_column);
              }
@@ -139,6 +141,17 @@ Exp:    num_tok  {
               //$$ = workBrackTwo($1, $3);
               debug("(%d,%d)Exp ::= Exp - Exp\n", @$.first_line, @$.first_column);
               }
+
+
+        | '-' Exp %prec ONEOP {
+              //$$ = workBrackOne($2);
+              debug("(%d,%d)Exp ::= - Exp\n", @$.first_line, @$.first_column);
+              }
+        | '+' Exp %prec ONEOP {
+              //$$ = workBrackOne($2);
+              debug("(%d,%d)Exp ::= + Exp\n", @$.first_line, @$.first_column);
+              }
+
         | Exp '*' Exp {
               //$$ = workBrackTwo($1, $3);
               debug("(%d,%d)Exp ::= Exp * Exp\n", @$.first_line, @$.first_column);
@@ -151,34 +164,32 @@ Exp:    num_tok  {
               //$$ = workBrackTwo($1, $3);
               debug("(%d,%d)Exp ::= Exp %% Exp\n", @$.first_line, @$.first_column);
               }
-        | '-' Exp %prec ONEOP {
-              //$$ = workBrackOne($2);
-              debug("(%d,%d)Exp ::= - Exp\n", @$.first_line, @$.first_column);
-              }
-        | '+' Exp %prec ONEOP {
-              //$$ = workBrackOne($2);
-              debug("(%d,%d)Exp ::= + Exp\n", @$.first_line, @$.first_column);
-              }   
         | '(' Exp ')'  {
               //$$ = workBrackZero($2);
               debug("(%d,%d)Exp ::= ( Exp )\n", @$.first_line, @$.first_column);
               }  
-        | Exp Exp {
+        | Exp error Exp {
           //$$ = workBrackTwo($1, $2);
-            sprintf(buffer, "lack BinOp after Exp (%d, %d)", @1.last_line, @1.last_column);
+            sprintf(buffer, "expect BinOp after Exp at (%d, %d)", @1.last_line, @1.last_column);
+            
             yyerror(buffer);
+            draw(@1.last_line, @1.last_column + 1);
             debug("(%d,%d)Exp ::= Exp Exp\n", @$.first_line, @$.first_column);
           }
+
         | '(' Exp {
-            sprintf(buffer, "lack ')' after Exp (%d, %d)", @2.last_line, @2.last_column);
+            sprintf(buffer, "expect ')' after Exp at (%d, %d)", @2.last_line, @2.last_column);
+            draw(@2.last_line, @2.last_column + 1);
             yyerror(buffer);
             debug("Exp :: = ( Exp");
         }
         | Exp error ')' {
-            sprintf(buffer, "lack '(' befor Exp (%d, %d)", @1.first_line, @1.first_column);
+            sprintf(buffer, "expect '(' before Exp at (%d, %d) ", @1.first_line, @1.first_column);
             yyerror(buffer);
+            draw(@1.first_line, @1.first_column - 1);
             debug("Exp :: = Exp )");
-        } 
+        }
+| error {yyerror("bye!"); return 0;}
         ;
         
          
@@ -198,7 +209,12 @@ int workBrackZero(int u) {
 
 void yyerror(const char *msg)
 {
-    error("%s", msg);
+    // if (strcmp(msg, "syntax error") != 0)
+        error("%s", msg);
+}
+
+void draw(int line, int column) {
+    
 }
 
 void yywarning(const char *msg) {

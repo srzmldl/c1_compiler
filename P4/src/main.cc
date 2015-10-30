@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string>
+#include <bits/stdc++.h>
 #include "node.hh"
 #include "tok.hh"
 // comment the next line to hide debug info
@@ -18,6 +19,7 @@ int main(int argc, char** argv)
         return 0;
     yyin = infp;        // infp is initialized in handle_opt()
     yyparse();
+    
     /*if (dumpfp != NULL) {
         DumpDOT *dumper = new DumpDOT(dumpfp);
         root->dumpdot(dumper);

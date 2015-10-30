@@ -1,0 +1,11 @@
+
+
+BinOp:   '+'  {debug("BinOp ::= +\n");}
+        | '-' {debug("BinOp ::= -\n");}
+        | '*' {debug("BinOp ::= *\n");}
+        | '/' {debug("BinOp ::= /\n");}
+        | '%' {debug("BinOp ::= %%\n");}
+        ;
+
+
+

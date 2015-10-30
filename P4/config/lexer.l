@@ -1,0 +1,67 @@
+%option noyywrap
+%{
+#include <string>
+#include "node.hh"
+#include "tok.hh"
+%}
+
+dig [0-9]
+numb {dig}+
+
+alpha [A-Za-z_]
+name {alpha}({alpha}|{dig})*
+
+
+%%
+
+{numb}     {
+    yylval.num = atol(yytext);
+    return(num_tok);
+            }
+"const" return const_tok;
+"int" return int_tok;
+"void" return void_tok;
+"if"  return if_tok;
+"else" return else_tok;
+"while" return while_tok;
+{name} {
+    yylval.ident = new std::string(yytext);
+    return ident_tok;
+}
+"," return ',';
+";" return ';';
+"+" return '+';
+"-" return '-';
+"*" return '*';
+"/" return '/';
+"%" return '%';
+"=" return  '=';
+"<=" return lessEqu_tok;
+">=" return moreEqu_tok;
+"==" return equ_tok;
+"!=" return nequ_tok;
+"<" return less_tok;
+">" return more_tok;
+"{" return '{';
+"}" return '}';
+"[" return '[';
+"]" return ']';
+"(" return '(';
+")"  return ')';
+
+[\t \n]*     /* throw away whitespace */
+. return err_tok;
+
+"/*"  	{
+    int c;
+    while((c = yyinput()) != 0)
+    {
+        if(c == '*')
+        {
+            if((c = yyinput()) == '/') break;
+            else unput(c);
+        }
+    }
+}
+
+%%

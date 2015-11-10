@@ -1,0 +1,41 @@
+* 5.1第二问,例子均来自compub
+** AST 结构与构建(顺便把第一问也答了)
+   - 查看node.hh种各种Node类型知
+     + type域指明结点类型
+     + loc存储位置信息
+     + 然后是一些如打印dumpdot,setLoc等成员函数
+     + InputNode儿子数是非空行数,所以用LineNode的Vector当链表存下来
+     + LineNode因为只有一个asgn儿子,直接指定了*asgn
+     + AsgnNode有var,exp儿子
+     + UnaryExpNode一个exp儿子
+     + BinaryExpNode,两个exp儿子,分别是左,右操作式
+     + NumNode, VarNode叶子结点,没有儿子
+     + ExpNode可以理解为一种泛结点,可以式UnaryExpNode,BinaryExpNode等
+   - 先是root结点,内容是行数
+   - 每一行一个LineNode,全都是root的儿子(空行被忽略),内容是"asgn"
+   - 每个LineNode一个AsgnNode儿子,内容是"var|exp"
+   - 对于每个AsgnNode
+     + var半边指向VarNode,VarNode内容是变量名
+     + exp半边指向ExpNode
+   - expNode就可以分很多种了,各种数字,变量,运算构出exp子树即可
+   - 每个结点还会通过setLoc把位置信息@$传入保存
+   - 在规约的时候新建结点(空行,eol之类特殊情况除外),可以理解为自顶向下地构建好了AST
+** $$, $1, $2等含义
+   - 左部文法符号对应变量用$$调用,右部从第一个符号开始依次$1,$2...调用
+   - 先在union中声明类型有哪些,样例中有num,var,node
+   - type后尖括号定义了用$引用文法符号时的类型
+     + 例如type<node> input line asgn exp在有input,line,asgn文法符号的时候可以用$符号调用这个node类型变量.
+     + 如input->input line中 if($2!= NULL)语句
+       * 用$2调用右部第二个文法符号对应的语义变量. 在type中知道这是node类型,表示语法树上的结点
+       * 判断非空才连到root结点上作为root的儿子(append到儿子链表中),如果是空行直接忽略
+       * if的执行语句中再次调用了$2转成LineNode指针类型
+** @$的含义
+   - 用来跟踪程序位置
+   - 有first_line, first_column, last_line, last_column四个域
+   - @$表示产生式左部符号,右部从第一个符号开始依次@1,@2...调用位置信息
+   - 例如parser.y中asgn-->var_tok '=' exp 有一句$$->setLoc((Loc*)&(@$))
+     + $$表示asgn对应的node
+     + 然后调用asgn这个node的成员函数setLoc设置位置,并传入asgn的位置参数$$
+     + 然后再看node.cc中setLoc的实现,就是讲node的loc的四个域对应赋值,这样结点的位置信息就记录下来了.
+* 5.2第一问,AST结点在语法分析中的创建时机和信息填充时机
+* 代码思路

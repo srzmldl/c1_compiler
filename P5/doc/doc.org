@@ -38,4 +38,46 @@
      + 然后调用asgn这个node的成员函数setLoc设置位置,并传入asgn的位置参数$$
      + 然后再看node.cc中setLoc的实现,就是讲node的loc的四个域对应赋值,这样结点的位置信息就记录下来了.
 * 5.2第一问,AST结点在语法分析中的创建时机和信息填充时机
+
 * 代码思路
+- Node : virtual
+  + inputNode : 儿子链表 vector 存储
+  + MultiExpNode : 仅仅为了让图好看一点,数组赋值加一个实结点
+  + ExpNode : nextExp
+  + DeclNode : virtual, node类型next域, 可链DeclNode, FuncDef(CompUnitNode), Stmt(Block)
+    * ConstDeclNode
+    * VarDeclNode
+  + ConstDefNode : virtual, constNext可链下一个constDefNode 
+    * ConstDefEleNode
+    * ConstDefArrLimNode
+    * ConstDefArrNoLimNode
+  + VarDefNode : virtual, varNext可链下一个VarDefNode
+    + VarDefEleNoEquNode
+    + VarDefArrLimNoEquNode
+    + VarDefEleEquNode
+    + VarDefArrNoLimEquNode
+    + VarDefArrLimEquNode
+  + FuncDefNode : next 可链DeclNode, FuncDefNode
+  + BlockNode
+  + BlockItemNode : virtual, next可链DeclNode,StmtNode
+    * StmtNode: virtual
+      - AssignStmtNode
+      - CallStmtNode
+      - IfStmtNode
+      - IfElseStmtNode
+      - WhileStmtNode
+      - CommaStmtNode
+  + LValNode: virtual
+    * RefArrNode
+  + CondNode
+  + ExpNode : virtual, nextExp可链exp
+** src/dumpdot.cc
+** config/parser.y
+** include/node.hh
+
+
+** main唯一性
+
+** 变量声明唯一性
+
+** 未声明变量地使用

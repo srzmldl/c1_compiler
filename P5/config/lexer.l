@@ -59,17 +59,24 @@ name {alpha}({alpha}|{dig})*
 ")"  return ')';
 
 "\n" {++yycolumn = 1;}
-[\t ]*     /* throw away whitespace */
+[\t ]*     {yyleng += 3;}/* throw away whitespace */
 . return err_tok;
 
 "/*"  	{
     int c;
     while((c = yyinput()) != 0)
     {
-        if(c == '*')
-        {
-            if((c = yyinput()) == '/') break;
-            else unput(c);
+        if (c == '\n') {
+           ++yycolumn = 1;
+        } else {
+          yyleng++;
+          if(c == '\t') yyleng += 3;
+          if(c == '*') {
+              if((c = yyinput()) == '/') {
+                   yyleng++;
+                   break;
+              } else unput(c);
+          }
         }
     }
 }

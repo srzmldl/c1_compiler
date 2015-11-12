@@ -10,49 +10,162 @@ using namespace std;
 typedef enum
 {
     NUM,
-    VAR,
+    VARDEFELEEQU,
+    VARDEFARRLIMNOEQU,
+    VARDEFELENOEQU,
+    VARDEFARRLIMEQU,
+    CONSTDECL,
+    CONSTDEFARRNOLIM,
+    MULTIEXPNODE,
+    IDENT,
+    CONSTDEFELE,
     INPUT,
-    LINE,
-    ASGN,
-    EXP,
+    VARDECL,
+    FUNCDEF,
+    VARDEFARRNOLIMEQU,
     BINARYEXP,
-    UNARYEXP
+    UNARYEXP,
+    BLOCK,
+    CONSTDEFARRLIM,
+    ASSIGNSTMT,
+    CALLSTMT,
+    IFSTMTNODE,
+    WHILESTMT,
+    COMMASTMT,
+    REFARRNODE,
+    COND,
+    IFELSESTMTNODE
 } NodeType;
 
 class Node {
+    
 public:
     NodeType type;
-    virtual void printast(FILE *fp, int indent) = 0;
+    //virtual //void printast(FILE *fp, int indent) = 0;
+    virtual int dumpdot(DumpDOT *dumper) = 0;
+};
+
+class ExpNode: public Node{
+public:
+    ExpNode* nextExp;
+    //virtual //void printast(FILE *fp, int indent) = 0;
+    virtual int dumpdot(DumpDOT *dumper) = 0;
+};
+
+
+class LValNode : public Node {
+public:
+    //virtual //void printast(FILE *fp, int indent) = 0;
     virtual int dumpdot(DumpDOT *dumper) = 0;
 };
 
 
 class InputNode : public Node {
-    vector<Node*> comp;
+    vector<Node*> comps;
 public:
     InputNode() { type = INPUT; };
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
-    void append(LineNode *line);
+    void append(Node *compUnit);
+};
+
+class  IdentNode : public Node {
+public:
+    std::string *name;
+    IdentNode(std::string *name) : name(name) {
+        type = IDENT;
+    };
+    //void printast(FILE *fp, int indent);
+    int dumpdot(DumpDOT *dumper);
+};
+
+class NumNode : public ExpNode {
+public:
+    int val;
+    NumNode(int val) : val(val) { type = NUM; };
+    //void printast(FILE *fp, int indent);
+    int dumpdot(DumpDOT *dumper);
+};
+
+class MultiExpNode: public Node {
+public:
+    ExpNode* fir;
+    MultiExpNode(ExpNode* fir) : fir(fir) {type = MULTIEXPNODE;};
+    //void printast(FILE *fp, int indent);
+    int dumpdot(DumpDOT *dumper);
+};
+
+class BinaryExpNode : public ExpNode {
+public:
+    char op;
+    ExpNode *lhs, *rhs;
+    BinaryExpNode(ExpNode *lhs, char op, ExpNode *rhs) : op(op), lhs(lhs), rhs(rhs) {
+        type = BINARYEXP;
+        nextExp = NULL;
+    };
+    //void printast(FILE *fp, int indent);
+    int dumpdot(DumpDOT *dumper);
+};
+
+class UnaryExpNode : public ExpNode {
+public:
+    char op;
+    ExpNode *operand;
+    UnaryExpNode(char op, ExpNode *operand) : op(op), operand(operand) { type = UNARYEXP; };
+    //void printast(FILE *fp, int indent);
+    int dumpdot(DumpDOT *dumper);
+};
+
+//=================
+
+class BlockItemNode : public Node {
+public:
+    BlockItemNode* next;
+    //virtual //void printast(FILE *fp, int indent) = 0;
+    virtual int dumpdot(DumpDOT *dumper) = 0;
+};
+    
+class BlockNode : public Node {
+public:
+    //void printast(FILE *fp, int indent);
+    int dumpdot(DumpDOT *dumper);
+    BlockItemNode* fir;
+    BlockNode(BlockItemNode* fir) : fir(fir) {
+        type = BLOCK;
+    };
+};
+
+//=========
+
+
+class CondNode : public Node {
+public:
+    //void printast(FILE *fp, int indent);
+    int dumpdot(DumpDOT *dumper);
+    ExpNode *lhs, *rhs;
+    std::string *RelOp;
+    CondNode(ExpNode *lhs, std::string *RelOp, ExpNode *rhs) : lhs(lhs), rhs(rhs), RelOp(RelOp) {
+        type = COND;
+    }
 };
 
 class DeclNode : public Node{
 public:
     Node* next;
-    virtual void printast(FILE *fp, int indent) = 0;
+    //virtual //void printast(FILE *fp, int indent) = 0;
     virtual int dumpdot(DumpDOT *dumper) = 0;
 };
 
 class ConstDefNode : public Node {
 public:
     ConstDefNode* constNext;
-    virtual void printast(FILE *fp, int indent) = 0;
+    //virtual //void printast(FILE *fp, int indent) = 0;
     virtual int dumpdot(DumpDOT *dumper) = 0;
 };
 
 class ConstDefEleNode : public ConstDefNode {
 public:
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     IdentNode* ident;
     ExpNode* exp;
@@ -64,21 +177,20 @@ public:
 
 class ConstDefArrLimNode : public ConstDefNode {
 public:
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     IdentNode* ident;
-    ExpNode* Lim;
+    ExpNode* lim;
     MultiExpNode* multiExp;
-    
     ConstDefArrLimNode(IdentNode* ident, ExpNode* lim, MultiExpNode* multiExp) : ident(ident), lim(lim), multiExp(multiExp) {
         type = CONSTDEFARRLIM;
         constNext = NULL;
     };
-}
+};
     
 class ConstDefArrNoLimNode : public ConstDefNode {
 public:
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     IdentNode* ident;
     MultiExpNode* multiExp;
@@ -87,7 +199,7 @@ public:
         type = CONSTDEFARRNOLIM;
         constNext = NULL;
     };
-}
+};
     
 class ConstDeclNode : public DeclNode {
 public:
@@ -96,25 +208,25 @@ public:
         type = CONSTDECL;
         next = NULL;
     };
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
 };
 
 class VarDefNode : public Node {
 public:
     VarDefNode* varNext;
-    virtual void printast(FILE *fp, int indent) = 0;
+    //virtual //void printast(FILE *fp, int indent) = 0;
     virtual int dumpdot(DumpDOT *dumper) = 0;
 };
 
 //var -> ident
 class VarDefEleNoEquNode : public VarDefNode {
 public:
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     IdentNode* ident;
 
-    VarDefEleNode(IdentNode* ident) : ident(ident) {
+    VarDefEleNoEquNode(IdentNode* ident) : ident(ident) {
         varNext = NULL;
         type = VARDEFELENOEQU;
     };
@@ -123,7 +235,7 @@ public:
 //var -> ident[exp]
 class VarDefArrLimNoEquNode : public VarDefNode {
 public:
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     IdentNode* ident;
     ExpNode* lim;
@@ -132,12 +244,12 @@ public:
         type = VARDEFARRLIMNOEQU;
         varNext = NULL;
     };
-}
+};
 
 //var -> ident = Exp
 class VarDefEleEquNode : public VarDefNode {
 public:
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     IdentNode* ident;
     ExpNode* exp;
@@ -151,67 +263,50 @@ public:
 //var -> ident[] = {1, 2,3}
 class VarDefArrNoLimEquNode : public VarDefNode{
 public:
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     IdentNode* ident;
     MultiExpNode* multiExp;
 
-    VarDefArrNoLimNode(IdentNode* ident, MultiExpNode* multiExp) : ident(ident), multiExp(multiExp) {
+    VarDefArrNoLimEquNode(IdentNode* ident, MultiExpNode* multiExp) : ident(ident), multiExp(multiExp) {
         type = VARDEFARRNOLIMEQU;
         varNext = NULL;
     };
-}
+};
 
 //var -> ident[Exp] = {1, 2, 4}
 class VarDefArrLimEquNode : public VarDefNode {
 public:
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     IdentNode* ident;
     ExpNode* lim;
     MultiExpNode* multiExp;
 
-    VarDefArrNoLimNode(IdentNode* ident, ExpNode* lim, MultiExpNode* multiExp) : ident(ident), lim(lim), multiExp(multiExp) {
+    VarDefArrLimEquNode(IdentNode* ident, ExpNode* lim, MultiExpNode* multiExp) : ident(ident), lim(lim), multiExp(multiExp) {
         type = VARDEFARRLIMEQU;
         varNext = NULL;
     };
-}
+};
     
 class VarDeclNode : public DeclNode {
 public:
     VarDefNode* fir;
     VarDeclNode(VarDefNode* fir) : fir(fir) {
-        type = VARDECL
+        type = VARDECL;
         next = NULL;
         };
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
 };
 
 //======================
-class MultiExpNode: public Node {
-    ExpNode* fir;
-    MultiExpNode(ExpNode* fir) : fir(fir) {type = MULTIEXPNODE};
-    void printast(FILE *fp, int indent);
-    int dumpdot(DumpDOT *dumper);
-};
-
-class ExpNode: public Node{
-public:
-    ExpNode* nextExp;
-    virtual void printast(FILE *fp, int indent) = 0;
-    virtual int dumpdot(DumpDOT *dumper) = 0;
-};
-
-class BinaryExpNode : public ExpNode {
-public: 
-}
 
 //=============================================
 class FuncDefNode : public Node{
 public:
     Node* next;
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     IdentNode* ident;
     BlockNode* block;
@@ -222,37 +317,21 @@ public:
     
 };
 
-class BlockItemNode : public Node {
-public:
-    Node* next;
-    virtual void printast(FILE *fp, int indent) = 0;
-    virtual int dumpdot(DumpDOT *dumper) = 0;
-};
-    
-class BlockNode : public Node {
-public:
-    void printast(FILE *fp, int indent);
-    int dumpdot(DumpDOT *dumper);
-    BlockItemNode* fir;
-    FuncDefNode(BlockItemNode* fir) : fir(fir) {
-        type = BLOCK;
-    };
-};
 
 class StmtNode : public BlockItemNode {
 public:
-    virtual void printast(FILE *fp, int indent) = 0;
+    //virtual //void printast(FILE *fp, int indent) = 0;
     virtual int dumpdot(DumpDOT *dumper) = 0;
 };
 
 //stmt -> LVal = exp;
 class AssignStmtNode : public StmtNode {
 public:
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     LValNode* LVal;
     ExpNode* exp;
-    AssignStmtNode((LValNode*) LVal, (ExpNode*) exp): LVal(LVal), exp(exp) {
+    AssignStmtNode(LValNode *LVal, ExpNode *exp): LVal(LVal), exp(exp) {
         type = ASSIGNSTMT;
         next = NULL;
     }
@@ -261,7 +340,7 @@ public:
 //stmt -> ident();
 class CallStmtNode : public StmtNode {
 public:
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     IdentNode* ident;
     CallStmtNode(IdentNode* ident) : ident(ident) {
@@ -274,12 +353,12 @@ public:
 //stmt -> if (Cond) Stmt
 class IfStmtNode : public StmtNode {
 public:
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     CondNode* cond;
     StmtNode* stmt;
-    CallStmtNode(CondNode* cond, StmtNode* stmt) : cond(cond), stmt(stmt) {
-        type = IfSTMTNODE;
+    IfStmtNode(CondNode* cond, StmtNode* stmt) : cond(cond), stmt(stmt) {
+        type = IFSTMTNODE;
         next = NULL;
     }
 };
@@ -287,12 +366,12 @@ public:
 //stmt -> if (Cond) stmt else stmt
 class IfElseStmtNode : public StmtNode {
 public:
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     CondNode *cond;
     StmtNode *thenStmt, *elseStmt;
-    CallStmtNode(CondNode* cond, StmtNode* thenStmt, StmtNode* elseStmt) : cond(cond), thenStmt(thenStmt), elseStmt(elseStmt) {
-        type = IfSTMTNODE;
+    IfElseStmtNode(CondNode* cond, StmtNode* thenStmt, StmtNode* elseStmt) : cond(cond), thenStmt(thenStmt), elseStmt(elseStmt) {
+        type = IFELSESTMTNODE;
         next = NULL;
     }
 };
@@ -300,7 +379,7 @@ public:
 //stmt -> while(Cond) Stmt
 class WhileStmtNode : public StmtNode {
 public:
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     CondNode* cond;
     StmtNode* stmt;
@@ -313,7 +392,7 @@ public:
 class CommaStmtNode : public StmtNode {
     
 public:
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     CommaStmtNode() {
         type = COMMASTMT;
@@ -321,90 +400,17 @@ public:
     }
 };
 
-
-class LValNode : public Node {
-public:
-    virtual void printast(FILE *fp, int indent) = 0;
-    virtual int dumpdot(DumpDOT *dumper) = 0;
-};
-
 //LVal --> ident [Exp]
 class RefArrNode : public LValNode {
 public:
-    void printast(FILE *fp, int indent);
+    //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     IdentNode *ident;
     ExpNode *exp;
     RefArrNode(IdentNode *ident, ExpNode *exp) : ident(ident), exp(exp) {
         type = REFARRNODE;
     }
-}
+};
     
-class CondNode : public Node {
-public:
-    void printast(FILE *fp, int indent);
-    int dumpdot(DumpDOT *dumper);
-    ExpNode *lhs, *rhs;
-    std::string *RelOp;
-    CondNode(ExpNode *lhs, std::string *RelOp, Expnode *rhs) : lhs(lhs), rhs(rhs), RelOp(RelOp) {
-        type = COND;
-    }
-}
-
-
-
-
-
-class NumNode : public ExpNode {
-    int val;
-public:
-    NumNode(int val) : val(val) { type = EXP; };
-    void printast(FILE *fp, int indent);
-    int dumpdot(DumpDOT *dumper);
-};
-
-class VarNode : public ExpNode {
-    std::string *name;
-public:
-    VarNode(std::string* name) : name(name) { type = VAR; };
-    void printast(FILE *fp, int indent);
-    int dumpdot(DumpDOT *dumper);
-};
-
-class BinaryExpNode : public ExpNode {
-    char op;
-    ExpNode *lhs, *rhs;
-public:
-    BinaryExpNode(char op, ExpNode *lhs, ExpNode *rhs) : op(op), lhs(lhs), rhs(rhs) { type = BINARYEXP; };
-    void printast(FILE *fp, int indent);
-    int dumpdot(DumpDOT *dumper);
-};
-
-class UnaryExpNode : public ExpNode {
-    char op;
-    ExpNode *operand;
-public:
-    UnaryExpNode(char op, ExpNode *operand) : op(op), operand(operand) { type = UNARYEXP; };
-    void printast(FILE *fp, int indent);
-    int dumpdot(DumpDOT *dumper);
-};
-
-class AsgnNode : public Node {
-    VarNode *var;
-    ExpNode *exp;
-public:
-    AsgnNode(VarNode *var, ExpNode *exp) : var(var), exp(exp) { type = ASGN; };
-    void printast(FILE *fp, int indent);
-    int dumpdot(DumpDOT *dumper);
-};
-
-class LineNode : public Node {
-    AsgnNode *asgn;
-public:
-    LineNode(AsgnNode *asgn) : asgn(asgn) { type = LINE; };
-    void printast(FILE *fp, int indent);
-    int dumpdot(DumpDOT *dumper);
-};
-
-
+    
 #endif

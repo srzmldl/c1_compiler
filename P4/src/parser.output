@@ -15,7 +15,6 @@ State 68 conflicts: 1 shift/reduce
 State 69 conflicts: 1 shift/reduce
 State 70 conflicts: 1 shift/reduce
 State 71 conflicts: 1 shift/reduce
-State 82 conflicts: 8 shift/reduce
 State 122 conflicts: 1 shift/reduce
 
 
@@ -58,11 +57,11 @@ Grammar
 
    24 Block: '{' MultiBlock '}'
 
-   25 MultiBlock: BlockItem
-   26           | MultiBlock BlockItem
+   25 MultiBlock: %empty
+   26           | BlockItem
+   27           | MultiBlock BlockItem
 
-   27 BlockItem: %empty
-   28          | Decl
+   28 BlockItem: Decl
    29          | Stmt
 
    30 Stmt: LVal '=' Exp ';'
@@ -166,9 +165,9 @@ FuncDef (44)
 Block (45)
     on left: 24, on right: 23 32
 MultiBlock (46)
-    on left: 25 26, on right: 24 26
+    on left: 25 26 27, on right: 24 27
 BlockItem (47)
-    on left: 27 28 29, on right: 25 26
+    on left: 28 29, on right: 26 27
 Stmt (48)
     on left: 30 31 32 33 34 35 36, on right: 29 33 35 36
 Cond (49)
@@ -910,14 +909,14 @@ State 60
     ';'        shift, and go to state 79
     '{'        shift, and go to state 60
 
-    const_tok  [reduce using rule 27 (BlockItem)]
-    int_tok    [reduce using rule 27 (BlockItem)]
-    if_tok     [reduce using rule 27 (BlockItem)]
-    while_tok  [reduce using rule 27 (BlockItem)]
-    ident_tok  [reduce using rule 27 (BlockItem)]
-    ';'        [reduce using rule 27 (BlockItem)]
-    '{'        [reduce using rule 27 (BlockItem)]
-    $default   reduce using rule 27 (BlockItem)
+    const_tok  [reduce using rule 25 (MultiBlock)]
+    int_tok    [reduce using rule 25 (MultiBlock)]
+    if_tok     [reduce using rule 25 (MultiBlock)]
+    while_tok  [reduce using rule 25 (MultiBlock)]
+    ident_tok  [reduce using rule 25 (MultiBlock)]
+    ';'        [reduce using rule 25 (MultiBlock)]
+    '{'        [reduce using rule 25 (MultiBlock)]
+    $default   reduce using rule 25 (MultiBlock)
 
     Decl        go to state 80
     ConstDecl   go to state 7
@@ -1300,7 +1299,7 @@ State 81
 State 82
 
    24 Block: '{' MultiBlock . '}'
-   26 MultiBlock: MultiBlock . BlockItem
+   27 MultiBlock: MultiBlock . BlockItem
 
     const_tok  shift, and go to state 3
     int_tok    shift, and go to state 4
@@ -1310,15 +1309,6 @@ State 82
     ';'        shift, and go to state 79
     '{'        shift, and go to state 60
     '}'        shift, and go to state 95
-
-    const_tok  [reduce using rule 27 (BlockItem)]
-    int_tok    [reduce using rule 27 (BlockItem)]
-    if_tok     [reduce using rule 27 (BlockItem)]
-    while_tok  [reduce using rule 27 (BlockItem)]
-    ident_tok  [reduce using rule 27 (BlockItem)]
-    ';'        [reduce using rule 27 (BlockItem)]
-    '{'        [reduce using rule 27 (BlockItem)]
-    '}'        [reduce using rule 27 (BlockItem)]
 
     Decl       go to state 80
     ConstDecl  go to state 7
@@ -1331,9 +1321,9 @@ State 82
 
 State 83
 
-   25 MultiBlock: BlockItem .
+   26 MultiBlock: BlockItem .
 
-    $default  reduce using rule 25 (MultiBlock)
+    $default  reduce using rule 26 (MultiBlock)
 
 
 State 84
@@ -1478,9 +1468,9 @@ State 95
 
 State 96
 
-   26 MultiBlock: MultiBlock BlockItem .
+   27 MultiBlock: MultiBlock BlockItem .
 
-    $default  reduce using rule 26 (MultiBlock)
+    $default  reduce using rule 27 (MultiBlock)
 
 
 State 97

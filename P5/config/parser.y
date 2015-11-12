@@ -19,23 +19,27 @@ char buffer[1024];
 {
     int  num;
     Node *node;
-    std::string *ident;
+        std::string *name;
 }
 
-%token <num> num_tok const_tok int_tok void_tok
-%token <num> if_tok else_tok while_tok ident_tok
-%token <num> eol_tok err_tok
-%token <num> ',' ';' '=' '{' '}' '[' ']' '(' ')'
+%token <num> num_tok
+%token const_tok int_tok void_tok
+%token if_tok else_tok while_tok
+%token <node> ident_tok
+%token eol_tok err_tok
+%token  ',' ';' '=' '{' '}' '[' ']' '(' ')'
 
-%left equ_tok nequ_tok
-%left more_tok moreEqu_tok less_tok lessEqu_tok
+%left  equ_tok nequ_tok
+%left  more_tok moreEqu_tok less_tok lessEqu_tok
 %left '+' '-'
 %left '*' '/' '%'
 %right ONEOP
 
- //%type <num> num_tok
- //%type <ident> ident_tok
-%type <node> CompUnit Decl FuncDef, ConstDecl, VarDecl
+%type <node> CompUnit Decl FuncDef ConstDecl VarDecl MultiConstDef ConstDef Exp
+%type <node> MultiExp MultiVar Var BlockItem Stmt LVal Cond MultiBlock Block 
+%type <name> RelOp
+
+
 %locations
 %%
 
@@ -49,7 +53,7 @@ char buffer[1024];
      }
     | CompUnit FuncDef {
         debug("(%d,%d)Compunit ::= CompUnit FuncDef\n", @$.first_line, @$.first_column);
-        root->append((CompUnitNode*)$2);
+        root->append((Node*)$2);
      }
     ;
     
@@ -78,17 +82,17 @@ ConstDecl: const_tok int_tok MultiConstDef ';'{
     
 MultiConstDef:  ConstDef {
     debug("(%d,%d)MultiConstDef :: = ConstDef\n", @$.first_line, @$.first_column);
+    $$ = (ConstDefNode*) $1;
      }
-    $$ = $1;
     | MultiConstDef ',' ConstDef {
         debug("(%d,%d)MultiConstDef :: = MultiConstDef, ConstDef\n", @$.first_line, @$.first_column);
-        $1->next = $1;
+        ((DeclNode*)$1)->next = $3;
           }
     ;        
     
 ConstDef: ident_tok '=' Exp {
     debug("(%d,%d)ConstDef ::= ident_tok = Exp\n", @$.first_line, @$.first_column);
-    $$ = new ConstDefEleNode((IdentNode*)$1, (ExpNode*)$3)
+    $$ = new ConstDefEleNode((IdentNode*)$1, (ExpNode*)$3);
     }
     | ident_tok '[' Exp ']' '=' '{' MultiExp '}' {
         debug("(%d,%d)ConstDef ::= ident_tok [ Exp ] = { MultiExp }\n", @$.first_line, @$.first_column);
@@ -102,7 +106,7 @@ ConstDef: ident_tok '=' Exp {
         
 VarDecl: int_tok MultiVar ';' {
         debug("(%d,%d)VarDecl::= int MultiVar ;\n", @$.first_line, @$.first_column);
-        $$ = new VarDeclNode((VarDefNode*) MultiVar);
+        $$ = new VarDeclNode((VarDefNode*) $2);
           }
     ;        
         
@@ -112,17 +116,17 @@ MultiVar: Var {
           }
         | MultiVar ',' Var {
         debug("(%d,%d)MultiVar ::= MultiVar, Var\n", @$.first_line, @$.first_column);
-        $1->next = $2;
+        ((VarDefNode*)$1)->varNext = (VarDefNode *)$3;
           }
         ;
         
-Var: ident_ok {
-    debug("(%d,%d)Var :: = ident_tok\n", @$.first_line, @$.first_column);
-    $$ = new VarDefEleNoEquNode((IdentNode*)$1);
-        }
-    | ident_tok '[' Exp ']' {
+Var: ident_tok {
+        debug("(%d,%d)Var :: = ident_tok\n", @$.first_line, @$.first_column);
+        $$ = new VarDefEleNoEquNode((IdentNode *)$1);
+          }
+        | ident_tok '[' Exp ']' {
         debug("(%d,%d)Var :: =  ident_tok [ Exp ]\n", @$.first_line, @$.first_column);
-        $$ = new VarDefArrLimNoEquNode((IdentNode*) $1, (ExpNode *) $3);
+        $$ = new VarDefArrLimNoEquNode((IdentNode *)$1, (ExpNode *) $3);
           }
     |  ident_tok '=' Exp {
         debug("(%d,%d)Var :: =  ident_tok = Exp\n", @$.first_line, @$.first_column);
@@ -130,11 +134,11 @@ Var: ident_ok {
            }
     | ident_tok '[' Exp ']' '=' '{' MultiExp'}' {
         debug("(%d,%d)Var :: =  ident_tok [ Exp ] = { MultiExp}\n", @$.first_line, @$.first_column);
-        $$ = new VarDefArrLimEquNode((ident*) $1, (ExpNode*) $3, (MultiExpNode*) $7);
+        $$ = new VarDefArrLimEquNode((IdentNode*) $1, (ExpNode*) $3, (MultiExpNode*) $7);
           }
         | ident_tok '[' ']' '=' '{' MultiExp'}' {
         debug("(%d,%d)Var :: =  ident_tok [ ] = { MultiExp}\n", @$.first_line, @$.first_column);
-        $$ = new VarDefArrNoLimNode((ident*) $1, (MultiExpNode*) $6);
+        $$ = new VarDefArrNoLimEquNode((IdentNode*)$1, (MultiExpNode*) $6);
           }
         ;
          
@@ -144,7 +148,7 @@ MultiExp: Exp {
           }
         | MultiExp ',' Exp {
         debug("(%d,%d)MultiExp ::= MultiExp, Exp\n", @$.first_line, @$.first_column);
-        $1->next = $3;
+        ((ExpNode *)$1)->nextExp = (ExpNode*)$3;
           }
         ;
         
@@ -156,7 +160,7 @@ FuncDef: void_tok ident_tok '(' ')'  Block {
         
 Block: '{' MultiBlock '}' {
         debug("(%d,%d)Block ::= MultiBlock\n", @$.first_line, @$.first_column);
-        $$ = new Block((BlockItemNode*) MultiBlock);
+        $$ = new BlockNode((BlockItemNode*) $2);
           }
     ;
         
@@ -164,16 +168,18 @@ MultiBlock: {
         debug("(%d,%d)MultiBlock ::= empty\n", @$.first_line, @$.first_column);
         $$ = NULL;
           }
-        | BlockItem {
+     | BlockItem {
         debug("(%d,%d)MultiBlock :: = BlockItem\n", @$.first_line, @$.first_column);
         $$ = (BlockItemNode*) $1;
-        |  MultiBlock BlockItem {
+          }
+     |  MultiBlock BlockItem {
         debug("(%d,%d)MultiBlock ::= MultiBlock BlockItem\n", @$.first_line, @$.first_column);
         if ($1 != NULL) {
         $$ = (BlockItemNode*)$1;
-        $1->next = $2;
+        ((BlockItemNode*)$1)->next = (BlockItemNode*)$2;
           } else {
         $$ = $2;
+          }
           }
     ;
         
@@ -200,19 +206,20 @@ Stmt:  LVal '=' Exp ';' {
         $$ = $1;
           }
     | while_tok '(' Cond ')' Stmt {
-        debug("(%d,%d)Stmp ::= while (Cond) Stmt\n", @$.first_line, @$.first_column);}
+        debug("(%d,%d)Stmp ::= while (Cond) Stmt\n", @$.first_line, @$.first_column);
         $$ = new WhileStmtNode((CondNode*) $3, (StmtNode*) $5);
+          }
     | ';' {
         debug("(%d,%d)Stmt ::= ;\n", @$.first_line, @$.first_column);
         $$ = new CommaStmtNode();
           }
     | if_tok '(' Cond ')' Stmt {
         debug("(%d,%d)Stmp :: = if (Cond) Stmt\n", @$.first_line, @$.first_column);
-        $$ = new ifStmtNode((CondNode*)$3, (StmtNode*)$5);
+        $$ = new IfStmtNode((CondNode*)$3, (StmtNode*)$5);
           }
     | if_tok '(' Cond ')' Stmt else_tok Stmt {
         debug("(%d,%d)Stmp :: = if (Cond) Stmt else Stmt\n", @$.first_line, @$.first_column);
-        $$ = new ifElseStmtNode((CondNode*)$3, (StmtNode*)$5, (StmtNode*)$7);
+        $$ = new IfElseStmtNode((CondNode*)$3, (StmtNode*)$5, (StmtNode*)$7);
           }
     ;
 
@@ -228,7 +235,7 @@ LVal:   ident_tok {
         debug("(%d,%d)LVal ::= ident\n", @$.first_line, @$.first_column);
           }
     | ident_tok '[' Exp ']' {
-        $$ = new refArrNode($)
+        $$ = new RefArrNode((IdentNode*)$1, (ExpNode*)$3);
         debug("(%d,%d)LVal ::= ident[Exp]\n", @$.first_line, @$.first_column);
           }
     ;
@@ -236,73 +243,85 @@ LVal:   ident_tok {
         
 RelOp:  equ_tok {
         debug("(%d,%d)RelOp ::= ==\n", @$.first_line, @$.first_column);
-        $$ = "==";
+        $$ = new std::string("==");
           }
     | nequ_tok {
         debug("(%d,%d)RelOp ::= !=\n", @$.first_line, @$.first_column);
-        $$ = "!=";
+        $$ = new std::string("!=");
           }
     | less_tok {
         debug("(%d,%d)RelOp ::= <\n", @$.first_line, @$.first_column);
-        $$ = "<";
+        $$ = new std::string("<");
           }
     | more_tok {
         debug("(%d,%d)RelOp ::= >\n", @$.first_line, @$.first_column);
-        $$ = ">";
+        $$ = new std::string(">");
           }
     | lessEqu_tok {
         debug("(%d,%d)RelOp ::= <=\n", @$.first_line, @$.first_column);
-        $$ = "<=";
+        $$ = new std::string("<=");
           }
     | moreEqu_tok {
         debug("(%d,%d)RelOp ::= >=\n", @$.first_line, @$.first_column);
-        $$ = ">=";
+        $$ = new std::string(">=");
           }
     ;
     
 Exp:    num_tok  {
         //$$ = 0;
+        $$ = new NumNode($1);
         debug("(%d,%d)Exp ::= number\n", @$.first_line, @$.first_column);
  }
     | LVal  {
             //$$ = 0;
-            debug("(%d,%d)Exp ::= LVal\n", @$.first_line, @$.first_column);
+        $$ = $1;
+        debug("(%d,%d)Exp ::= LVal\n", @$.first_line, @$.first_column);
       }
     | Exp '+' Exp {
             //$$ = workBrackTwo($1, $3);
-            debug("(%d,%d)Exp ::= Exp + Exp\n", @$.first_line, @$.first_column);
+        $$ = new BinaryExpNode((ExpNode *) $1, '+', (ExpNode *) $3);
+        debug("(%d,%d)Exp ::= Exp + Exp\n", @$.first_line, @$.first_column);
       }
     | Exp '-' Exp {
             //$$ = workBrackTwo($1, $3);
-            debug("(%d,%d)Exp ::= Exp - Exp\n", @$.first_line, @$.first_column);
+        $$ = new BinaryExpNode((ExpNode *) $1, '-', (ExpNode *) $3);
+        debug("(%d,%d)Exp ::= Exp - Exp\n", @$.first_line, @$.first_column);
       }
     
     
     | '-' Exp %prec ONEOP {
             //$$ = workBrackOne($2);
-            debug("(%d,%d)Exp ::= - Exp\n", @$.first_line, @$.first_column);
+        $$ = new UnaryExpNode('-', (ExpNode *) $2);
+        debug("(%d,%d)Exp ::= - Exp\n", @$.first_line, @$.first_column);
       }
     | '+' Exp %prec ONEOP {
             //$$ = workBrackOne($2);
-            debug("(%d,%d)Exp ::= + Exp\n", @$.first_line, @$.first_column);
+        $$ = new UnaryExpNode('+', (ExpNode *) $2);
+        debug("(%d,%d)Exp ::= + Exp\n", @$.first_line, @$.first_column);
       }
     
     | Exp '*' Exp {
             //$$ = workBrackTwo($1, $3);
-            debug("(%d,%d)Exp ::= Exp * Exp\n", @$.first_line, @$.first_column);
+        
+        $$ = new BinaryExpNode((ExpNode *) $1, '*', (ExpNode *) $3);
+        debug("(%d,%d)Exp ::= Exp * Exp\n", @$.first_line, @$.first_column);
       }
     | Exp '/' Exp {
             //$$ = workBrackTwo($1, $3);
-            debug("(%d,%d)Exp ::= Exp / Exp\n", @$.first_line, @$.first_column);
-      }
+        
+        $$ = new BinaryExpNode((ExpNode *) $1, '/', (ExpNode *) $3);
+        debug("(%d,%d)Exp ::= Exp / Exp\n", @$.first_line, @$.first_column);
+          }
     | Exp '%' Exp {
             //$$ = workBrackTwo($1, $3);
-            debug("(%d,%d)Exp ::= Exp %% Exp\n", @$.first_line, @$.first_column);
+        $$ = new BinaryExpNode((ExpNode *) $1, '%', (ExpNode *) $3);
+        debug("(%d,%d)Exp ::= Exp %% Exp\n", @$.first_line, @$.first_column);
       }
     | '(' Exp ')'  {
-            //$$ = workBrackZero($2);
-            debug("(%d,%d)Exp ::= ( Exp )\n", @$.first_line, @$.first_column);
-      }  
+        //$$ = workBrackZero($2);
+        $$ = $2;
+        debug("(%d,%d)Exp ::= ( Exp )\n", @$.first_line, @$.first_column);
+          }  
     | Exp error Exp {
             //$$ = workBrackTwo($1, $2);
             sprintf(buffer, "expect BinOp after Exp at (%d, %d)", @1.last_line, @1.last_column);

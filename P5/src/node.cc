@@ -2,9 +2,9 @@
 #include "util.hh"
 
 // add a new line
-void InputNode::append(LineNode *line)
+void InputNode::append(Node *compUnit)
 {
-    lines.push_back(line);
+    comps.push_back(compUnit);
 }
 
 // ====================================
@@ -16,7 +16,7 @@ void InputNode::append(LineNode *line)
 // prefix[] contains current line's prefixs
 // Its validating parts are prefix[0..indent-1] (indent is an argument passed
 // among the following functions)
-static int prefix[100];
+/*static int prefix[100];
 
 static void drawprefix(int indent){
     int i;
@@ -107,4 +107,4 @@ void InputNode::printast(FILE *fp, int indent)
             prefix[0] = 2;
         (*i)->printast(fp, 1);
     }
-}
+    } */

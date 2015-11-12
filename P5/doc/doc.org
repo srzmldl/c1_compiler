@@ -71,9 +71,13 @@
     * RefArrNode
   + CondNode
   + ExpNode : virtual, nextExp可链exp
-** src/dumpdot.cc
-** config/parser.y
-** include/node.hh
+    * BinaryExpNode
+    * UnaryExpNode
+  + IdentNode
+** src/dumpdot.cc 
+** config/parser.y OK
+** include/node.hh OK
+** node.cc OK
 
 
 ** main唯一性

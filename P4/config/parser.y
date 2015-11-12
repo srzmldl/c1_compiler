@@ -92,12 +92,12 @@ FuncDef: void_tok ident_tok '(' ')'  Block {debug("(%d,%d)FuncDef ::= void_tok i
 Block: '{' MultiBlock '}' {debug("(%d,%d)Block ::= MultiBlock\n", @$.first_line, @$.first_column);}
        ;
         
-MultiBlock: BlockItem {debug("(%d,%d)MultiBlock :: = BlockItem\n", @$.first_line, @$.first_column);}
+MultiBlock: {debug("(%d,%d)BlockItem ::= empty\n", @$.first_line, @$.first_column);}
+         | BlockItem {debug("(%d,%d)MultiBlock :: = BlockItem\n", @$.first_line, @$.first_column);}
         |  MultiBlock BlockItem {debug("(%d,%d)MultiBlock ::= MultiBlock BlockItem\n", @$.first_line, @$.first_column);}
         ;
         
-BlockItem: {debug("(%d,%d)BlockItem ::= empty\n", @$.first_line, @$.first_column);}
-        | Decl { debug("(%d,%d)BlockItem ::= Decl\n", @$.first_line, @$.first_column);}
+BlockItem: Decl { debug("(%d,%d)BlockItem ::= Decl\n", @$.first_line, @$.first_column);}
         | Stmt {debug("(%d,%d)BlockItem ::= Stmt\n", @$.first_line, @$.first_column);}
         ;
         

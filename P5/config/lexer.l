@@ -34,7 +34,8 @@ name {alpha}({alpha}|{dig})*
 "else" return else_tok;
 "while" return while_tok;
 {name} {
-    yylval.ident = new std::string(yytext);
+    //yylval.ident = new std::string(yytext);
+    yylval.node = new IdentNode(new std::string(yytext));
     return ident_tok;
 }
 "," return ',';

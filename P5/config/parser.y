@@ -49,30 +49,30 @@ char buffer[1024];
      }
     | CompUnit Decl {
         debug("(%d,%d)Compunit ::= CompUnit Decl\n", @$.first_line, @$.first_column);
-        root->append((Node*)$2);
+        root->append($2);
      }
     | CompUnit FuncDef {
         debug("(%d,%d)Compunit ::= CompUnit FuncDef\n", @$.first_line, @$.first_column);
-        root->append((Node*)$2);
+        root->append($2);
      }
     ;
     
 Decl : ConstDecl {
     debug("(%d,%d)Decl ::= ConstDecl\n", @$.first_line, @$.first_column);
-    $$ = (DeclNode*)$1;
+    $$ = $1;
      }
     | VarDecl {
         debug("(%d,%d)Decl ::= VarDecl\n", @$.first_line, @$.first_column);
-        $$ = (DeclNode*)$1;
+        $$ = $1;
           }
     ;
     
 ConstDecl: const_tok int_tok MultiConstDef ';'{
     debug("(%d,%d)ConstDecl ::= const int  MultiConstDef\n", @$.first_line, @$.first_column);
-    $$ = new ConstDeclNode(((ConstDefNode*)$3)->constHead);
+    $$ = new ConstDeclNode($3->head);
      }
     | const_tok MultiConstDef ';' {
-        $$ = new ConstDeclNode(((ConstDefNode*)$2)->constHead);
+        $$ = new ConstDeclNode($2->head);
         sprintf(buffer, "expect 'int' after const at (%d, %d)", @1.last_line, @1.last_column);
         yywarning(buffer);
         draw(@1.last_line, @1.last_column + 1);
@@ -82,33 +82,33 @@ ConstDecl: const_tok int_tok MultiConstDef ';'{
     
 MultiConstDef:  ConstDef {
     debug("(%d,%d)MultiConstDef :: = ConstDef\n", @$.first_line, @$.first_column);
-    $$ = (ConstDefNode*)$1;
+    $$ = $1;
      }
     | MultiConstDef ',' ConstDef {
         debug("(%d,%d)MultiConstDef :: = MultiConstDef, ConstDef\n", @$.first_line, @$.first_column);
-        $$ = (ConstDefNode*)$3;
-        ((ConstDefNode*)$1)->constNext = (ConstDefNode*)$3;
-        ((ConstDefNode*)$$)->constHead = ((ConstDefNode*)$1)->constHead;
+        $$ = $3;
+        $1->next = $3;
+        $$->head = $1->head;
           }
     ;        
     
 ConstDef: ident_tok '=' Exp {
     debug("(%d,%d)ConstDef ::= ident_tok = Exp\n", @$.first_line, @$.first_column);
-    $$ = new ConstDefEleNode((IdentNode*)$1, (ExpNode*)$3);
+    $$ = new ConstDefEleNode((IdentNode*)$1, $3);
     }
     | ident_tok '[' Exp ']' '=' '{' MultiExp '}' {
         debug("(%d,%d)ConstDef ::= ident_tok [ Exp ] = { MultiExp }\n", @$.first_line, @$.first_column);
-        $$ = new ConstDefArrLimNode((IdentNode*)$1, (ExpNode*)$3, (MultiExpNode*)$7);
+        $$ = new ConstDefArrLimNode((IdentNode*)$1, $3, $7->head);
           }
-        |  ident_tok '[' ']' '=' '{' MultiExp '}' {
+     |  ident_tok '[' ']' '=' '{' MultiExp '}' {
         debug("(%d,%d)ConstDef ::= ident_tok [ Exp ] = { MultiExp }\n", @$.first_line, @$.first_column);
-        $$ = new ConstDefArrNoLimNode((IdentNode*)$1, (MultiExpNode*)$6);
+        $$ = new ConstDefArrNoLimNode((IdentNode*)$1, $6->head);
           }
         ;
         
 VarDecl: int_tok MultiVar ';' {
         debug("(%d,%d)VarDecl::= int MultiVar ;\n", @$.first_line, @$.first_column);
-        $$ = new VarDeclNode(((VarDefNode*)$2)->varHead);
+        $$ = new VarDeclNode($2->head);
           }
     ;        
         
@@ -118,9 +118,9 @@ MultiVar: Var {
           }
         | MultiVar ',' Var {
         debug("(%d,%d)MultiVar ::= MultiVar, Var\n", @$.first_line, @$.first_column);
-        ((VarDefNode*)$1)->varNext = (VarDefNode *)$3;
         $$ = $3;
-        ((VarDefNode*)$$)->varHead = ((VarDefNode *)$1)->varHead;
+        $1->next = $3;
+        $$->head = $1->head;
           }
         ;
         
@@ -130,31 +130,31 @@ Var: ident_tok {
           }
         | ident_tok '[' Exp ']' {
         debug("(%d,%d)Var :: =  ident_tok [ Exp ]\n", @$.first_line, @$.first_column);
-        $$ = new VarDefArrLimNoEquNode((IdentNode *)$1, (ExpNode *) $3);
+        $$ = new VarDefArrLimNoEquNode((IdentNode *)$1, $3);
           }
     |  ident_tok '=' Exp {
         debug("(%d,%d)Var :: =  ident_tok = Exp\n", @$.first_line, @$.first_column);
-        $$ = new VarDefEleEquNode((IdentNode*)$1, (ExpNode*) $3);
-           }
-    | ident_tok '[' Exp ']' '=' '{' MultiExp'}' {
-        debug("(%d,%d)Var :: =  ident_tok [ Exp ] = { MultiExp}\n", @$.first_line, @$.first_column);
-        $$ = new VarDefArrLimEquNode((IdentNode*) $1, (ExpNode*) $3, (MultiExpNode*) $7);
+        $$ = new VarDefEleEquNode((IdentNode*)$1, $3);
           }
-        | ident_tok '[' ']' '=' '{' MultiExp'}' {
+     | ident_tok '[' Exp ']' '=' '{' MultiExp'}' {
+        debug("(%d,%d)Var :: =  ident_tok [ Exp ] = { MultiExp}\n", @$.first_line, @$.first_column);
+        $$ = new VarDefArrLimEquNode((IdentNode*) $1,  $3, $7->head);
+          }
+     | ident_tok '[' ']' '=' '{' MultiExp'}' {
         debug("(%d,%d)Var :: =  ident_tok [ ] = { MultiExp}\n", @$.first_line, @$.first_column);
-        $$ = new VarDefArrNoLimEquNode((IdentNode*)$1, (MultiExpNode*) $6);
+        $$ = new VarDefArrNoLimEquNode((IdentNode*)$1, $6->head);
           }
         ;
          
 MultiExp: Exp {
         debug("(%d,%d)MultiExp :: = Exp\n", @$.first_line, @$.first_column);
-        $$ = (ExpNode*) $1)->expHead;
+        $$ = $1;
           }
         | MultiExp ',' Exp {
         debug("(%d,%d)MultiExp ::= MultiExp, Exp\n", @$.first_line, @$.first_column);
-        ((ExpNode *)$1)->nextExp = (ExpNode*)$3;
-        $$ = (ExpNode*) $3;
-        ((ExpNode *)$$)->headExp = ((ExpNode*)$1)->headNode;
+        $$ = $3;
+        $1->next = $3;
+        $$->head = $1->head;
           }
         ;
         
@@ -166,7 +166,8 @@ FuncDef: void_tok ident_tok '(' ')'  Block {
      
 Block: '{' MultiBlock '}' {
         debug("(%d,%d)Block ::= MultiBlock\n", @$.first_line, @$.first_column);
-        $$ = new BlockNode(((BlockItemNode*) $2)->head);
+        if ($2 == NULL) $$ = new BlockNode($2);
+        else $$ = new BlockNode($2->head);
           }
     ;
         
@@ -176,32 +177,33 @@ MultiBlock: {
           }
      | BlockItem {
         debug("(%d,%d)MultiBlock :: = BlockItem\n", @$.first_line, @$.first_column);
-        $$ = (BlockItemNode*) $1;
+        $$ = $1;
           }
      |  MultiBlock BlockItem {
         debug("(%d,%d)MultiBlock ::= MultiBlock BlockItem\n", @$.first_line, @$.first_column);
         $$ = $2;
         if ($1 != NULL) {
-        ((BlockItemNode*)$1)->next = (BlockItemNode*)$2;
+        $1->next = $2;
+        $$->head = $1->head;
           } else {
-        ((BlockItemNode*)$$)->head = ((BlockItemNode*)$1)->head;
+        $$->head = $2;
           }
           }
     ;
         
 BlockItem: Decl {
         debug("(%d,%d)BlockItem ::= Decl\n", @$.first_line, @$.first_column);
-        $$ = (BlockItemNode*) $1;
+        $$ = $1;
           }
         | Stmt {
         debug("(%d,%d)BlockItem ::= Stmt\n", @$.first_line, @$.first_column);
-        $$ = (BlockItemNode*) $1;
+        $$ = $1;
           }
         ;
         
 Stmt:  LVal '=' Exp ';' {
         debug("(%d,%d)Stmt ::= LVal = Exp ;\n", @$.first_line, @$.first_column);
-        $$ = new AssignStmtNode((LValNode*)$1, (ExpNode*)$3);
+        $$ = new AssignStmtNode($1, $3);
           }
     | ident_tok '(' ')' ';' {
         debug("(%d,%d)Stmt ::= ident_tok();\n", @$.first_line, @$.first_column);
@@ -231,7 +233,7 @@ Stmt:  LVal '=' Exp ';' {
 
 
 Cond:   Exp RelOp Exp {
-        $$ = new CondNode((ExpNode*) $1, $2, (ExpNode*) $3);
+        $$ = new CondNode($1, $2, $3);
         debug("(%d,%d)Cond ::= Exp RelOp Exp\n", @$.first_line, @$.first_column);
           }
     ;
@@ -240,8 +242,8 @@ LVal:   ident_tok {
         $$ = $1;
         debug("(%d,%d)LVal ::= ident\n", @$.first_line, @$.first_column);
           }
-    | ident_tok '[' Exp ']' {
-        $$ = new RefArrNode((IdentNode*)$1, (ExpNode*)$3);
+     | ident_tok '[' Exp ']' {
+        $$ = new RefArrNode((IdentNode*)$1, $3);
         debug("(%d,%d)LVal ::= ident[Exp]\n", @$.first_line, @$.first_column);
           }
     ;
@@ -285,42 +287,42 @@ Exp:    num_tok  {
       }
     | Exp '+' Exp {
             //$$ = workBrackTwo($1, $3);
-        $$ = new BinaryExpNode((ExpNode *) $1, '+', (ExpNode *) $3);
+        $$ = new BinaryExpNode($1, '+', $3);
         debug("(%d,%d)Exp ::= Exp + Exp\n", @$.first_line, @$.first_column);
       }
     | Exp '-' Exp {
             //$$ = workBrackTwo($1, $3);
-        $$ = new BinaryExpNode((ExpNode *) $1, '-', (ExpNode *) $3);
+        $$ = new BinaryExpNode($1, '-', $3);
         debug("(%d,%d)Exp ::= Exp - Exp\n", @$.first_line, @$.first_column);
       }
     
     
     | '-' Exp %prec ONEOP {
             //$$ = workBrackOne($2);
-        $$ = new UnaryExpNode('-', (ExpNode *) $2);
+        $$ = new UnaryExpNode('-', $2);
         debug("(%d,%d)Exp ::= - Exp\n", @$.first_line, @$.first_column);
       }
     | '+' Exp %prec ONEOP {
             //$$ = workBrackOne($2);
-        $$ = new UnaryExpNode('+', (ExpNode *) $2);
+        $$ = new UnaryExpNode('+', $2);
         debug("(%d,%d)Exp ::= + Exp\n", @$.first_line, @$.first_column);
       }
     
     | Exp '*' Exp {
             //$$ = workBrackTwo($1, $3);
         
-        $$ = new BinaryExpNode((ExpNode *) $1, '*', (ExpNode *) $3);
+        $$ = new BinaryExpNode($1, '*', $3);
         debug("(%d,%d)Exp ::= Exp * Exp\n", @$.first_line, @$.first_column);
       }
     | Exp '/' Exp {
             //$$ = workBrackTwo($1, $3);
         
-        $$ = new BinaryExpNode((ExpNode *) $1, '/', (ExpNode *) $3);
+        $$ = new BinaryExpNode($1, '/', $3);
         debug("(%d,%d)Exp ::= Exp / Exp\n", @$.first_line, @$.first_column);
           }
     | Exp '%' Exp {
             //$$ = workBrackTwo($1, $3);
-        $$ = new BinaryExpNode((ExpNode *) $1, '%', (ExpNode *) $3);
+        $$ = new BinaryExpNode($1, '%', $3);
         debug("(%d,%d)Exp ::= Exp %% Exp\n", @$.first_line, @$.first_column);
       }
     | '(' Exp ')'  {

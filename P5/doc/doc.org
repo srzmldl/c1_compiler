@@ -40,39 +40,38 @@
 * 5.2第一问,AST结点在语法分析中的创建时机和信息填充时机
 
 * 代码思路
-- Node : virtual
+- Node : virtual, next, head
   + inputNode : 儿子链表 vector 存储
-  + ExpNode : nextExp
-  + DeclNode : virtual, node类型next域, 可链DeclNode, FuncDef(CompUnitNode), Stmt(Block); head域表示链表头
-    * ConstDeclNode
-    * VarDeclNode
-  + ConstDefNode : virtual, constNext可链下一个constDefNode, constHead 表示const链表头 
-    * ConstDefEleNode
-    * ConstDefArrLimNode
-    * ConstDefArrNoLimNode
-  + VarDefNode : virtual, varNext可链下一个VarDefNode, varHead表示var链表头
-    + VarDefEleNoEquNode
-    + VarDefArrLimNoEquNode
-    + VarDefEleEquNode
-    + VarDefArrNoLimEquNode
-    + VarDefArrLimEquNode
-  + FuncDefNode : next 可链DeclNode, FuncDefNode, head表示compunit表头
+  + ConstDeclNode
+  + VarDeclNode
+
+  + ConstDefEleNode
+  + ConstDefArrLimNode
+  + ConstDefArrNoLimNode
+
+  + VarDefEleNoEquNode
+  + VarDefArrLimNoEquNode
+  + VarDefEleEquNode
+  + VarDefArrNoLimEquNode
+  + VarDefArrLimEquNode
+
+  + FuncDefNode
   + BlockNode
-  + BlockItemNode : virtual, next可链DeclNode,StmtNode, head表示表头
-    * StmtNode: virtual
-      - AssignStmtNode
-      - CallStmtNode
-      - IfStmtNode
-      - IfElseStmtNode
-      - WhileStmtNode
-      - CommaStmtNode
-  + LValNode: virtual
-    * RefArrNode
+
+  + AssignStmtNode
+  + CallStmtNode
+  + IfStmtNode
+  + IfElseStmtNode
+  + WhileStmtNode
+  + CommaStmtNode
+
+  + RefArrNode
   + CondNode
-  + ExpNode : virtual, nextExp可链exp, headExp表示表头
-    * BinaryExpNode
-    * UnaryExpNode
+
+  + BinaryExpNode
+  + UnaryExpNode
   + IdentNode
+  + NumNode
 ** src/dumpdot.cc 
 ** config/parser.y OK
 ** include/node.hh OK
@@ -84,3 +83,4 @@
 ** 变量声明唯一性
 
 ** 未声明变量地使用
+* 

@@ -1,0 +1,34 @@
+* Files
+| Name         | Description                |
+|--------------+----------------------------|
+| README.org   | 这个文档                   |
+| doc.org      | 回答问题,思路等            |
+| ../bin/*     | 可执行文件                 |
+| ../Makefile  | Makefile编译               |
+| ../config/*  | 词法,语法                  |
+| ../include/* | 各种头文件                 |
+| ../src/*     | 源文件以及自动生成的文件   |
+| ../test/*    | 多种测试程序(具体下面解释) |
+| ../trans.sh  | 方便生成图片的脚本         |
+
+* 检查方法
+** 我写的测试代码 
+   test目录下四种程序存储在四个文件夹下:
+   - recoverError(只有给定错误可以还原)
+   - shouldTerminal(别的错误需要中止)
+   - correctCode(正确程序)
+   - onlyWarning(只有warning的程序)
+** 检查某一种程序,改后面文件名即可测试其他
+   依次执行下列三条指令,即可得到watch.png
+   1) make
+   2) bin/c1 test/correctCode/bubbleSort.c
+   3) ./trans.sh
+** 测试程序包含的情况
+   all.cpp包含了所有产生式,其他测试程序是各种奇奇怪怪的情况加乱入的注释.
+   - 所有产生式至少出现了一次
+   - 测试了很多层循环,if相互嵌套
+   - 测试了复杂表达式,包括乱七八糟的结合,单目运算
+   - 测试了函数,const,var以及各种各样的数组乱七八糟顺序,乱七八糟组合
+   - 注释插在if中,在while中,在表达式中,多行均有测试
+      
+  

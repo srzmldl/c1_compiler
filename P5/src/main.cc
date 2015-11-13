@@ -27,7 +27,7 @@ int main(int argc, char** argv)
     yyin = infp;        // infp is initialized in handle_opt()
     yyparse();
 
-    dumpfp = fopen("asgn.dot", "w");
+    dumpfp = fopen("c1.dot", "w");
     if (dumpfp != NULL) {
         DumpDOT *dumper = new DumpDOT(dumpfp);
         root->dumpdot(dumper);

@@ -1,2 +1,2 @@
 #!/bin/sh
-dot -Tpng asgn.dot -o watch.png
+dot -Tpng c1.dot -o watch.png

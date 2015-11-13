@@ -7,5 +7,6 @@ extern char *dumpfile_name;
 extern FILE *infp;
 extern FILE *outfp;
 extern FILE *dumpfp;
+extern void handleError();
 
 #endif

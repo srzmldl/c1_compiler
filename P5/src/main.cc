@@ -13,9 +13,12 @@ extern int yylex();     // lexer.cc provides yylex()
 extern int yyparse();   // parser.cc provides yyparse()
 extern InputNode *root; // AST's root, shared with yyparse()
 extern std::vector <std::string> wholeFile;
+extern std::vector <Node*> nodeVec;
+extern int errorFlag;
 
 int main(int argc, char** argv)
 {
+    errorFlag = 0;
     if (handle_opt(argc, argv) == false)
         return 0;
     freopen(argv[1], "r", stdin);
@@ -27,12 +30,14 @@ int main(int argc, char** argv)
     yyin = infp;        // infp is initialized in handle_opt()
     yyparse();
 
-    dumpfp = fopen("c1.dot", "w");
-    if (dumpfp != NULL) {
-        DumpDOT *dumper = new DumpDOT(dumpfp);
-        root->dumpdot(dumper);
-        delete dumper;
-        fclose(dumpfp);
+    if (!errorFlag) {
+        dumpfp = fopen("c1.dot", "w");
+        if (dumpfp != NULL) {
+            DumpDOT *dumper = new DumpDOT(dumpfp);
+            root->dumpdot(dumper);
+            delete dumper;
+            fclose(dumpfp);
+        }
     }
     /*root->printast(stdout, 0);*/
     return 0;

@@ -1,4 +1,4 @@
-CC=clang++ -g
+CC=clang++ -g -Wall
 LEX=lex
 YACC=bison --report=state --graph
 CFLAGS=-I include

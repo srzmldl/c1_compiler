@@ -60,7 +60,8 @@ name {alpha}({alpha}|{dig})*
 ")"  return ')';
 
 "\n" {++yycolumn = 1;}
-[\t ]*     {yyleng += 3;}/* throw away whitespace */
+"\t"     {yycolumn += 3, yyleng += 3;}/* throw away whitespace */
+" " /* throw away*/
 . return err_tok;
 
 "/*"  	{
@@ -70,13 +71,13 @@ name {alpha}({alpha}|{dig})*
         if (c == '\n') {
            ++yycolumn = 1;
         } else {
-          yyleng++;
-          if(c == '\t') yyleng += 3;
+          ++yyleng, ++yycolumn;
+          if(c == '\t') yyleng += 3, yycolumn += 3;
           if(c == '*') {
               if((c = yyinput()) == '/') {
-                   yyleng++;
+                   ++yyleng, ++yycolumn;
                    break;
-              } else unput(c);
+              } else { unput(c);}
           }
         }
     }

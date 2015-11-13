@@ -37,12 +37,23 @@ typedef enum
     IFELSESTMTNODE
 } NodeType;
 
+typedef struct {
+    int first_line;
+    int first_column;
+    int last_line;
+    int last_column;
+} Loc;
+
 class Node {
 public:
     NodeType type;
     Node *head, *next; //own link
+    Loc* loc;
+    Node() {loc = (Loc*)malloc(sizeof(Loc));}
+    void setLoc(Loc* loc);
     //virtual //void printast(FILE *fp, int indent) = 0;
     virtual int dumpdot(DumpDOT *dumper) = 0;
+    virtual ~Node() {};
 };
 
 class InputNode : public Node {
@@ -53,6 +64,7 @@ public:
         head = this;
         next = NULL;
     };
+    //~InputNode() {};
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     void append(Node *compUnit);
@@ -66,6 +78,7 @@ public:
         head = this;
         type = IDENT;
     };
+    //~IdentNode(){};
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
 };

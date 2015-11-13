@@ -69,6 +69,7 @@ void DumpDOT::drawLine(int nSrc, int pSrc, int nDst) {
     fprintf(fp, " -> %d;\n", nDst);
 }
 
+// draw list from nThis[pos]
 void drawList(int nThis, int pos, Node *list, DumpDOT *dumper) {
     for (Node *tmp = list; tmp; tmp = tmp->next) {
         int ntmp = tmp->dumpdot(dumper);

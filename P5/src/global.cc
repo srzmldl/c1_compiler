@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <bits/stdc++.h>
 #include "global.hh"
+#include "node.hh"
 
 char *infile_name = NULL;   // input file's name
 char *outfile_name = NULL;  // output file's name
@@ -9,3 +10,17 @@ FILE *infp = NULL;          // input file's pointer, default is stdin
 FILE *outfp = NULL;         // output file's pointer, default is stdout
 FILE *dumpfp = NULL;        // dump file's pointer
 std::vector < std::string > wholeFile;
+std::vector <Node*> nodeVec;
+int errorFlag = 0;
+
+void clearNode() {
+    for (; !nodeVec.empty(); ) {
+        delete nodeVec.back();
+        nodeVec.pop_back();
+    }
+}
+
+void handleError() {
+    errorFlag = 1;
+    clearNode();
+}

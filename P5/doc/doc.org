@@ -38,49 +38,42 @@
      + 然后调用asgn这个node的成员函数setLoc设置位置,并传入asgn的位置参数$$
      + 然后再看node.cc中setLoc的实现,就是讲node的loc的四个域对应赋值,这样结点的位置信息就记录下来了.
 * 5.2第一问,AST结点在语法分析中的创建时机和信息填充时机
-
+** dumpDot
+   - 在语法分析AST结构建立好之后没有错误再建
+   - 从根节点开始递归建立语法树
+** AST
+   - 产生式右部结点(儿子结点)已经建立之后,建立这个结点
+   - 规约的时候建立新结点(需要new的产生式),并把父亲和各个儿子的关系确立
+   - 涉及到multiExp,multiBlock之类的需要链表结构,都是写成左递归,所以规约时候,把next赋值即可,见代码思路里详细解释.
 * 代码思路
-- Node : virtual, next, head
-  + inputNode : 儿子链表 vector 存储
-  + ConstDeclNode
-  + VarDeclNode
+** 类一览
+   一个虚结点,其他结点均继承自Node(一开始有一个继承树,后来乱掉了,直接粗暴继承Node).
+- Node : virtual类, next, head记录这个结点所在list的表头以及它的next
+  + inputNode : 儿子链表用 vector 存储
+  + ConstDeclNode,ConstDefEleNode, ConstDefArrLimNode, ConstDefArrNoLimNode
+  + VarDeclNode, VarDefEleNoEquNode, VarDefArrLimNoEquNode
+  + VarDefEleEquNode, VarDefArrNoLimEquNode, VarDefArrLimEquNode
+  + FuncDefNode, BlockNode
+  + RefArrNode, CondNode
+  + AssignStmtNode, CallStmtNode, IfStmtNode
+  + IfElseStmtNode, WhileStmtNode, CommaStmtNode
+  + BinaryExpNode, UnaryExpNode, IdentNode, NumNode
 
-  + ConstDefEleNode
-  + ConstDefArrLimNode
-  + ConstDefArrNoLimNode
-
-  + VarDefEleNoEquNode
-  + VarDefArrLimNoEquNode
-  + VarDefEleEquNode
-  + VarDefArrNoLimEquNode
-  + VarDefArrLimEquNode
-
-  + FuncDefNode
-  + BlockNode
-
-  + AssignStmtNode
-  + CallStmtNode
-  + IfStmtNode
-  + IfElseStmtNode
-  + WhileStmtNode
-  + CommaStmtNode
-
-  + RefArrNode
-  + CondNode
-
-  + BinaryExpNode
-  + UnaryExpNode
-  + IdentNode
-  + NumNode
-** src/dumpdot.cc 
-** config/parser.y OK
-** include/node.hh OK
-** node.cc OK
-
-
-** main唯一性
-
-** 变量声明唯一性
-
-** 未声明变量地使用
-* 
+** 链表实现MultiExp,MultiBlock等
+   - 当一个part要指向不确定长度的内容时,通过链表实现.
+   - 每个Node一定只会有一个next(因为树状结构)
+   - 比如数组赋初值的时候,exps域就是一个list(实际上就是存储表头),在*.yy中,规约的时候注意更新相应的next以及本身的指针,比如MultiExp -> MultiExp, Exp,需要如下更新
+     + $1->next = $2;
+     + $$ = $3;(这个作用是为了保证上面的next没有错,即实际$值是表尾,不这么做的话最后只能画出表头和表尾)
+   - 注意MultiBlock比较特殊,因为可能是NULL,需要各种判断再赋值
+   - 输出的时候再dumpdot.cc中实现了drawList()函数,传入箭头尾巴的位置,和需要画的链表头,把链表扫一遍依次画出来即可.
+     
+** 记录位置以及多行注释(默认制表符号是4格)
+   - PS: 只考虑正常编辑器里边那种四格缩进.
+   - 模仿comppub里的parser.y再每次new出结点的时候setLoc即可.
+   - 在lexer中匹配到/*之后的函数里,依次用yyinput()的时候扫描到换行则一样的++yycolumn =1,扫描到别的字符yyleng++, 扫描到制表符另外再+3即可
+   - 每次规约产生式都顺便输出了位置,方便检查
+   - 经过测试可以发现是先执行ACTION宏定义中的动作,再执行语义动作.所以再语义动作中,额外加的yyleng需要加到yycolumn上去
+** 出错清空
+   - 全局变量errorFlag记录是否已经出错,如果出错,errorFlag赋值为1,之后每次new,或者赋值别的儿子结点之前先判断errorFlag,没出错才建新结点
+   - 每次new出来点之后存到全局vector,发现错误后立马把vector清空,之后不再加如新元素.

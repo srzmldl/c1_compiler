@@ -69,10 +69,10 @@ Decl : ConstDecl {
     
 ConstDecl: const_tok int_tok MultiConstDef ';'{
     debug("(%d,%d)ConstDecl ::= const int  MultiConstDef\n", @$.first_line, @$.first_column);
-    $$ = new ConstDeclNode((ConstDefNode *)$3);
+    $$ = new ConstDeclNode(((ConstDefNode*)$3)->constHead);
      }
     | const_tok MultiConstDef ';' {
-        $$ = new ConstDeclNode((ConstDefNode*)$2);
+        $$ = new ConstDeclNode(((ConstDefNode*)$2)->constHead);
         sprintf(buffer, "expect 'int' after const at (%d, %d)", @1.last_line, @1.last_column);
         yywarning(buffer);
         draw(@1.last_line, @1.last_column + 1);
@@ -82,11 +82,13 @@ ConstDecl: const_tok int_tok MultiConstDef ';'{
     
 MultiConstDef:  ConstDef {
     debug("(%d,%d)MultiConstDef :: = ConstDef\n", @$.first_line, @$.first_column);
-    $$ = (ConstDefNode*) $1;
+    $$ = (ConstDefNode*)$1;
      }
     | MultiConstDef ',' ConstDef {
         debug("(%d,%d)MultiConstDef :: = MultiConstDef, ConstDef\n", @$.first_line, @$.first_column);
-        ((DeclNode*)$1)->next = $3;
+        $$ = (ConstDefNode*)$3;
+        ((ConstDefNode*)$1)->constNext = (ConstDefNode*)$3;
+        ((ConstDefNode*)$$)->constHead = ((ConstDefNode*)$1)->constHead;
           }
     ;        
     
@@ -106,7 +108,7 @@ ConstDef: ident_tok '=' Exp {
         
 VarDecl: int_tok MultiVar ';' {
         debug("(%d,%d)VarDecl::= int MultiVar ;\n", @$.first_line, @$.first_column);
-        $$ = new VarDeclNode((VarDefNode*) $2);
+        $$ = new VarDeclNode(((VarDefNode*)$2)->varHead);
           }
     ;        
         
@@ -117,6 +119,8 @@ MultiVar: Var {
         | MultiVar ',' Var {
         debug("(%d,%d)MultiVar ::= MultiVar, Var\n", @$.first_line, @$.first_column);
         ((VarDefNode*)$1)->varNext = (VarDefNode *)$3;
+        $$ = $3;
+        ((VarDefNode*)$$)->varHead = ((VarDefNode *)$1)->varHead;
           }
         ;
         
@@ -144,11 +148,13 @@ Var: ident_tok {
          
 MultiExp: Exp {
         debug("(%d,%d)MultiExp :: = Exp\n", @$.first_line, @$.first_column);
-        $$ = new MultiExpNode((ExpNode*) $1);
+        $$ = (ExpNode*) $1)->expHead;
           }
         | MultiExp ',' Exp {
         debug("(%d,%d)MultiExp ::= MultiExp, Exp\n", @$.first_line, @$.first_column);
         ((ExpNode *)$1)->nextExp = (ExpNode*)$3;
+        $$ = (ExpNode*) $3;
+        ((ExpNode *)$$)->headExp = ((ExpNode*)$1)->headNode;
           }
         ;
         
@@ -156,11 +162,11 @@ FuncDef: void_tok ident_tok '(' ')'  Block {
         debug("(%d,%d)FuncDef ::= void_tok ident_tok ( ) Block\n", @$.first_line, @$.first_column);
         $$ = new FuncDefNode((IdentNode*) $2, (BlockNode*) $5);
           }
-        ;
-        
+     ;
+     
 Block: '{' MultiBlock '}' {
         debug("(%d,%d)Block ::= MultiBlock\n", @$.first_line, @$.first_column);
-        $$ = new BlockNode((BlockItemNode*) $2);
+        $$ = new BlockNode(((BlockItemNode*) $2)->head);
           }
     ;
         
@@ -174,11 +180,11 @@ MultiBlock: {
           }
      |  MultiBlock BlockItem {
         debug("(%d,%d)MultiBlock ::= MultiBlock BlockItem\n", @$.first_line, @$.first_column);
+        $$ = $2;
         if ($1 != NULL) {
-        $$ = (BlockItemNode*)$1;
         ((BlockItemNode*)$1)->next = (BlockItemNode*)$2;
           } else {
-        $$ = $2;
+        ((BlockItemNode*)$$)->head = ((BlockItemNode*)$1)->head;
           }
           }
     ;

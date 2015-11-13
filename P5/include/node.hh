@@ -47,18 +47,16 @@ public:
 
 class ExpNode: public Node{
 public:
-    ExpNode* nextExp;
+    ExpNode *nextExp, *headExp;
     //virtual //void printast(FILE *fp, int indent) = 0;
     virtual int dumpdot(DumpDOT *dumper) = 0;
 };
 
-
-class LValNode : public Node {
+class LValNode : public ExpNode {
 public:
     //virtual //void printast(FILE *fp, int indent) = 0;
     virtual int dumpdot(DumpDOT *dumper) = 0;
 };
-
 
 class InputNode : public Node {
     vector<Node*> comps;
@@ -82,15 +80,11 @@ public:
 class NumNode : public ExpNode {
 public:
     int val;
-    NumNode(int val) : val(val) { type = NUM; };
-    //void printast(FILE *fp, int indent);
-    int dumpdot(DumpDOT *dumper);
-};
-
-class MultiExpNode: public Node {
-public:
-    ExpNode* fir;
-    MultiExpNode(ExpNode* fir) : fir(fir) {type = MULTIEXPNODE;};
+    NumNode(int val) : val(val) {
+        type = NUM;
+        nextExp = NULL;
+        headExp = this;
+    };
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
 };
@@ -102,6 +96,7 @@ public:
     BinaryExpNode(ExpNode *lhs, char op, ExpNode *rhs) : op(op), lhs(lhs), rhs(rhs) {
         type = BINARYEXP;
         nextExp = NULL;
+        headExp = this;
     };
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
@@ -111,7 +106,11 @@ class UnaryExpNode : public ExpNode {
 public:
     char op;
     ExpNode *operand;
-    UnaryExpNode(char op, ExpNode *operand) : op(op), operand(operand) { type = UNARYEXP; };
+    UnaryExpNode(char op, ExpNode *operand) : op(op), operand(operand) {
+        type = UNARYEXP;
+        nextExp = NULL;
+        headExp = this;
+    };
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
 };
@@ -120,7 +119,7 @@ public:
 
 class BlockItemNode : public Node {
 public:
-    BlockItemNode* next;
+    BlockItemNode *next, *head;
     //virtual //void printast(FILE *fp, int indent) = 0;
     virtual int dumpdot(DumpDOT *dumper) = 0;
 };
@@ -129,8 +128,8 @@ class BlockNode : public Node {
 public:
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
-    BlockItemNode* fir;
-    BlockNode(BlockItemNode* fir) : fir(fir) {
+    BlockItemNode *fir;
+    BlockNode(BlockItemNode* fir) : fir(fir){
         type = BLOCK;
     };
 };
@@ -151,14 +150,14 @@ public:
 
 class DeclNode : public Node{
 public:
-    Node* next;
+    Node *next, *head;
     //virtual //void printast(FILE *fp, int indent) = 0;
     virtual int dumpdot(DumpDOT *dumper) = 0;
 };
 
 class ConstDefNode : public Node {
 public:
-    ConstDefNode* constNext;
+    ConstDefNode *constNext, *constHead;
     //virtual //void printast(FILE *fp, int indent) = 0;
     virtual int dumpdot(DumpDOT *dumper) = 0;
 };
@@ -171,6 +170,7 @@ public:
     ExpNode* exp;
     ConstDefEleNode(IdentNode* ident, ExpNode* exp) : ident(ident), exp(exp) {
         constNext = NULL;
+        constHead = this;
         type = CONSTDEFELE;
     };
 };
@@ -181,10 +181,11 @@ public:
     int dumpdot(DumpDOT *dumper);
     IdentNode* ident;
     ExpNode* lim;
-    MultiExpNode* multiExp;
-    ConstDefArrLimNode(IdentNode* ident, ExpNode* lim, MultiExpNode* multiExp) : ident(ident), lim(lim), multiExp(multiExp) {
+    ExpNode* fir;
+    ConstDefArrLimNode(IdentNode* ident, ExpNode* lim, ExpNode* fir) : ident(ident), lim(lim), fir(fir) {
         type = CONSTDEFARRLIM;
         constNext = NULL;
+        constHead = this;
     };
 };
     
@@ -198,6 +199,7 @@ public:
     ConstDefArrNoLimNode(IdentNode* ident, MultiExpNode* multiExp) : ident(ident), multiExp(multiExp) {
         type = CONSTDEFARRNOLIM;
         constNext = NULL;
+        constHead = this;
     };
 };
     
@@ -207,6 +209,7 @@ public:
     ConstDeclNode(ConstDefNode* fir) : fir(fir) {
         type = CONSTDECL;
         next = NULL;
+        head = this;
     };
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
@@ -214,7 +217,7 @@ public:
 
 class VarDefNode : public Node {
 public:
-    VarDefNode* varNext;
+    VarDefNode *varNext, *varHead;
     //virtual //void printast(FILE *fp, int indent) = 0;
     virtual int dumpdot(DumpDOT *dumper) = 0;
 };
@@ -228,6 +231,7 @@ public:
 
     VarDefEleNoEquNode(IdentNode* ident) : ident(ident) {
         varNext = NULL;
+        varHead = this;
         type = VARDEFELENOEQU;
     };
 };
@@ -243,6 +247,7 @@ public:
     VarDefArrLimNoEquNode(IdentNode* ident, ExpNode* lim) : ident(ident), lim(lim) {
         type = VARDEFARRLIMNOEQU;
         varNext = NULL;
+        varHead = this;
     };
 };
 
@@ -256,7 +261,8 @@ public:
     
     VarDefEleEquNode(IdentNode* ident, ExpNode* exp) : ident(ident), exp(exp) {
         varNext = NULL;
-        type = VARDEFELEEQU;
+m        type = VARDEFELEEQU;
+        varHead = this;
     };
 };
 
@@ -271,6 +277,7 @@ public:
     VarDefArrNoLimEquNode(IdentNode* ident, MultiExpNode* multiExp) : ident(ident), multiExp(multiExp) {
         type = VARDEFARRNOLIMEQU;
         varNext = NULL;
+        varHead = this;
     };
 };
 
@@ -286,6 +293,7 @@ public:
     VarDefArrLimEquNode(IdentNode* ident, ExpNode* lim, MultiExpNode* multiExp) : ident(ident), lim(lim), multiExp(multiExp) {
         type = VARDEFARRLIMEQU;
         varNext = NULL;
+        varHead = this;
     };
 };
     
@@ -295,6 +303,7 @@ public:
     VarDeclNode(VarDefNode* fir) : fir(fir) {
         type = VARDECL;
         next = NULL;
+        head = this;
         };
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
@@ -305,13 +314,14 @@ public:
 //=============================================
 class FuncDefNode : public Node{
 public:
-    Node* next;
+    Node *next, *head;
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
     IdentNode* ident;
     BlockNode* block;
     FuncDefNode(IdentNode* ident, BlockNode* block) : ident(ident), block(block) {
         next = NULL;
+        head = this;
         type = FUNCDEF;
     };
     
@@ -334,6 +344,7 @@ public:
     AssignStmtNode(LValNode *LVal, ExpNode *exp): LVal(LVal), exp(exp) {
         type = ASSIGNSTMT;
         next = NULL;
+        head = this;
     }
 };
 
@@ -346,6 +357,7 @@ public:
     CallStmtNode(IdentNode* ident) : ident(ident) {
         type = CALLSTMT;
         next = NULL;
+        head = this;
     }
 };
 //stmt -> Block
@@ -360,6 +372,7 @@ public:
     IfStmtNode(CondNode* cond, StmtNode* stmt) : cond(cond), stmt(stmt) {
         type = IFSTMTNODE;
         next = NULL;
+        head = this;
     }
 };
 
@@ -373,6 +386,7 @@ public:
     IfElseStmtNode(CondNode* cond, StmtNode* thenStmt, StmtNode* elseStmt) : cond(cond), thenStmt(thenStmt), elseStmt(elseStmt) {
         type = IFELSESTMTNODE;
         next = NULL;
+        head = this;
     }
 };
 
@@ -386,6 +400,7 @@ public:
     WhileStmtNode(CondNode* cond, StmtNode* stmt) : cond(cond), stmt(stmt) {
         type = WHILESTMT;
         next = NULL;
+        head = this;
     }
 };
 //stmt -> ;
@@ -397,6 +412,7 @@ public:
     CommaStmtNode() {
         type = COMMASTMT;
         next = NULL;
+        head = this;
     }
 };
 
@@ -409,6 +425,8 @@ public:
     ExpNode *exp;
     RefArrNode(IdentNode *ident, ExpNode *exp) : ident(ident), exp(exp) {
         type = REFARRNODE;
+        nextExp = NULL;
+        headExp = this;
     }
 };
     

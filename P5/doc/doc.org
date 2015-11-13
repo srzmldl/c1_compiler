@@ -42,24 +42,23 @@
 * 代码思路
 - Node : virtual
   + inputNode : 儿子链表 vector 存储
-  + MultiExpNode : 仅仅为了让图好看一点,数组赋值加一个实结点
   + ExpNode : nextExp
-  + DeclNode : virtual, node类型next域, 可链DeclNode, FuncDef(CompUnitNode), Stmt(Block)
+  + DeclNode : virtual, node类型next域, 可链DeclNode, FuncDef(CompUnitNode), Stmt(Block); head域表示链表头
     * ConstDeclNode
     * VarDeclNode
-  + ConstDefNode : virtual, constNext可链下一个constDefNode 
+  + ConstDefNode : virtual, constNext可链下一个constDefNode, constHead 表示const链表头 
     * ConstDefEleNode
     * ConstDefArrLimNode
     * ConstDefArrNoLimNode
-  + VarDefNode : virtual, varNext可链下一个VarDefNode
+  + VarDefNode : virtual, varNext可链下一个VarDefNode, varHead表示var链表头
     + VarDefEleNoEquNode
     + VarDefArrLimNoEquNode
     + VarDefEleEquNode
     + VarDefArrNoLimEquNode
     + VarDefArrLimEquNode
-  + FuncDefNode : next 可链DeclNode, FuncDefNode
+  + FuncDefNode : next 可链DeclNode, FuncDefNode, head表示compunit表头
   + BlockNode
-  + BlockItemNode : virtual, next可链DeclNode,StmtNode
+  + BlockItemNode : virtual, next可链DeclNode,StmtNode, head表示表头
     * StmtNode: virtual
       - AssignStmtNode
       - CallStmtNode
@@ -70,7 +69,7 @@
   + LValNode: virtual
     * RefArrNode
   + CondNode
-  + ExpNode : virtual, nextExp可链exp
+  + ExpNode : virtual, nextExp可链exp, headExp表示表头
     * BinaryExpNode
     * UnaryExpNode
   + IdentNode

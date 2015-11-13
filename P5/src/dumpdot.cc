@@ -8,6 +8,7 @@
 #include <sstream>
 #include "node.hh"
 #include "dumpdot.hh"
+#include <iostream>
 
 //===----------------------------------------------------------------------===//
 // Utilities in Dump DOT
@@ -93,7 +94,8 @@ int InputNode::dumpdot(DumpDOT *dumper) {
     strs << comps.size() << " compUnits";
     int nThis = dumper->newNode(1, strs.str().c_str());
     for (Node* comp : comps) {
-        int ncomp = comp->dumpdot(dumper);
+        //std::cout << comp->type << "!!!" << endl;
+        int ncomp = (comp->type == FUNCDEF ? (((FuncDefNode*)comp)->dumpdot(dumper)) : (((DeclNode*)comp)->dumpdot(dumper)));
         dumper->drawLine(nThis, 0, ncomp);
     }
     return nThis;
@@ -144,10 +146,10 @@ int UnaryExpNode::dumpdot(DumpDOT *dumper) {
 }
 
 int BlockNode::dumpdot(DumpDOT *dumper) {
-    int nThis = dumper->newNode(3, "{", " ", "}");
+    int nThis = dumper->newNode(1, "blocks");
     for (BlockItemNode *tmp = fir; tmp; tmp = tmp->next) {
         int nBlockItem = tmp->dumpdot(dumper);
-        dumper->drawLine(nThis, 1, nBlockItem);
+        dumper->drawLine(nThis, 0, nBlockItem);
     }
     return nThis;
 }
@@ -256,38 +258,70 @@ int VarDeclNode::dumpdot(DumpDOT *dumper) {
 }
 
 int FuncDefNode::dumpdot(DumpDOT *dumper) {
-    int nThis = dumper->newNode(2, "ident()", "{block}");
+    int nThis = dumper->newNode(2, "funcIdent", "funcBlock");
     int nident = ident->dumpdot(dumper);
     int nblock = block->dumpdot(dumper);
+    std::cout << "func!!!" << endl;
     dumper->drawLine(nThis, 0, nident);
     dumper->drawLine(nThis, 1, nblock);
     return nThis;
 }
 
 int AssignStmtNode::dumpdot(DumpDOT *dumper) {
-    //int nThis = dumper->newNode()
+    int nThis = dumper->newNode(3, "LVal", "=", "exp");
+    int nlval = LVal->dumpdot(dumper);
+    int nexp = exp->dumpdot(dumper);
+    dumper->drawLine(nThis, 0, nlval);
+    dumper->drawLine(nThis, 2, nexp);
+    return nThis;
 }
 
 int CallStmtNode::dumpdot(DumpDOT *dumper) {
-    
+    int nThis = dumper->newNode(1, "ident()");
+    int nident = ident->dumpdot(dumper);
+    dumper->drawLine(nThis, 0, nident);
+    return nThis;
 }
 
 
 int IfStmtNode::dumpdot(DumpDOT *dumper) {
-    
+    int nThis = dumper->newNode(3, "if", "cond", "then");
+    int ncond = cond->dumpdot(dumper);
+    int nstmt = stmt->dumpdot(dumper);
+    dumper->drawLine(nThis, 1, ncond);
+    dumper->drawLine(nThis, 2, nstmt);
+    return nThis;
 }
 int IfElseStmtNode::dumpdot(DumpDOT *dumper) {
-    
+    int nThis = dumper->newNode(4, "if", "cond", "then", "else");
+    int ncond = cond->dumpdot(dumper);
+    int nthen = thenStmt->dumpdot(dumper);
+    int nelse = elseStmt->dumpdot(dumper);
+    dumper->drawLine(nThis, 1, ncond);
+    dumper->drawLine(nThis, 2, nthen);
+    dumper->drawLine(nThis, 3, nelse);
+    return nThis;
 }
 int WhileStmtNode::dumpdot(DumpDOT *dumper) {
-    
+    int nThis = dumper->newNode(3, "while", "cond", "stmt");
+    int ncond = cond->dumpdot(dumper);
+    int nstmt = stmt->dumpdot(dumper);
+    dumper->drawLine(nThis, 1, ncond);
+    dumper->drawLine(nThis, 2, nstmt);
+    return nThis;
 }
 int CommaStmtNode::dumpdot(DumpDOT *dumper) {
-    
+    int nThis = dumper->newNode(1, ";");
+    return nThis;
 }
 
 int RefArrNode::dumpdot(DumpDOT *dumper) {
-    
+    int nThis = dumper->newNode(2, "ident", "[exp]");
+    int nident = ident->dumpdot(dumper);
+    int nexp = exp->dumpdot(dumper);
+    dumper->drawLine(nThis, 0, nident);
+    dumper->drawLine(nThis, 1, nexp);
+    return nThis;
 }
 
 

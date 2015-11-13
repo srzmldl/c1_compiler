@@ -95,7 +95,7 @@ int InputNode::dumpdot(DumpDOT *dumper) {
     int nThis = dumper->newNode(1, strs.str().c_str());
     for (Node* comp : comps) {
         //std::cout << comp->type << "!!!" << endl;
-        int ncomp = (comp->type == FUNCDEF ? (((FuncDefNode*)comp)->dumpdot(dumper)) : (((DeclNode*)comp)->dumpdot(dumper)));
+        int ncomp = comp->dumpdot(dumper);
         dumper->drawLine(nThis, 0, ncomp);
     }
     return nThis;

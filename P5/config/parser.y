@@ -62,17 +62,17 @@ CompUnit :  {
 | CompUnit FuncDef {
         debug("(%d,%d)Compunit ::= CompUnit FuncDef\n", @$.first_line, @$.first_column);
         if (!errorFlag) root->append($2);
-     }
+ }
 ;
 
 Decl : ConstDecl {
     debug("(%d,%d)Decl ::= ConstDecl\n", @$.first_line, @$.first_column);
     $$ = $1;
-     }
+ }
 | VarDecl {
-        debug("(%d,%d)Decl ::= VarDecl\n", @$.first_line, @$.first_column);
-        $$ = $1;
-          }
+    debug("(%d,%d)Decl ::= VarDecl\n", @$.first_line, @$.first_column);
+    $$ = $1;
+  }
 ;
 
 //===============warning1===============
@@ -84,7 +84,7 @@ ConstDecl: const_tok int_tok MultiConstDef ';'{
         $$->setLoc((Loc*)&(@$));
     }
     
-     }
+ }
 | const_tok MultiConstDef ';' {
         if (!errorFlag) {
             $$ = new ConstDeclNode($2->head);
@@ -96,13 +96,14 @@ ConstDecl: const_tok int_tok MultiConstDef ';'{
         yywarning(buffer);
         drawErrWarnPos(@1.last_line, @1.last_column);
         debug("(%d,%d)ConstDecl ::= const MultiConstDef\n", @$.first_line, @$.first_column);
-     }
+ }
+
 ;         
 //=================warning 1 End=================
 MultiConstDef:  ConstDef {
     debug("(%d,%d)MultiConstDef :: = ConstDef\n", @$.first_line, @$.first_column);
     $$ = $1;
-     }
+ }
 | MultiConstDef ',' ConstDef {
     debug("(%d,%d)MultiConstDef :: = MultiConstDef, ConstDef\n", @$.first_line, @$.first_column);
     if (!errorFlag) {
@@ -111,7 +112,7 @@ MultiConstDef:  ConstDef {
         $$->head = $1->head;
     }
   }
-;        
+;
 
 ConstDef: ident_tok '=' Exp {
     debug("(%d,%d)ConstDef ::= ident_tok = Exp\n", @$.first_line, @$.first_column);
@@ -138,7 +139,8 @@ ConstDef: ident_tok '=' Exp {
              nodeVec.push_back($$);
              $$->setLoc((Loc*)&(@$));   
          }
-        }
+   }
+
 ;
 
 VarDecl: int_tok MultiVar ';' {
@@ -149,40 +151,42 @@ VarDecl: int_tok MultiVar ';' {
             $$->setLoc((Loc*)&(@$));
         }
  }
-;        
+
+;
 
 MultiVar: Var {
-        debug("(%d,%d)MultiVar :: = Var\n", @$.first_line, @$.first_column);
-        $$ = $1;
-          }
+    debug("(%d,%d)MultiVar :: = Var\n", @$.first_line, @$.first_column);
+    $$ = $1;
+ }
 | MultiVar ',' Var {
-        debug("(%d,%d)MultiVar ::= MultiVar, Var\n", @$.first_line, @$.first_column);
-        if (!errorFlag) {
-            $$ = $3;
-            $1->next = $3;
-            $$->head = $1->head;
-        }
-          }
+    debug("(%d,%d)MultiVar ::= MultiVar, Var\n", @$.first_line, @$.first_column);
+    if (!errorFlag) {
+        $$ = $3;
+        $1->next = $3;
+        $$->head = $1->head;
+    }
+  }
+
 ;
 
 Var: ident_tok {
-        debug("(%d,%d)Var :: = ident_tok\n", @$.first_line, @$.first_column);
-        if (!errorFlag) {
-            $$ = new VarDefEleNoEquNode((IdentNode *)$1);
-            nodeVec.push_back($$);
-            $$->setLoc((Loc*)&(@$));
-        }
-        
-          }
+    debug("(%d,%d)Var :: = ident_tok\n", @$.first_line, @$.first_column);
+    if (!errorFlag) {
+        $$ = new VarDefEleNoEquNode((IdentNode *)$1);
+        nodeVec.push_back($$);
+        $$->setLoc((Loc*)&(@$));
+    }
+    
+ }
 | ident_tok '[' Exp ']' {
-        debug("(%d,%d)Var :: =  ident_tok [ Exp ]\n", @$.first_line, @$.first_column);
-        if (!errorFlag) {
-            $$ = new VarDefArrLimNoEquNode((IdentNode *)$1, $3);
-            nodeVec.push_back($$);
-            $$->setLoc((Loc*)&(@$));
-        }
-        
-          }
+    debug("(%d,%d)Var :: =  ident_tok [ Exp ]\n", @$.first_line, @$.first_column);
+    if (!errorFlag) {
+        $$ = new VarDefArrLimNoEquNode((IdentNode *)$1, $3);
+        nodeVec.push_back($$);
+        $$->setLoc((Loc*)&(@$));
+    }
+    
+  }
 |  ident_tok '=' Exp {
     debug("(%d,%d)Var :: =  ident_tok = Exp\n", @$.first_line, @$.first_column);
     if (!errorFlag) {
@@ -208,8 +212,9 @@ Var: ident_tok {
         $$->setLoc((Loc*)&(@$));
     }
   }
+
 ;
-         
+
 MultiExp: Exp {
     debug("(%d,%d)MultiExp :: = Exp\n", @$.first_line, @$.first_column);
     $$ = $1;
@@ -241,11 +246,11 @@ Block: '{' MultiBlock '}' {
         else $$ = new BlockNode($2->head);
         nodeVec.push_back($$);
         $$->setLoc((Loc*)&(@$));
-    }
-    
+    }  
  }
+
 ;
-        
+
 MultiBlock: {
     debug("(%d,%d)MultiBlock ::= empty\n", @$.first_line, @$.first_column);
     $$ = NULL;
@@ -267,7 +272,7 @@ MultiBlock: {
     }
  }
 ;
-        
+
 BlockItem: Decl {
     debug("(%d,%d)BlockItem ::= Decl\n", @$.first_line, @$.first_column);
     $$ = $1;
@@ -276,8 +281,9 @@ BlockItem: Decl {
     debug("(%d,%d)BlockItem ::= Stmt\n", @$.first_line, @$.first_column);
     $$ = $1;
   }
+
 ;
-        
+
 Stmt:  LVal '=' Exp ';' {
     debug("(%d,%d)Stmt ::= LVal = Exp ;\n", @$.first_line, @$.first_column);
     if (!errorFlag) {
@@ -334,6 +340,7 @@ Stmt:  LVal '=' Exp ';' {
         $$->setLoc((Loc*)&(@$));
     }
   }
+
 ;
 
 
@@ -345,6 +352,7 @@ Cond:   Exp RelOp Exp {
     }
     debug("(%d,%d)Cond ::= Exp RelOp Exp\n", @$.first_line, @$.first_column);
  }
+
 ;
 
 LVal:   ident_tok {
@@ -363,25 +371,26 @@ LVal:   ident_tok {
     }
     debug("(%d,%d)LVal ::= ident[Exp]\n", @$.first_line, @$.first_column);
   }
+
 ;
 
 RelOp:  equ_tok {
     debug("(%d,%d)RelOp ::= ==\n", @$.first_line, @$.first_column);
     if (!errorFlag) 
-        $$ = new std::string("==");
+    $$ = new std::string("==");
  }
 | nequ_tok {
     debug("(%d,%d)RelOp ::= !=\n", @$.first_line, @$.first_column);
     if (!errorFlag)
-        $$ = new std::string("!=");
+    $$ = new std::string("!=");
   }
 | less_tok {
     debug("(%d,%d)RelOp ::= <\n", @$.first_line, @$.first_column);
     if (!errorFlag) $$ = new std::string("<");
   }
 | more_tok {
-        debug("(%d,%d)RelOp ::= >\n", @$.first_line, @$.first_column);
-        if (!errorFlag) $$ = new std::string(">");
+    debug("(%d,%d)RelOp ::= >\n", @$.first_line, @$.first_column);
+    if (!errorFlag) $$ = new std::string(">");
   }
 | lessEqu_tok {
     debug("(%d,%d)RelOp ::= <=\n", @$.first_line, @$.first_column);
@@ -391,10 +400,11 @@ RelOp:  equ_tok {
     debug("(%d,%d)RelOp ::= >=\n", @$.first_line, @$.first_column);
     if (!errorFlag) $$ = new std::string(">=");
   }
+
 ;
-    
-Exp:    num_tok  {
-        //$$ = 0;
+
+Exp: num_tok  {
+    //$$ = 0;
     if (!errorFlag){ 
         $$ = new NumNode($1);
         nodeVec.push_back($$);
@@ -403,7 +413,7 @@ Exp:    num_tok  {
     debug("(%d,%d)Exp ::= number\n", @$.first_line, @$.first_column);
  }
 | LVal  {
-            //$$ = 0;
+    //$$ = 0;
     $$ = $1;
     debug("(%d,%d)Exp ::= LVal\n", @$.first_line, @$.first_column);
   }
@@ -479,7 +489,6 @@ Exp:    num_tok  {
 | Exp error Exp {
     //$$ = workBrackTwo($1, $2);
     sprintf(buffer, "expect BinOp after Exp at (%d, %d)", @1.last_line, @1.last_column);
-            
     yyerror(buffer);
     drawErrWarnPos(@1.last_line, @1.last_column);
     debug("(%d,%d)Exp ::= Exp Exp\n", @$.first_line, @$.first_column);
@@ -508,7 +517,8 @@ Exp:    num_tok  {
   }
 //=================error kind2 end============================
 | error {
-    yyerror("bye! You are really foolish\n"); return -1;
+    yyerror("bye! You are really foolish\n");
+    return -1;
   }
 ;
 

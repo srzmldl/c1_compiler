@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <iostream>
 #include "dumpdot.hh"
 using namespace std;
 
@@ -16,7 +17,6 @@ typedef enum
     VARDEFARRLIMEQU,
     CONSTDECL,
     CONSTDEFARRNOLIM,
-    MULTIEXPNODE,
     IDENT,
     CONSTDEFELE,
     INPUT,
@@ -53,7 +53,9 @@ public:
     void setLoc(Loc* loc);
     //virtual //void printast(FILE *fp, int indent) = 0;
     virtual int dumpdot(DumpDOT *dumper) = 0;
-    virtual ~Node() {};
+    virtual ~Node() {
+        //cout << "delete Node" << endl;
+    };
 };
 
 class InputNode : public Node {
@@ -78,7 +80,9 @@ public:
         head = this;
         type = IDENT;
     };
-    //~IdentNode(){};
+    /*~IdentNode(){
+        cout << "delete identNode\n";
+        }; */
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
 };

@@ -29,7 +29,8 @@ int main(int argc, char** argv)
     }
     yyin = infp;        // infp is initialized in handle_opt()
     yyparse();
-
+    
+    //cout << root->type << endl;
     if (!errorFlag) {
         dumpfp = fopen("c1.dot", "w");
         if (dumpfp != NULL) {
@@ -38,7 +39,9 @@ int main(int argc, char** argv)
             delete dumper;
             fclose(dumpfp);
         }
-    }
+    } else root = NULL;
+
+    //cout << root->head->head << endl;
     /*root->printast(stdout, 0);*/
     return 0;
 }

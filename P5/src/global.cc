@@ -12,12 +12,16 @@ FILE *dumpfp = NULL;        // dump file's pointer
 std::vector < std::string > wholeFile;
 std::vector <Node*> nodeVec;
 int errorFlag = 0;
+//extern Node* root;
 
 void clearNode() {
     for (; !nodeVec.empty(); ) {
         delete nodeVec.back();
+        nodeVec.back() = NULL;
+        //cout << (nodeVec.back())->type << endl;
         nodeVec.pop_back();
     }
+    //  root = NULL;
 }
 
 void handleError() {

@@ -48,7 +48,7 @@ int DumpDOT::newNode(int num, ...) {
 int DumpDOT::newNode(std::vector<std::string> list) {
     fprintf(fp, "    %d [label = \"", count);
     bool first = true;
-    for (int i=0; i<list.size(); i++) {
+    for (int i=0; i < (int) list.size(); i++) {
         std::string st = list[i];
         if (!first)
             fprintf(fp, "|");

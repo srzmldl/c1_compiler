@@ -31,7 +31,7 @@ int main(int argc, char** argv)
     yyparse();
     
     //cout << root->type << endl;
-    if (!errorFlag) {
+    if (!errorFlag && root != NULL) {
         dumpfp = fopen("c1.dot", "w");
         if (dumpfp != NULL) {
             DumpDOT *dumper = new DumpDOT(dumpfp);

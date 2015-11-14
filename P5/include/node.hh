@@ -54,8 +54,8 @@ public:
     //virtual //void printast(FILE *fp, int indent) = 0;
     virtual int dumpdot(DumpDOT *dumper) = 0;
     virtual ~Node() {
-        head = next = NULL;
-        loc = NULL;
+        // head = next = NULL;
+        //loc = NULL;
         //cout << "delete Node" << endl;
     };
 };

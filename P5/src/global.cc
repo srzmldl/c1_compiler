@@ -15,16 +15,20 @@ int errorFlag = 0;
 //extern Node* root;
 
 void clearNode() {
+    //std::cout << nodeVec.size() << endl;
     for (; !nodeVec.empty(); ) {
+        //if (nodeVec.back())
+        
+        // std::cout << (nodeVec.back())->type << endl;
         delete nodeVec.back();
         nodeVec.back() = NULL;
-        //cout << (nodeVec.back())->type << endl;
         nodeVec.pop_back();
     }
     //  root = NULL;
 }
 
 void handleError() {
+    //std::cout << errorFlag << endl;
+    if (!errorFlag) clearNode();
     errorFlag = 1;
-    clearNode();
 }

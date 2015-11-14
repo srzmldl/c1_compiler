@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string>
 #include <string.h>
-//#define DEBUG
+#define DEBUG
 #include "node.hh"
 #include "util.hh"
 #include "global.hh"
@@ -21,7 +21,7 @@ char buffer[1024];
 {
     int  num;
     Node *node;
-        std::string *name;
+    std::string *name;
 }
 
 %token <num> num_tok
@@ -56,12 +56,12 @@ CompUnit :  {
 | CompUnit Decl {
     debug("(%d,%d)Compunit ::= CompUnit Decl\n", @$.first_line, @$.first_column);
     if (!errorFlag) {
-        root->append($2);
+        if (root) root->append($2);
     }
  }
 | CompUnit FuncDef {
         debug("(%d,%d)Compunit ::= CompUnit FuncDef\n", @$.first_line, @$.first_column);
-        if (!errorFlag) root->append($2);
+        if (!errorFlag && root) root->append($2);
  }
 ;
 
@@ -302,11 +302,12 @@ Stmt:  LVal '=' Exp ';' {
   }
 | Block {
     debug("(%d,%d)Stmt ::= Block\n", @$.first_line, @$.first_column);
-    if (!errorFlag) {
+    $$ = $1;
+    /*if (!errorFlag) {
         $$ = $1;
         nodeVec.push_back($$);
         $$->setLoc((Loc*)&(@$));
-    }
+        } */
   }
 | while_tok '(' Cond ')' Stmt {
     debug("(%d,%d)Stmp ::= while (Cond) Stmt\n", @$.first_line, @$.first_column);
@@ -356,11 +357,12 @@ Cond:   Exp RelOp Exp {
 ;
 
 LVal:   ident_tok {
-    if (!errorFlag) {
+    $$ = $1;
+    /*if (!errorFlag) {
         $$ = $1;
         nodeVec.push_back($$);
         $$->setLoc((Loc*)&(@$));
-    }
+        }*/
     debug("(%d,%d)LVal ::= ident\n", @$.first_line, @$.first_column);
  }
 | ident_tok '[' Exp ']' {
@@ -405,6 +407,7 @@ RelOp:  equ_tok {
 
 Exp: num_tok  {
     //$$ = 0;
+    
     if (!errorFlag){ 
         $$ = new NumNode($1);
         nodeVec.push_back($$);
@@ -529,6 +532,7 @@ void yyerror(const char *msg)
 {
     // if (strcmp(msg, "syntax error") != 0)
     error("%s", msg);
+    handleError();
 }
 
 int checkBlank(char x) {

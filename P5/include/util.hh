@@ -10,7 +10,7 @@
 #endif
 
 // error info is in red
-#define error(format, args...) fprintf(stderr, "\033[31merror: " format "\033[0m\n", ##args), handleError()
+#define error(format, args...) fprintf(stderr, "\033[31merror: " format "\033[0m\n", ##args)
 
 // warning info is in orange
 #define warning(format, args...) fprintf(stderr, "\033[33mwarning: " format "\033[0m\n", ##args)

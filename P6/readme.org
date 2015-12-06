@@ -17,4 +17,4 @@
 | clang-check                | done   |
 | driver                     | done   |
 | bonus1                     | todo   |
-| bonus2                     | todo   |
+| bonus2                     | done   |

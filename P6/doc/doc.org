@@ -202,10 +202,11 @@ Returning 120 S32b
       - 终于到最后了,实打实的unreachable,就可以输出prompt信息咯
 ** clang-check
 *** Checker.inc
-    - 调用一堆package,比如alpha,llvm等
-    - 调用一堆checker,比如DereferenceChecker,CallAndMessageChecker等
-    - 定义一堆member数组常量
-    - 定义一堆checkName table
+    - 被ClangSACCheckers.h  #include,将下面一堆东西include进去,然后被调用
+      + 调用一堆package,比如alpha,llvm等
+      + 调用一堆checker,比如DereferenceChecker,CallAndMessageChecker等
+      + 定义一堆member数组常量
+      + 定义一堆checkName table
 *** ClangCheck.cpp
     - 看main函数,定义Clangtool类实例Tool
     - 然后用Tool的成员函数来处理命令行参数的修正,n帮助等
@@ -236,3 +237,57 @@ CHECKER("alpha.deadcode.UnreachableCode", UnreachableCodeChecker, UnreachableCod
 ** bonus1
    
 ** bonus2
+*** check目标
+    主要是防止如下情况出现
+    - 内存泄露
+    - 重复free
+    - free之后又调用
+*** 代码解析(简单的小函数略去)
+**** 杂七杂八函数系列
+    - 先是一个巨大的namespace,重要的如下
+      + allocationFamily
+      + ref类
+        * :allocated, released, relinquished, escaped
+        * K,Family二进制数来压缩kind和family状态
+        * 然后是一堆获得kind和family信息的public method
+        * 然后是用来画点的函数
+      + ReallocPair结构体存储realloc的信息
+      + MallocChecker类
+        * 6种check类型
+        * 三种内存操作方式
+        * 然后是一堆具体check的函数
+    - initIdentferInfo初始化内存操作相关标识符的信息
+    - isStandardNewDelete检查是否为标准的new,delete操作
+      + 没有non-placement
+      + single placement
+    - 实现performKernelMalloc
+      + 3参数or 2参数malloc
+      + 同样通过二进制位压缩状态
+    - vistNode检查该节点状态
+      + 正常,输出malloc操作信息
+      + reallocationfailed,输出重复allocate的信息
+    - 找realloc失败的symbol
+      + 遍历prevMap中所有元素,当前map中不能lookup到就返回这个symbol
+      + 找不到就返回空指针
+    - ReportBadFree/MismatchedDealloc/OffsetFree/UseAfterFree/DoubleDelete/Realloc/Leak 系列用来输出各类错误的信息
+
+**** check错误系列全家桶
+    - checkDoubleDelete 检查所有m是否被重复删除:只需要删除sym的时候检查这个节点是否已经被释放了,如果已经被释放了,就报告重复删除错误
+    - checkUseAfterFree检查free后使用:在使用该节点的时候检查是否release即可,如果被release了,那么报告这个错误
+    - checkLocation检查Sym是否在作用域内,调用checkUseAfterFree即可
+    - registerNewDeleteLeaksChecker启用checker
+      + enable这个checker
+      + newdeleteleakschecker视为newDeleteChecker的子过程
+**** checkpost/pre系列全家桶
+     - checkPreCall
+       + call哪些free之类的前之前必须调用checkDoubleDelete看是否重复删除
+     - checkPreStmt
+       + 在一些语句分析前要检查是否会调用一些已经free过的memory
+     - checkPostStmt
+       + 才C里边加入应该加的state,方便track之后防止内存leak
+     - checkPostobjCmessage与checkPostStmt类似
+*** 核心思想
+    - 虾米那说的相应检查详见上部分的checkpost/pre系列全家桶
+    - 在call之前,即调用free,new之前需要执行checkPreCall做相应检查
+    - stmt中用memory的时候调用checkPreStmt做相应检查
+    - 在Stmt和objCmessage之后需要处理悬空指针防止内存泄露

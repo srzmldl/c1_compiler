@@ -1,0 +1,87 @@
+* tools/clang/lib/Parse/ParseStmt.cpp
+** ParseIfStatement
+*** 工作流程
+    - 确认token是‘if’，否则输出错误
+    - 吃掉if这个token
+    - 检测if后是否紧跟着做括号，不是的话进行错误处理
+    - 确定语言选项，C99或者c++的标准，存在C99orCXX布尔变量里
+    - 进入if作用域(declscope和controlscope)
+    - 分析左括号后面的条件表达式，调用ParseParentExprOrCondetion，这个用来分析'(' expression/condition')'
+    - 错误的时后调用StmtError()错误处理程序
+    - 用CondExp转为FullCondExp
+    - 进入复合语句内部作用域innerscope(declscope)
+    - 解析then的复合语句，并且得到后面的else的位置InnerStatementTrailingElseLoc
+    - 退出then复合语句作用域
+    - 判断有下个token是否为else
+      + 是else的时候
+        * 吃掉else的token
+        * 进入else复合语句作用域innerscope(decelscope)
+        * 调用parsestatement分析else语句
+        * 退出else复合语句作用域
+      + 是code_completion即代码结束符的时候，调用CodeCompleteAfterIf，中断解析，报stmterror
+      + 检查前面得到的InnerStatementTrailingElseLoc是否合法，不合法则调用warning有悬空else
+    - 退出if作用域
+    - 最后检查三种错误以及错误恢复（详见下一小问）
+    - 呼啦啦，if正确分析，调用ActOnIfStmt处理好if相关的后续工作。
+*** 错误处理手段
+    - parseIfStatement 调用时assert一下tok是‘if’
+    - if后面不是紧跟着左括号出书期望左括号的信息
+    - 之后调用条件表达式分析程序，错误的话调用stmtError处理错误
+    - if {} code_completion 报stmterror
+    - if {} 解析后面的else位置合法的时候报悬空else的warning
+    - 三种错误情形报stmterror
+      + thenstmt不合法&& elsestmt不合法
+      + thenstmt不合法，elsestmt为空
+      + thenstmt为空，elsestmt不合法
+    - 接下来建立在除去上面三种错误的基础上(一个合法，一个不合法；或者全合法)
+      + then不合法，else合法，直接用空语句代替thenstmt(即换成一个分号)
+      + else不合法，then合法，类似的用空stmt代替elsestmt
+** ParseWhileStatement
+*** 结合ParseBreakStatement,说明clang如何处理作用域
+**** 先了解scope类(看include/sema/Scope.h即可大致了解)
+   - 可以看到定义了ScopeFlags枚举类型，里面有breakscope，continuescope之类的2的幂次的数，多重作用域的时候就只需要or起来就行了。判断作用域只需要and一下
+   - 看一眼构造函数调用init(parent,scopeFlags)，构成了一个树形结构，并切初始化作用域标记
+   - 然后有一堆诸如getBlockParent之类的函数，对各类作用域调用一些成员
+   - 其他的暂时不看，本题了解这些就够了
+**** 然后看看Parser/h里边的ParseScope类
+   - 主要关心进入作用域EnterScope和退出作用域ExitScope即可，主要是在ScopeFlags上操作
+**** 回到ParserWhileStatement答题
+***** ParseWhileStatement中处理作用域
+      - 根据得到的语言标准(C99orCXX),确定ScopeFlags
+      - 传入用ScopeFlags构造WhileScope(注意flag有breakScope这些goto语句变形)
+      - 进入substatement作用域(仅仅DeclScope)
+      - 处理完后退出InnerScope，然后退出WhileScope
+***** ParseBreakStatement
+      - 很短，首先吃掉break这个token
+      - 然后执行break，参数有breakLoc和getCurScope(),就是跳出当前的作用域
+***** 综述
+      - 利用ScopeFlags这个64位无符号数确定作用域类型，不同二进制位代表不同性质
+      - 进入不同结构时进入不同作用域(传入不同scopeflags)
+      - 有break语句则退出当前作用域，跳刀parent去
+      - 正常结束结构则调用exit退出作用域
+*** WhileScope和InnerScope的区别
+    
+#+begin_src c++
+if (C99orCXX)
+    ScopeFlags = Scope::BreakScope | Scope::ContinueScope |
+                 Scope::DeclScope  | Scope::ControlScope;
+  else
+    ScopeFlags = Scope::BreakScope | Scope::ContinueScope;
+  ParseScope WhileScope(this, ScopeFlags);
+#+end_src
+
+#+begin_src c++
+ ParseScope InnerScope(this, Scope::DeclScope, C99orCXX, Tok.is(tok::l_brace));
+#+end_src
+    对比一下二者的构造马上就可以看出区别了。
+    - InnerScope只有DeclScope有效(相应位为1),只能包含一个declaration
+    - WhileScope(为了方便，只看率C99orCXX吧)则还有Break，Continue这些goto语句变种，从而支持这些语句；还包括了Decl和InnerScope一样；此外，还有ControlScope
+
+*** scope释放时利用scopecache减少malloc次数
+    - Parser.h中82行后几行定义了Cache用到的NumCachedScopes表示剩下的cache容量，ScopeCacheSize表示总大小，并定义了scope类型的大小为ScopeCacheSize的ScopeCache类数组，用来cache，就不用每次free，malloc了.(用数组模拟了一个栈)
+    - 这个版本的clang的cache大小16
+    - parser.cpp中EnterScope即进入作用域的时候，只有在cache空的时候才new，否则从cache中弹出一个到*N中，然后就不用malloc，init一下就可以用了
+    - parser.cpp中ExitScope则只有在cache空间满了才delete，否则ScopeCache[NumCachedScopes++] = OldScope;存进去以后用。
+    - 综上，有效地减小了new和delete次数
+
+* 

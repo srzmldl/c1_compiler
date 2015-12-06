@@ -13,7 +13,7 @@
 | static analyzer/readme.txt | done   |
 | cfg.c && png/dot           | done   |
 | fib.c                      | done   |
-| unreachable.c              | todo   |
+| unreachable.c              | done   |
 | clang-check                | todo   |
 | driver                     | todo   |
 | bonus1                     | todo   |

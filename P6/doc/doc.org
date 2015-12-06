@@ -177,9 +177,31 @@ Returning 120 S32b
      + 递归调用fibonacci(x-1)知道x==1
      + return依次返回x!
 
-
 ** unreachable.c
+*** 不可达代码
+    - 给的样例,显然很容易发现不可达
+    - 实际上,猜测不可能通过复杂逻辑运算确定值.所以设计了一个y通过gcd(x,x+3)=gcd(4,7)得到.然后if后面的语句就不可达了.
+    - 验证之后确实不可达却没有被检测到
+*** UnreachableCodeChecker.cpp
+**** 基本思想
+     - 在访问过的路径上做标记
+     - post-analysis 去发现哪些从内没有访问过的点
+**** 代码解析
+     外部调用的public方法checkEndAnalysis流程如下(其他私有辅助函数就不一一解释了)
+      - eng还有工作要做return
+      - 遍历出度,碰上没有简历过的CFG就保存一个.
+      - 没有得到CFG或者parentMap就return
+      - 检查D是tmpplate instantiation则说明它在所有实例中都是不可达的,退出
+      - 然后再用迭代器I遍历C的出度CB,reachable map中找得到的就continue
+      - 找不到但是CB被标记为visit过的话,需要去找不可达的入口
+      - 如果CB此时reachable了,那么continue
+      - 检查到这个CFGBlock的路径上是否有false positive,有则continue
+      - 考虑__builtin_unreachable的特殊情况.
+      - 找到要报不可达的语句
+      - 如果这个是systemhead则continue
+      - 终于到最后了,实打实的unreachable,就可以输出prompt信息咯
 ** clang-check
+   
 ** driver
 ** bonus1
 ** bonus2

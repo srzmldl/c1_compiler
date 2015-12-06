@@ -158,7 +158,26 @@ if (C99orCXX)
        + 产生新的ProgramState和ExplodedNode
        + 找到bug,告诉BugReporter对象
 ** cfg.c
+   - 默认直接输出ps文件了,所以截屏png TAT
 ** fib.c
+   输出内容如下
+   #+begin_src c++
+fibonacci(5)
+ fibonacci(x - 1)
+  fibonacci(x - 1)
+   fibonacci(x - 1)
+    fibonacci(x - 1)
+    Returning 1 S32b
+   Returning 2 S32b
+  Returning 6 S32b
+ Returning 24 S32b
+Returning 120 S32b
+   #+end_src
+   - 可以见到就是展示了地柜和回溯的过程
+     + 递归调用fibonacci(x-1)知道x==1
+     + return依次返回x!
+
+
 ** unreachable.c
 ** clang-check
 ** driver

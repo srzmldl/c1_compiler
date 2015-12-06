@@ -11,8 +11,8 @@
 | ParseWhileStatement        | done   |
 | ParseExpr                  | done   |
 | static analyzer/readme.txt | done   |
-| cfg.c && png/dot           | todo   |
-| fib.c                      | todo   |
+| cfg.c && png/dot           | done   |
+| fib.c                      | done   |
 | unreachable.c              | todo   |
 | clang-check                | todo   |
 | driver                     | todo   |

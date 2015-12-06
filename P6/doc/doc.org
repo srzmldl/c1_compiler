@@ -129,7 +129,7 @@ if (C99orCXX)
 *** two layers
     - 静态分析引擎(GREExprEngine.cpp and friends)
     - 一些静态检查器(*Checker.cpp)
-      + 通过Cheker和CheckerVisitor借口简历在引擎上
+      + 通过Cheker和CheckerVisitor接口建立在引擎上
 *** 工作原理
 **** 基本概念
      - 程序的状态(变量或者表达式的值等)封装在state(ProgramState)中
@@ -201,7 +201,26 @@ Returning 120 S32b
       - 如果这个是systemhead则continue
       - 终于到最后了,实打实的unreachable,就可以输出prompt信息咯
 ** clang-check
-   
+*** Checker.inc
+    - 调用一堆package,比如alpha,llvm等
+    - 调用一堆checker,比如DereferenceChecker,CallAndMessageChecker等
+    - 定义一堆member数组常量
+    - 定义一堆checkName table
+*** ClangCheck.cpp
+    - 看main函数,定义Clangtool类实例Tool
+    - 然后用Tool的成员函数来处理命令行参数的修正,n帮助等
+    - 根据选择的模式选择frontendfactory调用不同的checker
+*** dumpcalls和unreachableCode的例子
+    checker.inc中，相关语句如下
+    #+begin_src c++
+CHECKER("debug.DumpCalls", CallDumper, TraversalChecker.cpp, "Print calls as they are traversed by the engine", -1, false)
+CHECKER("alpha.deadcode.UnreachableCode", UnreachableCodeChecker, UnreachableCodeChecker.cpp, "Check unreachable code", -1, true)
+ { "debug.DumpCalls",                                           CheckerArray67, 0, false },
+{ "alpha.deadcode.UnreachableCode",                            CheckerArray15, 0, false }
+    #+end_src
+    - 指定了调用这两个checker时候的参数
+    - 引擎会通过这些信息,在需要的时候加载这两个checker
 ** driver
+   - 
 ** bonus1
 ** bonus2

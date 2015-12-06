@@ -14,7 +14,7 @@
 | cfg.c && png/dot           | done   |
 | fib.c                      | done   |
 | unreachable.c              | done   |
-| clang-check                | todo   |
+| clang-check                | done   |
 | driver                     | todo   |
 | bonus1                     | todo   |
 | bonus2                     | todo   |

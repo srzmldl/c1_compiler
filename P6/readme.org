@@ -16,5 +16,5 @@
 | unreachable.c              | done   |
 | clang-check                | done   |
 | driver                     | done   |
-| bonus1                     | todo   |
+| bonus1                     | half   |
 | bonus2                     | done   |

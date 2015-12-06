@@ -235,7 +235,12 @@ CHECKER("alpha.deadcode.UnreachableCode", UnreachableCodeChecker, UnreachableCod
     - 识别出cc1参数之后调用executeCC1Tool进入cc1的编译入口,再根据相应的参数决定是否汇编
     - 后面用llvm的一些函数用来错误处理,静态分析等
 ** bonus1
-   
+*** idea
+    条件语句中判断(expr1 || expr2)之类的经常不小心打成'|'('&&','==')也经常打错. 所以在condition中出现'|','&'等报warning
+*** 设计
+ 只需要在condition节点检查一下运算符报warning即可.需要修改checkPreStmt,然后register改一改即可.
+*** 实现
+    todo
 ** bonus2
 *** check目标
     主要是防止如下情况出现

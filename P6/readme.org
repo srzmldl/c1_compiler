@@ -15,6 +15,6 @@
 | fib.c                      | done   |
 | unreachable.c              | done   |
 | clang-check                | done   |
-| driver                     | todo   |
+| driver                     | done   |
 | bonus1                     | todo   |
 | bonus2                     | todo   |

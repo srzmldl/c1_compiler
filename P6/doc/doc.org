@@ -220,7 +220,19 @@ CHECKER("alpha.deadcode.UnreachableCode", UnreachableCodeChecker, UnreachableCod
     #+end_src
     - 指定了调用这两个checker时候的参数
     - 引擎会通过这些信息,在需要的时候加载这两个checker
-** driver
-   - 
+** clang driver
+*** main函数
+    - 先处理命令行参数,提供帮助信息,错误信息等
+    - 发现-cc1的时候调用ExecuteCC1Tool编译程序
+      + 调用cc1_main编译
+      + 有as选项则调用cc1as_main编译汇编
+    - 处理CCC_OVERRIDE_OPTIONS
+    - 然后调用了一些列llvm的一些核心函数
+    - 最后处理一些crash错误等
+*** 综述
+    - 可以见得,clang driver实际上是一个包含了全部编译过程的驱动,集合clang前端和llvm
+    - 识别出cc1参数之后调用executeCC1Tool进入cc1的编译入口,再根据相应的参数决定是否汇编
+    - 后面用llvm的一些函数用来错误处理,静态分析等
 ** bonus1
+   
 ** bonus2

@@ -10,7 +10,7 @@
 | ParseIfStatement           | done   |
 | ParseWhileStatement        | done   |
 | ParseExpr                  | done   |
-| static analyzer/readme.txt | todo   |
+| static analyzer/readme.txt | done   |
 | cfg.c && png/dot           | todo   |
 | fib.c                      | todo   |
 | unreachable.c              | todo   |

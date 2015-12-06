@@ -124,4 +124,43 @@ if (C99orCXX)
       + ThisPrec<NextTokPrec
       + 优先级相等,但是是右结合
     - 上面递归实际上就是通过判断上面的两种情况决定先算后面的.实现了优先级和结合性.
-* 
+* static analyzer
+** 读readme.txt,分析工作原理
+*** two layers
+    - 静态分析引擎(GREExprEngine.cpp and friends)
+    - 一些静态检查器(*Checker.cpp)
+      + 通过Cheker和CheckerVisitor借口简历在引擎上
+*** 工作原理
+**** 基本概念
+     - 程序的状态(变量或者表达式的值等)封装在state(ProgramState)中
+     - 程序的位置称为program point(ProgramPoint)
+     - state + program point --> exploded graph上的一个节点
+**** 基本流程
+     - 从root开始,上米娜有程序入口entry program point和初始状态
+     - 然后分析expressions
+     - 状态改变,生成带有更新program point和更新状态的新节点
+     - 到达bug节点则找到了错误
+**** 分支推导
+     - 通过分治推导有多条路径,比如true branch和false branch分治
+     - assumptions约束了program的value,这些约束存在ProgramState对象里(由Constraintmanager产生)
+     - 如果条件分支造成约束条件不满足,则这个分支不可行,不能走这条路径
+     - 通过节点cache防止指数爆炸
+       + 如果新节点和已有节点状态一样，则不会new,而是复用已有节点
+       + 节点复用造成环,不再是DAG
+**** 节点和状态的不变性
+     - 一旦create,就不再改变
+     - immutability很关键,因为这个ExplodedGraph就是代表从入口开始分析程序的过程
+     - 利用函数式数据结构实现永久化
+**** 举个例子说明checkers和engine的交互
+     - engine通过visitor interface和checker交互(如GREExprEngine调用PreVisitCallExpr())
+     - checker检查是否有不满足的条件.然后:
+       + 啥都不干
+       + 产生新的ProgramState和ExplodedNode
+       + 找到bug,告诉BugReporter对象
+** cfg.c
+** fib.c
+** unreachable.c
+** clang-check
+** driver
+** bonus1
+** bonus2

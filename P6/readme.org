@@ -9,7 +9,7 @@
 |----------------------------+--------|
 | ParseIfStatement           | done   |
 | ParseWhileStatement        | done   |
-| ParseExpr                  | todo   |
+| ParseExpr                  | done   |
 | static analyzer/readme.txt | todo   |
 | cfg.c && png/dot           | todo   |
 | fib.c                      | todo   |

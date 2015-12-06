@@ -83,5 +83,45 @@ if (C99orCXX)
     - parser.cpp中EnterScope即进入作用域的时候，只有在cache空的时候才new，否则从cache中弹出一个到*N中，然后就不用malloc，init一下就可以用了
     - parser.cpp中ExitScope则只有在cache空间满了才delete，否则ScopeCache[NumCachedScopes++] = OldScope;存进去以后用。
     - 综上，有效地减小了new和delete次数
-
+* tools/clang/lib/Parse/ParseExpr.cpp
+** 处理二元运算的原理
+*** ParseExpression过程简述
+    - 先分析LHS
+    - 再分析RHS,优先级时Comma
+*** ParseRHSOfBinaryExpression过程简述
+    - 传入LHS和最小优先级MinPrec,分析二元运算
+    - 调用getBinPrecedence得到下一个token的优先级
+    - 一直while循环，直到NextTokPrec优先级比MinPrec还小
+      + 吃掉token
+      + 碰上逗号后有不可能作为表达式开始的符号则return LHS
+      + 碰上省略号则“搁置争议，留给子孙后代处理”
+      + 处理三目运算
+      + 得RHS
+        * c++11&&l_brace的token则braced-init-list
+        * c++并且nexttokPrec小于conditional的优先级则解析assignementexpression
+        * 其他情况是castexpression
+      + 检查RHS是否非法
+      + ThisPrec暂存NextTokPrec，NextTokPrec取下一个运算符优先级
+      + 处理下个运算符优先级更高,或者同级但是右结合的情况(详见优先级分析部分)
+      + RHS合法,处理RHSIsInitList的情况
+      + LHS合法,然后把LHS和RHS拼起来到LHS
+*** 原理综述
+    看了ParseRHSOfBinaryExpression就很清楚了, 再总结一下主要思想.
+    - 通过传入MinPrec,限制在这层递归中while循环的运算距离.(即算到更小优先级的运算符就要回溯了)
+    - 如果下一个运算符优先级更低,或者同级但是左结合,那么可以先算这个运算符,然后while继续下一个
+    - 如果下一个优先级更高,或者同级但是右集合,这时候当前运算符就要保留,递归先算后面的,递归的距离边界是当前运算符优先级(+!isRightAssoc)
+** 优先级和结合性的体现
+*** OperatorPrecedence.h
+    首先要了解一下关于优先级的一些声明。prec名字空间下有如下相关内容
+    - Level枚举类型，Unkown最低，comma其次，然后按照优先级越高数字越大定义了LogicalOr，Additive等
+    - 然后有一个方法getBinOpPrecedence返回指定二元运算的优先级。
+*** 结合性体现
+    - 默认左结合
+    - ParseExpr.cpp第361行，ThisPrec优先级是Conditional(问号语句)或者Assignmentd(赋值语句),那么isRightAssoc则为true(因为这两种运算就是右结合的);否则就是左结合
+    - 在优先级一样的时候考虑是否右结合(详见下部分)
+*** 优先级体现
+    - ParseExpr.cpp第366行有如下几种情况递归调用ParseRHSOfBinaryExpression,传入的是当前的RHS,nextTokPrec再取下一个.
+      + ThisPrec<NextTokPrec
+      + 优先级相等,但是是右结合
+    - 上面递归实际上就是通过判断上面的两种情况决定先算后面的.实现了优先级和结合性.
 * 

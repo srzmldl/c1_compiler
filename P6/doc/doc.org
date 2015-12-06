@@ -292,7 +292,7 @@ CHECKER("alpha.deadcode.UnreachableCode", UnreachableCodeChecker, UnreachableCod
        + 才C里边加入应该加的state,方便track之后防止内存leak
      - checkPostobjCmessage与checkPostStmt类似
 *** 核心思想
-    - 虾米那说的相应检查详见上部分的checkpost/pre系列全家桶
+    - 下面说的相应检查详见上部分的checkpost/pre系列全家桶
     - 在call之前,即调用free,new之前需要执行checkPreCall做相应检查
     - stmt中用memory的时候调用checkPreStmt做相应检查
     - 在Stmt和objCmessage之后需要处理悬空指针防止内存泄露

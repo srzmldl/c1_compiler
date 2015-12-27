@@ -1,0 +1,73 @@
+* 理解Kaleidoscope代码生成
+** 7.1-1 基本定义解释
+*** Module作用
+    Module包含了代码段中所有的函数和全局变量. 是LLVM IR存代码的顶层架构.我们跑到include/llvm/IR/Module.h去瞄一眼.观察得到具体作用如下
+    - 一个Module实例用来存储和一个LLVM module相关的所有信息
+    - 是其他所有IR对象的顶层容器
+    - 每个module包含一个全局变量链表,函数链表,依赖的库链表,符号表,和目标特性相关的各种各样的数据
+    - module维护一个GlobalValRefMap对象保存所有对全局变量的常引用. 销毁的时候要抹掉这个map里的相应入口
+*** IRBuilder作用
+    IRBuilder作用是能方便地产生LLVM指令.我们跑到include/llvm/IR/IRBuilder.h去瞄一眼,得到如下更详细信息
+    - IRBuilder缺省实现是IRBuilderDefaultInserter,插入在insertion point处
+    - 公用基类IRBuilderBase
+    - 然后是IRBuilder模板类,要点如下
+      + 提供了创建指令和插入到基本block(basicblock末尾,或者特定迭代器位置都行)的统一API
+      + 某些指令性质,需要在创建后用mutators
+      + template中可以指定三个参数,一是是否在最后指令输出中保留名字(缺省保留),一是指定一个创建常量的类,最后是指定定制的insertion hooks
+*** Kaleidoscope符号表
+    符号表是NameValues用的是STL里的map.它的key是string,value是Value*. 记录了当前作用域下的变量以及它们的LLVM表达式. 在Kaleidoscope中,只有函数参数能被引用.在为函数体生成代码的时候,函数参数会存在这个map中
+** 7.1-2 get,create解释
+    从字面意思,结合代码很容易看出来,比如GetInsertBlock,GetInsertPoint这种get开头的函数,多是通过这个函数调用,获得一个已经有的常量/类里的私有成员;但是CreateMemSet,CreateMemCpy等都有new过程,即新建了某个量.类似的还有set开头的SetInsertPoint,SetCurrentDebugLocation往往是改变一个私有成员的值.
+    对于常量,因为都是唯一的并且是共享的,所以都用get,而不是create或者new
+** 7.1-3 声明定义函数过程
+*** FunctionAST::Codegen
+   涉及到的函数主要是是FunctionAST和PrototypeAST的Codegen.具体步骤如下
+   - 先清空NamedValueds这个map,确保不会被上次函数定义的符号表影响到
+   - 接着调用prototype的codegen,这一步的展开解释见下一小节
+   - 检验得到不合法的函数则return 0
+   - 新建一个基本块开始进行插入,指定好插入的位置
+   - 接着调用body的codegen
+     + 成功,则新建一条return指令,并且调用verifyFunction检查这个函数有没有别的错误,之后就可以返回函数了
+     + 失败了则抹去这个函数,在return 0
+*** PrototypeAST::Codegen
+   - 先把函数参数存入Doubles这个vector,因为kaleidoscope都是double,所以只需要知道参数个数和各自名字就行
+   - 通过FunctionType::get获得函数类别
+   - Function::create创建相应的函数,需要指定是否外部调用,用户指定的名字,和TheModule
+   - 处理好重复定义函数. 
+     + 因为原本已经有了这个函数，所以这次新建的这个g重复定义函数需要先抹掉,再到TheModule里根据Name找出这个原来的函数
+     + 重复定义要求老函数必须是空的,所以检查一下非空则报重复定义函数的错误,再return 0
+     + 重复定义还要求老函数和新函数参数个数必须匹配,检查不通过则报错再return0
+     + 通过上面两个检测则可以将这个老函数当成新函数处理了.
+   - 然后遍历函数的args,将其中所有的参数添加到符号表,即NamedValues,以便后续使用.
+   - 最后就只要把函数F返回就行了
+** 7.1-4 操作多个block,解释ThenBB
+*** 操作多个block
+    基本思想是通过block的create,然后设置插入位置到该block的起点后递归调用子模块比如then,else语句的codegen;再createBr以及其它辅助指令生成后就完成了这个模块的代码生成;接着设置插入位置到另外模块的起点做类似的过程.这些blocks会以链表的形式存在父函数上.对于这种分支语句,还要借助phi函数,通过addIncoming接收不同的前驱.最后以phi node作为返回值
+*** 解释ThenBB
+    phi节点需要有每一个前驱的entry. 那then语句里最后ThenBB=Builder.GetInsertBlock()为例. 这一层的then表达式也可能嵌套多层if,这使得当前block实际上就改变了.用这句话保证了当前block是最新的当前block,这样对于phi节点来说才有意义.
+** 7.1-5 更改循环
+   随手写一个for循环可以看到生成的IR中循环体是一个block,先执行一遍再测试.如果要改成c1规范,除去本来有的entry block和afterloop block, 需要将原本的loop block切成两个blocks.(具体的实现见c1的while即可)
+   - 第一个block包含phi,由入口决定i的值.然后判断边界条件,T的话跳转到新的loop body;F跳转到afterloop
+   - 第二个block是新的loop block, 把循环体和inc语句拿出来组一个新block,最后无条件跳转到第一个block
+** 7.1-6 内存分配,多层嵌套操作符号表
+*** 学习使用alloca在栈上为变量分配内存
+    在llvm中,所有memory都是通过load/store显式调用.内存对象并不需要SSA化,比如全局变量G,H就不需要版本化或者重命名.全局变量直接通过变量定义声明.但是stack变量通过alloca,要点如下
+    - '%X = alloca i32' 即在stack上分配空间给i32类型的%X
+    - '%X.2 = load i32 %X' 取出%X的值到X.2中
+    - 'store i32 %X.0, i32* %X' 存储X.0的值到%X中
+    - 这样就避免了phi函数,但是可以用mem2reg可以优化. 使得一些符合条件的alloca操作变成寄存器存取
+*** 多层嵌套时如何操作符号表
+    基本思想是通过OldBindings存储这个scope中定义的变量的老值,生成完body的代码之后,将OldBIndings的值复原.具体过程如下
+    - 先定义一个OldBingdings的vector,用来存老值
+    - 扫描Varnames里的所有元素
+      + 调用InitVal的codegen将初值的代码生成(缺省0.0)
+      + 为这个变量分配alloca
+      + 将初值store到这个alloca
+      + 将NamedValues中VarName对应的value老值push到OldBingdins中
+      + NamedValues中VarName映射到刚才分配的新的alloca上
+    - 进行body的codegen
+    - 扫描VarNames中的每个元素,从头到尾顺序正好和OldBindins的顺序一样,依次还原即可.
+    - 最后BodyVal作为返回值
+* 常用命令一览
+  - clang++ a.cpp -S -emit-llvm  生成cpp文件的llvm IR
+  - llvm-as < a.ll | opt -analyze -view-cfg 查看程序流图

@@ -1,0 +1,31 @@
+* Files
+| doc.org      | 回答问题,思路文档                 |
+| README.org   | 这个文档                          |
+| ../Makefile  | Makefile编译                      |
+| ../bin/*     | 可执行文件                        |
+| ../config/*  | flex,bison对应的词法规则,语法规则 |
+| ../include/* | 各种头文件                        |
+| ../src/*     | main程序以及自动生成的代码        |
+| ../test/*    | 各种测试程序                      |
+
+* 完成情况一览
+| 7.1-1 Module,IRBuilder,符号表 | DONE |
+| 7.1-2 常量时函数名是get       | DONE |
+| 7.1-3 声明和定义函数的过程    | DONE |
+| 7.1-4 为什么需要ThenBB=***    | DONE |
+| 7.1-5 修改循环                | DONE |
+| 7.1-6 内存分配,操作符号表     | DONE |
+| 7.2-1 增加Codegen             | TODO |
+| 7.2-2 一维数组                | TODO |
+| 7.2-3 外部函数声明            | TODO |
+| 7.2-4 IR dump,llc             | TODO |
+| 7.2-5 静态库                  | TODO |
+| 7.3-1 not,and,or 短路运算     | TODO |
+| 7.3-2 循环break,continue      | TODO |
+| 7.3-3 支持含参数的函数        | TODO |
+| 7.3-4 支持函数带返回值        | TODO |
+| 7.3-5 支持return语句          | TODO |
+| 7.3-6 支持多维数组            | TODO |
+| 7.3-6 支持float类型           | TODO |
+
+* 注意事项以及检查方法

@@ -1,5 +1,6 @@
 const int a = 3, b = 10;
 int c = 15;
+int output;
 
 void dd() {
     int h, cc, d, b;
@@ -7,10 +8,29 @@ void dd() {
     d = d * b / (-6) + (-h);
 }
 
+extern void print() {} 
+
 void main() {
     int a, b, c, d, e = d + c;
     const int h = a + b;
     a = b + c;
     c = d + e;
-    dd();
+    if (a == a) {
+    output = 100;
+    print();
+   }
+  output = 90;
+   print();
+   if (a != a) {    
+    output = 85;
+    print();
+}
+  output = 80;
+  print();
+  a = 1;
+  while (a <= 0) {
+   output = a;
+   a = a + 1;
+   print();
+}
 }

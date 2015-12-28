@@ -1,5 +1,6 @@
-/*#include <stdio.h>
-*/
+extern void print() {}
+int output;
+
 void main()
 {
     const int n = 10;
@@ -21,14 +22,6 @@ void main()
         if (a[i] > max) max = a[i];
         i = i + 1;
     }
-
-    i = 0;
-  /*  printf("Array generated:\n");
-    */while (i < n)
-    {
-     /*   printf("%d ", a[i]);
-       */ i = i + 1;
-    }
-   /* printf("\n");
-    printf("max of them: %d\n", max);
-*/} 
+    output = max;
+    print();
+} 

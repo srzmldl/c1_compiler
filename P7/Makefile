@@ -1,4 +1,4 @@
-CC=clang++ -g 
+CC=clang++ -g -w 
 LEX=lex
 YACC=bison
 CFLAGS=-I include
@@ -6,7 +6,7 @@ LLVMFLAGS=`llvm-config --cxxflags --ldflags --system-libs --libs core mcjit nati
 YFLAGS=
 LFLAGS=
 
-all: bin/c1
+all: bin/c1 bin/libmy.a
 
 bin/c1:  bin/lexer.o bin/parser.o bin/main.o bin/util.o bin/global.o bin/node.o bin/dumpdot.o bin/codegen.o
 	@mkdir -p bin
@@ -50,7 +50,15 @@ bin/dumpdot.o: src/dumpdot.cc include/dumpdot.hh include/node.hh
 	@mkdir -p bin
 	$(CC) $(CFLAGS) -std=c++11 -c -o $@ $< $(LLVMFLAGS)
 
+bin/libmy.o: src/libmy.c
+	@mkdir -p bin
+	clang -c -o $@ $<
+bin/libmy.a: bin/libmy.o
+	@mkdir -p bin
+	ar rcs $@ $<
+
 .PHONY: clean
 clean:
-	rm -f bin/*.o src/lexer.cc src/parser.cc include/tok.hh
+	rm -f bin/*.o src/lexer.cc src/parser.cc include/tok.hh bin/libmy.a
 	rm -f *.png *.dot
+

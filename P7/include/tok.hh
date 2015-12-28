@@ -49,19 +49,20 @@ extern int yydebug;
     const_tok = 259,
     int_tok = 260,
     void_tok = 261,
-    if_tok = 262,
-    else_tok = 263,
-    while_tok = 264,
-    ident_tok = 265,
-    eol_tok = 266,
-    err_tok = 267,
-    equ_tok = 268,
-    nequ_tok = 269,
-    more_tok = 270,
-    moreEqu_tok = 271,
-    less_tok = 272,
-    lessEqu_tok = 273,
-    ONEOP = 274
+    extern_tok = 262,
+    if_tok = 263,
+    else_tok = 264,
+    while_tok = 265,
+    ident_tok = 266,
+    eol_tok = 267,
+    err_tok = 268,
+    equ_tok = 269,
+    nequ_tok = 270,
+    more_tok = 271,
+    moreEqu_tok = 272,
+    less_tok = 273,
+    lessEqu_tok = 274,
+    ONEOP = 275
   };
 #endif
 
@@ -76,7 +77,7 @@ union YYSTYPE
     Node *node;
     std::string *name;
 
-#line 80 "include/tok.hh" /* yacc.c:1909  */
+#line 81 "include/tok.hh" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

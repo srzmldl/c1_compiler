@@ -25,7 +25,7 @@ char buffer[1024];
 }
 
 %token <num> num_tok
-%token const_tok int_tok void_tok
+%token const_tok int_tok void_tok, extern_tok
 %token if_tok else_tok while_tok
 %token <node> ident_tok
 %token eol_tok err_tok
@@ -233,6 +233,14 @@ FuncDef: void_tok ident_tok '(' ')'  Block {
     debug("(%d,%d)FuncDef ::= void_tok ident_tok ( ) Block\n", @$.first_line, @$.first_column);
     if (!errorFlag) {
         $$ = new FuncDefNode((IdentNode*) $2, (BlockNode*) $5);
+        nodeVec.push_back($$);
+        $$->setLoc((Loc*)&(@$));
+    }
+ }
+| extern_tok void_tok ident_tok '(' ')'  Block {
+    debug("(%d,%d)FuncDef ::= void_tok ident_tok ( ) Block\n", @$.first_line, @$.first_column);
+    if (!errorFlag) {
+        $$ = new FuncDefNode((IdentNode*) $3, (BlockNode*) $6);
         nodeVec.push_back($$);
         $$->setLoc((Loc*)&(@$));
     }

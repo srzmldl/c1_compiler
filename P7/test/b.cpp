@@ -35,56 +35,25 @@ int main(int argc, char**argv) {
 Module* makeLLVMModule() {
  // Module Construction
  Module* mod = new Module("a.ll", getGlobalContext());
- mod->setDataLayout("0x5057380");
+ mod->setDataLayout("0x37812b0");
  mod->setTargetTriple("x86_64-unknown-linux-gnu");
  
  // Type Definitions
- std::vector<Type*>FuncTy_0_args;
- FunctionType* FuncTy_0 = FunctionType::get(
-  /*Result=*/Type::getVoidTy(mod->getContext()),
-  /*Params=*/FuncTy_0_args,
-  /*isVarArg=*/false);
+ PointerType* PointerTy_0 = PointerType::get(IntegerType::get(mod->getContext(), 32), 0);
  
- PointerType* PointerTy_1 = PointerType::get(IntegerType::get(mod->getContext(), 32), 0);
- 
- std::vector<Type*>FuncTy_2_args;
- FunctionType* FuncTy_2 = FunctionType::get(
+ std::vector<Type*>FuncTy_1_args;
+ FunctionType* FuncTy_1 = FunctionType::get(
   /*Result=*/IntegerType::get(mod->getContext(), 32),
-  /*Params=*/FuncTy_2_args,
+  /*Params=*/FuncTy_1_args,
   /*isVarArg=*/false);
  
  
  // Function Declarations
  
- Function* func__Z2ffv = mod->getFunction("_Z2ffv");
- if (!func__Z2ffv) {
- func__Z2ffv = Function::Create(
-  /*Type=*/FuncTy_0,
-  /*Linkage=*/GlobalValue::ExternalLinkage,
-  /*Name=*/"_Z2ffv", mod); 
- func__Z2ffv->setCallingConv(CallingConv::C);
- }
- AttributeSet func__Z2ffv_PAL;
- {
-  SmallVector<AttributeSet, 4> Attrs;
-  AttributeSet PAS;
-   {
-    AttrBuilder B;
-    B.addAttribute(Attribute::NoUnwind);
-    B.addAttribute(Attribute::UWTable);
-    PAS = AttributeSet::get(mod->getContext(), ~0U, B);
-   }
-  
-  Attrs.push_back(PAS);
-  func__Z2ffv_PAL = AttributeSet::get(mod->getContext(), Attrs);
-  
- }
- func__Z2ffv->setAttributes(func__Z2ffv_PAL);
- 
  Function* func_main = mod->getFunction("main");
  if (!func_main) {
  func_main = Function::Create(
-  /*Type=*/FuncTy_2,
+  /*Type=*/FuncTy_1,
   /*Linkage=*/GlobalValue::ExternalLinkage,
   /*Name=*/"main", mod); 
  func_main->setCallingConv(CallingConv::C);
@@ -109,49 +78,35 @@ Module* makeLLVMModule() {
  // Global Variable Declarations
 
  
+ GlobalVariable* gvar_int32_x = new GlobalVariable(/*Module=*/*mod, 
+ /*Type=*/IntegerType::get(mod->getContext(), 32),
+ /*isConstant=*/false,
+ /*Linkage=*/GlobalValue::ExternalLinkage,
+ /*Initializer=*/0, // has initializer, specified below
+ /*Name=*/"x");
+ gvar_int32_x->setAlignment(4);
+ 
  // Constant Definitions
+ ConstantInt* const_int32_2 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("0"), 10));
  ConstantInt* const_int32_3 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("1"), 10));
- ConstantInt* const_int32_4 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("2"), 10));
- ConstantInt* const_int32_5 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("3"), 10));
- ConstantInt* const_int32_6 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("0"), 10));
  
  // Global Variable Definitions
+ gvar_int32_x->setInitializer(const_int32_2);
  
  // Function Definitions
- 
- // Function: _Z2ffv (func__Z2ffv)
- {
-  
-  BasicBlock* label_entry = BasicBlock::Create(mod->getContext(), "entry",func__Z2ffv,0);
-  
-  // Block entry (label_entry)
-  AllocaInst* ptr_x = new AllocaInst(IntegerType::get(mod->getContext(), 32), "x", label_entry);
-  ptr_x->setAlignment(4);
-  StoreInst* void_7 = new StoreInst(const_int32_4, ptr_x, false, label_entry);
-  void_7->setAlignment(4);
-  ReturnInst::Create(mod->getContext(), label_entry);
-  
- }
  
  // Function: main (func_main)
  {
   
-  BasicBlock* label_entry_9 = BasicBlock::Create(mod->getContext(), "entry",func_main,0);
+  BasicBlock* label_entry = BasicBlock::Create(mod->getContext(), "entry",func_main,0);
   
-  // Block entry (label_entry_9)
-  AllocaInst* ptr_a = new AllocaInst(IntegerType::get(mod->getContext(), 32), "a", label_entry_9);
-  ptr_a->setAlignment(4);
-  AllocaInst* ptr_b = new AllocaInst(IntegerType::get(mod->getContext(), 32), "b", label_entry_9);
-  ptr_b->setAlignment(4);
-  AllocaInst* ptr_c = new AllocaInst(IntegerType::get(mod->getContext(), 32), "c", label_entry_9);
-  ptr_c->setAlignment(4);
-  StoreInst* void_10 = new StoreInst(const_int32_3, ptr_a, false, label_entry_9);
-  void_10->setAlignment(4);
-  StoreInst* void_11 = new StoreInst(const_int32_4, ptr_b, false, label_entry_9);
-  void_11->setAlignment(4);
-  StoreInst* void_12 = new StoreInst(const_int32_5, ptr_c, false, label_entry_9);
-  void_12->setAlignment(4);
-  ReturnInst::Create(mod->getContext(), const_int32_6, label_entry_9);
+  // Block entry (label_entry)
+  AllocaInst* ptr_retval = new AllocaInst(IntegerType::get(mod->getContext(), 32), "retval", label_entry);
+  ptr_retval->setAlignment(4);
+  StoreInst* void_4 = new StoreInst(const_int32_2, ptr_retval, false, label_entry);
+  StoreInst* void_5 = new StoreInst(const_int32_3, gvar_int32_x, false, label_entry);
+  void_5->setAlignment(4);
+  ReturnInst::Create(mod->getContext(), const_int32_2, label_entry);
   
  }
  

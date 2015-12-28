@@ -30,6 +30,7 @@ name {alpha}({alpha}|{dig})*
 "const" return const_tok;
 "int" return int_tok;
 "void" return void_tok;
+"extern" return extern_tok;
 "if"  return if_tok;
 "else" return else_tok;
 "while" return while_tok;

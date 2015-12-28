@@ -1,12 +1,9 @@
-const int c = 5;
+int x;
 
-void ff() {
-    int x = 2;
-}
 int main() {
-    const int a = 1, b = 2;
-    int c = a + b;
-    a = a + 1;
+    x = 1;
+    return 0;
+    //a = a + 1;
 }
 
 //int a;

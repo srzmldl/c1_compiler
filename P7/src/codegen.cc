@@ -22,6 +22,7 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/PassManager.h"
+#include "llvm/IR/Verifier.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Transforms/Scalar.h"
 
@@ -101,7 +102,7 @@ Value *IdentNode::Codegen() {
         return Builder.CreateLoad(V, (*name).c_str());
     V = NamedValuesGlobal[*name];
     if (V == 0)
-        ErrorV("can not find variable");
+        return ErrorV("can not find variable");
     return Builder.CreateLoad(V, (*name).c_str());
     //return 0;
 }
@@ -141,10 +142,10 @@ Value *UnaryExpNode::Codegen() {
 //return to do
 Value *BlockNode::Codegen() {
     ++nowLevel;
+    Value *tmp = 0;
     for (Node *p = blockList; p != NULL; p = p->next) {
-        Value *tmp = p->Codegen();//codegenDecl(p);
+        tmp = p->Codegen();//codegenDecl(p);
         //if (tmp == 0) tmp = codegenStmt(p);
-        if (p->next == NULL) return tmp;
     }
     for (; !varVector.empty() && varVector.back().level == nowLevel; varVector.pop_back()) {
         varLevelNode tmp = varVector.back();
@@ -152,7 +153,7 @@ Value *BlockNode::Codegen() {
         else NamedValues[tmp.name] = tmp.old;
     }
     --nowLevel;
-    return 0;
+    return tmp;
 }
 
 Value *CondNode::Codegen() {
@@ -187,7 +188,6 @@ Value *ConstDefEleNode::Codegen() {
         NamedValuesGlobal[*(ident->name)] = Foo;
         ConstantInt* const_int32 = ConstantInt::get(TheModule->getContext(), APInt(32, ((NumNode *)exp)->val, 10));
         Foo->setInitializer(const_int32);
-//        Builder.CreateStore
         return Foo;
     }
 }
@@ -221,10 +221,6 @@ Value *VarDefEleNoEquNode::Codegen() {
         Foo->setInitializer(const_int32);
         return Foo;
     }
-//Builder.CreateStore(FooVal, Foo);
-    //  ConstantInt *defval = ConstantInt::get(TheModule->getContext(), APInt(32, 0));
-    //AllocaInst *val = Builder.CreateAlloca(IntegerType::get(TheModule->getContext(), 32), 0, ident->name->c_str());
-    //Builder.CreateStore(defval, val);
 }
 
 Value *VarDefArrLimNoEquNode::Codegen() {
@@ -243,7 +239,6 @@ Value *VarDefEleEquNode::Codegen() {
         NamedValuesGlobal[*(ident->name)] = Foo;
         ConstantInt* const_int32 = ConstantInt::get(TheModule->getContext(), APInt(32, ((NumNode *)exp)->val, 10));
         Foo->setInitializer(const_int32);
-//        Builder.CreateStore
         return Foo;
     }
 }
@@ -263,6 +258,19 @@ Value *VarDeclNode::Codegen() {
 }
 
 Function *FuncDefNode::Codegen() {
+    if ((*ident->name) == "print") {
+        std::vector<Type*> func_print_args;
+        FunctionType *func_print_type =
+            FunctionType::get(Type::getInt32Ty(getGlobalContext()),func_print_args, true);
+        Function *func_print = Function::Create(
+            func_print_type, GlobalValue::ExternalLinkage, "print", TheModule);
+        
+        return func_print;
+        //Builder.CreateCall(func_print);
+        ConstantInt *RetVal = ConstantInt::get(getGlobalContext(), APInt(32, 0));
+        Builder.CreateRet(RetVal);
+    }
+    
     int arg_size = 0;
     std::vector<Type*> theFuncArgs(arg_size, Type::getInt32Ty(getGlobalContext()));
     FunctionType *theFuncType =
@@ -273,6 +281,8 @@ Function *FuncDefNode::Codegen() {
     BasicBlock *EntryBB = BasicBlock::Create(getGlobalContext(), "entry", theFunc);
     Builder.SetInsertPoint(EntryBB);
     block->Codegen();
+    ConstantInt *RetVal = ConstantInt::get(getGlobalContext(), APInt(32, 0));
+    Builder.CreateRet(RetVal);
     return theFunc;
 }
 //array TODO
@@ -280,6 +290,10 @@ Value *AssignStmtNode::Codegen() {
     Value *Val = exp->Codegen();
     if (Val == 0) return 0;
     Value *Variable = NamedValues[*(((IdentNode *)LVal)->name)];
+    if (!Variable)
+        Variable = NamedValuesGlobal[*(((IdentNode *)LVal)->name)];
+    if (!Variable)
+        ErrorV("can not find variable");
     Builder.CreateStore(Val, Variable);
     return Val;
 }
@@ -298,6 +312,7 @@ Value *CallStmtNode::Codegen() {
     //caller->setTailCall(false);
     //Builder.Insert(caller, "tmpcall");
     //return caller;
+
 }
 
 Value *IfStmtNode::Codegen() {
@@ -342,7 +357,7 @@ Value *IfStmtNode::Codegen() {
 }
 
 Value *IfElseStmtNode::Codegen() {
-    /*  Value *CondV = cond->Codegen();
+    Value *CondV = cond->Codegen();
     if (CondV == 0)
         return 0;
 
@@ -355,15 +370,15 @@ Value *IfElseStmtNode::Codegen() {
     // Create blocks for the then and else cases.  Insert the 'then' block at the
   // end of the function.
     BasicBlock *ThenBB =
-        BasicBlock::Create(getGlobalContext(), "if.then", TheFunction, 0);
-    BasicBlock *ElseBB = BasicBlock::Create(getGlobalContext(), "if.else", TheFunction, 0);
-    BasicBlock *MergeBB = BasicBlock::Create(getGlobalContext(), "if.end", TheFunction, 0);
+        BasicBlock::Create(getGlobalContext(), "if.then", TheFunction);
+    BasicBlock *ElseBB = BasicBlock::Create(getGlobalContext(), "if.else", TheFunction);
+    BasicBlock *MergeBB = BasicBlock::Create(getGlobalContext(), "if.end", TheFunction);
 
     Builder.CreateCondBr(CondV, ThenBB, ElseBB);
-    
+
     // Emit then value.
     Builder.SetInsertPoint(ThenBB);
-    
+
     Value *ThenV = thenStmt->Codegen();
     if (ThenV == 0)
         return 0;
@@ -393,10 +408,10 @@ Value *IfElseStmtNode::Codegen() {
     PN->addIncoming(ThenV, ThenBB);
     PN->addIncoming(ElseV, ElseBB);
     return PN;
-    */
 }
 
 Value *WhileStmtNode::Codegen() {
+    
 }
 
 Value *CommaStmtNode::Codegen() {

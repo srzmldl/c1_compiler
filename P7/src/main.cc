@@ -19,7 +19,7 @@ extern std::vector <Node*> nodeVec;
 extern int errorFlag;
 
 void generatellvmIR() {
-    //freopen("c1.ll", "w", stdout);
+    freopen("c1.ll", "w", stderr);
     root->Codegen();
 }
 

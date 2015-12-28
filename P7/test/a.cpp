@@ -1,19 +1,12 @@
-int a, b, c, d, e;
+const int c = 5;
 
-/*void dd() {
-    int h, cc, d, b;
-    h = cc;
-    d = d * b / (-6) + (-h);
-}*/
-
-void f(int x) {
-    x++;
+void ff() {
+    int x = 2;
 }
-
 int main() {
-    int a, b, c, d, e, f, g;
-    a = b + c;
-    c = d + e;
+    const int a = 1, b = 2;
+    int c = a + b;
+    a = a + 1;
 }
 
 //int a;

@@ -70,41 +70,21 @@
     - 最后BodyVal作为返回值
 * 为C1生成IR的思路
 ** 仿照Kaleidoscope，为C1的各种AST结点增加Codegen方法
-   - InputNode
-     + 扫描儿子链表,每一个节点是一个独立的(暂时)block.
-   - IdentNode
-     + 这里只生成表达式中变量的codegen,函数的ident单独在function的codegen里考虑
-   - NumNode
-     + 数字,返回常量
-   - BinaryExpNode
-     + 递归表达式左右两边,然后switch运算符做相应运算
-   - UnaryExpNode
-     + 先生成operand
-     + 如果是负号,则create一条0减去它的指令,否则直接返回OperandV
-   - BlockNode
-     + ast中,儿子是blockitem链表,依次遍历做codegen即可
-   - CondNode
-     + 先递归codegen左右表达式
-     + 再根据RelOp选择不同的create
-   - ConstDefEleNode TODO
-   - ConstDefArrLimNode TODO
-   - ConstDefArrNoLimNode TODO
-   - ConstDeclNode TODO
-   - VarDefEleNoEquNode TODO
-   - VarDefArrLimNoEquNode TODO
-   - VarDefEleEquNode
-   - VarDefArrNoLimEquNode
-   - VarDefArrLimEquNode
-   - VarDeclNode
-   - FuncDefNode
-   - AssignStmtNode
-   - CallStmtNode
-   - IfStmtNode
-   - IfElseStmtNode
-   - WhileStmtNode
-   - CommaStmtNode
-   - RefArrNode
-
+   重要部分的思路如下(做得比较挫,所以所有出现错误的时候会先报完错,然后再段错误):
+*** 全局变量和局部变量嵌套的处理
+    基本思想是进入block可以看成是一个树上的深度有限遍历.用一个栈维护当前层的变量.
+    - 全局变量 单独考虑
+    - 建立一个varLevelNode的struct作为varVector的元素
+      + level表示当前block的层次
+      + isNew表示这个是不是这一层的新节点
+      + name表示这个变量的名字
+      + old表示如果不是新节点,存旧节点用来恢复
+    - 每个block的codegen的时候,levelNow++
+    - 每次新定义变量的时候都要根据是否覆盖了老的局部变量,确定varLevelNode的各个成员的值.然后pushback到varVector里面
+    - 每次退出block的时候,把levelNow这一层的都从varVector中pop_back出来
+    - 最后levelNow--
+    - 全局变量,暂时不支持求值,所以全局变量初始化只支持数字,不支持表达式.应该可以通过AST求出来再赋值的.
+*** 
 ** 支持一维数组
 ** 支持外部函数声明
 ** IR dump 到文件中,学习llc,生成.o
@@ -117,3 +97,8 @@
   - clang++ a.cpp -S -emit-llvm  生成cpp文件的llvm IR
   - llc -march=cpp test.ll
   - llvm-as < a.ll | opt -analyze -view-cfg 查看程序流图
+* 问题
+** 全局变量初始化
+   因为全局变量和局部变量产生式没有区别.所以全局变量的值在文法中也没有求出来.解决办法如下.
+     - 在AST上对全局变量特殊处理,求出值来
+     - 统一在main函数里面store(好粗暴)

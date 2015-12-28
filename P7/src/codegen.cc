@@ -49,59 +49,42 @@ static IRBuilder<> Builder(getGlobalContext());
 FunctionPassManager FPM(TheModule);
 std::map<std::string, AllocaInst *> NamedValues;
 std::map<std::string, GlobalVariable *> NamedValuesGlobal;
-static int ifGlobal = 0;
+
+static int nowLevel = 0;
+struct varLevelNode {
+    int level;
+    bool isNew;
+    std::string name;
+    AllocaInst *old;
+    varLevelNode (int level = 0, bool isNew = true, std::string name = "", AllocaInst *old = NULL) : level(level), isNew(isNew), name(name), old(old) {}
+};
+
+static std::vector< varLevelNode > varVector;
 
 Value *ErrorV(const char *Str) {
     fprintf(stderr, "Error: %s\n", Str);
     return 0;
 }
-
-//static Module &TheModule = new Module()
-/*Value *codegenDecl(Node *x) {
-    if (x->type == VARDECL)
-        return ((VarDeclNode*)x)->Codegen();
-    else
-        return ((ConstDeclNode*)x)->Codegen();
-    return 0;
+void createNewMap(std::string name, AllocaInst* alloc) {
+    int isNew = 1;
+    AllocaInst *old = NULL;
+    if (NamedValues[name]) isNew = 0, old = NamedValues[name];
+    varVector.push_back(varLevelNode(nowLevel, isNew, name, old));
+    NamedValues[name] = alloc;
 }
 
-Value *codegenStmt(Node *x) {
-    switch (x->type) {
-    case ASSIGNSTMT:
-        return ((AssignStmtNode *)x)->Codegen();
-    case CALLSTMT:
-        return ((CallStmtNode*)x)->Codegen();
-    case IFSTMTNODE:
-        return ((IfStmtNode*)x)->Codegen();
-    case IFELSESTMTNODE:
-        return ((IfElseStmtNode*)x)->Codegen();
-    case WHILESTMT:
-        return ((WhileStmtNode*)x)->Codegen();
-    case COMMASTMT:
-        return ((CommaStmtNode*)x)->Codegen();
-    case BLOCK:
-        return ((BlockNode*)x)->Codegen();
-    default:return 0;
-    }
-}
-*/
 Value *InputNode::Codegen() {
     //freopen("c1.ll", "w", stderr);
     //FPM.add(createPromoteMemoryToRegisterPass());
     // Add other optimizations if you like.
     FPM.doInitialization();
-    ifGlobal = 0;
     for (std::vector<Node*>::iterator it  = comps.begin(); it != comps.end(); it++) {
         if (( *it)->type == FUNCDEF) {
             Function *funcTop = ((FuncDefNode*)(*it))->Codegen();
             FPM.run(*funcTop);
             //funcTop->dump();
         } else {
-            ifGlobal = 1;
             Value *valTop = (*it)->Codegen();
-            //valTop->dump();
-            ifGlobal = 0;
-            //return valTop;
         }
     }
     //verifyModule(*TheModule, PrintMessageAction);
@@ -114,8 +97,11 @@ Value *InputNode::Codegen() {
 
 Value *IdentNode::Codegen() {
     Value *V = NamedValues[*name];
+    if (V) 
+        return Builder.CreateLoad(V, (*name).c_str());
+    V = NamedValuesGlobal[*name];
     if (V == 0)
-      return ErrorV("Unknown variable name");
+        ErrorV("can not find variable");
     return Builder.CreateLoad(V, (*name).c_str());
     //return 0;
 }
@@ -152,14 +138,20 @@ Value *UnaryExpNode::Codegen() {
     if (op == '+') return OperandV;
     return Builder.CreateSub(ConstantInt::get(TheModule->getContext(), APInt(32, 0)), OperandV, "unopsub");
 }
-
 //return to do
 Value *BlockNode::Codegen() {
+    ++nowLevel;
     for (Node *p = blockList; p != NULL; p = p->next) {
         Value *tmp = p->Codegen();//codegenDecl(p);
         //if (tmp == 0) tmp = codegenStmt(p);
         if (p->next == NULL) return tmp;
     }
+    for (; !varVector.empty() && varVector.back().level == nowLevel; varVector.pop_back()) {
+        varLevelNode tmp = varVector.back();
+        if (tmp.isNew) NamedValues.erase(tmp.name);
+        else NamedValues[tmp.name] = tmp.old;
+    }
+    --nowLevel;
     return 0;
 }
 
@@ -184,6 +176,20 @@ Value *CondNode::Codegen() {
 
 Value *ConstDefEleNode::Codegen() {
     Value *val = exp->Codegen();
+    if (nowLevel > 0) {
+        AllocaInst *Foo = Builder.CreateAlloca(IntegerType::get(TheModule->getContext(), 32), 0, ident->name->c_str());
+        createNewMap(*(ident->name), Foo);
+        Builder.CreateStore(val, Foo, false);
+        return Foo;
+    } else {
+        GlobalVariable *Foo =
+            new GlobalVariable(*TheModule, IntegerType::get(TheModule->getContext(), 32), false, GlobalValue::ExternalLinkage, 0, ident->name->c_str());
+        NamedValuesGlobal[*(ident->name)] = Foo;
+        ConstantInt* const_int32 = ConstantInt::get(TheModule->getContext(), APInt(32, ((NumNode *)exp)->val, 10));
+        Foo->setInitializer(const_int32);
+//        Builder.CreateStore
+        return Foo;
+    }
 }
 
 Value *ConstDefArrLimNode::Codegen() {
@@ -193,15 +199,19 @@ Value *ConstDefArrNoLimNode::Codegen() {
 }
 
 Value *ConstDeclNode::Codegen() {
+    for (Node *p = constDefLink; p; p = p->next) {
+        //printf("%d\n", p->type);
+        Value *tmp = p->Codegen();
+        if (p->next == NULL) return tmp;
+    }
 }
 
 Value *VarDefEleNoEquNode::Codegen() {
     //Constant *FooVal = ConstantInt::get(TheModule->getContext(), APInt(32, 10));
     // printf("!!!");
-    if (!ifGlobal) {
+    if (nowLevel > 0) {
         AllocaInst *Foo = Builder.CreateAlloca(IntegerType::get(TheModule->getContext(), 32), 0, ident->name->c_str());
-        NamedValues[*(ident->name)] = Foo;
-        //  Foo->dump();
+        createNewMap(*(ident->name), Foo);
         return Foo;
     } else {
         GlobalVariable *Foo =
@@ -221,6 +231,21 @@ Value *VarDefArrLimNoEquNode::Codegen() {
 }
 
 Value *VarDefEleEquNode::Codegen() {
+    Value* val = exp->Codegen();
+    if (nowLevel > 0) {
+        AllocaInst *Foo = Builder.CreateAlloca(IntegerType::get(TheModule->getContext(), 32), 0, ident->name->c_str());
+        createNewMap(*(ident->name), Foo);
+        Builder.CreateStore(val, Foo, false);
+        return Foo;
+    } else {
+        GlobalVariable *Foo =
+            new GlobalVariable(*TheModule, IntegerType::get(TheModule->getContext(), 32), false, GlobalValue::ExternalLinkage, 0, ident->name->c_str());
+        NamedValuesGlobal[*(ident->name)] = Foo;
+        ConstantInt* const_int32 = ConstantInt::get(TheModule->getContext(), APInt(32, ((NumNode *)exp)->val, 10));
+        Foo->setInitializer(const_int32);
+//        Builder.CreateStore
+        return Foo;
+    }
 }
 
 Value *VarDefArrNoLimEquNode::Codegen() {
@@ -238,12 +263,14 @@ Value *VarDeclNode::Codegen() {
 }
 
 Function *FuncDefNode::Codegen() {
-    std::vector<Type*> theFuncArgs;
+    int arg_size = 0;
+    std::vector<Type*> theFuncArgs(arg_size, Type::getInt32Ty(getGlobalContext()));
     FunctionType *theFuncType =
-        FunctionType::get(Type::getVoidTy(TheModule->getContext()),
-                theFuncArgs, false);
-    Function *theFunc = Function::Create(theFuncType, GlobalValue::ExternalLinkage, ident->name->c_str(), TheModule);
-    BasicBlock *EntryBB = BasicBlock::Create(TheModule->getContext(), "entry", theFunc, 0);
+        FunctionType::get(Type::getInt32Ty(getGlobalContext()), theFuncArgs, false);
+
+    Function *theFunc = Function::Create(theFuncType, Function::ExternalLinkage, ident->name->c_str(), TheModule);
+//    theFunc->setCallingConv(CallingConv::C);
+    BasicBlock *EntryBB = BasicBlock::Create(getGlobalContext(), "entry", theFunc);
     Builder.SetInsertPoint(EntryBB);
     block->Codegen();
     return theFunc;
@@ -258,23 +285,29 @@ Value *AssignStmtNode::Codegen() {
 }
 
 Value *CallStmtNode::Codegen() {
-/*    ident->Codegen();
+    //ident->Codegen();
     Function *CalleeF = TheModule->getFunction(*(ident->name));
+    //CallInst *CallerF = CallInst::Create(CalleeF, "calltmp");
     if (CalleeF == 0)
         return ErrorV("Unknown function referenced");
     //if (CalleeF)
-    std::vector <Value *> ArgsV;
-    return Builder.CreateCall(CalleeF, ArgsV, "calltmp");*/
+    std::vector<Value*> theFuncArgs;
+    return Builder.CreateCall(CalleeF, theFuncArgs, "calltmp");
+    //CallInst* caller = CallInst::Create(CalleeF, "");
+    //caller->setCallingConv(CallingConv::C);
+    //caller->setTailCall(false);
+    //Builder.Insert(caller, "tmpcall");
+    //return caller;
 }
 
 Value *IfStmtNode::Codegen() {
-    /*
-    Value *CondV = cond->Codegen();
+    
+    /* Value *CondV = cond->Codegen();
     if (CondV == 0)
         return 0;
 
     // Convert condition to a bool by comparing equal to 0.0.
-    CondV = Builder.CreateFCmpONE(
+    CondV = Builder.CreateICmp(
         CondV, ConstantFP::get(getGlobalContext(), APFloat(true)), "ifcond");
 
     Function *TheFunction = Builder.GetInsertBlock()->getParent();
@@ -309,23 +342,22 @@ Value *IfStmtNode::Codegen() {
 }
 
 Value *IfElseStmtNode::Codegen() {
-    /*
-    Value *CondV = cond->Codegen();
+    /*  Value *CondV = cond->Codegen();
     if (CondV == 0)
         return 0;
 
     // Convert condition to a bool by comparing equal to 0.0.
-    CondV = Builder.CreateFCmpONE(
-        CondV, ConstantFP::get(getGlobalContext(), APInt(0)), "ifcond");
+    //CondV = Builder.CreateFCmpONE(
+    //  CondV, ConstantFP::get(getGlobalContext(), APInt(0)), "ifcond");
 
     Function *TheFunction = Builder.GetInsertBlock()->getParent();
     
     // Create blocks for the then and else cases.  Insert the 'then' block at the
   // end of the function.
     BasicBlock *ThenBB =
-        BasicBlock::Create(getGlobalContext(), "then", TheFunction);
-    BasicBlock *ElseBB = BasicBlock::Create(getGlobalContext(), "else");
-    BasicBlock *MergeBB = BasicBlock::Create(getGlobalContext(), "ifcont");
+        BasicBlock::Create(getGlobalContext(), "if.then", TheFunction, 0);
+    BasicBlock *ElseBB = BasicBlock::Create(getGlobalContext(), "if.else", TheFunction, 0);
+    BasicBlock *MergeBB = BasicBlock::Create(getGlobalContext(), "if.end", TheFunction, 0);
 
     Builder.CreateCondBr(CondV, ThenBB, ElseBB);
     
@@ -368,7 +400,7 @@ Value *WhileStmtNode::Codegen() {
 }
 
 Value *CommaStmtNode::Codegen() {
-    return 0;
+    return NULL;
 }
 
 Value *RefArrNode::Codegen() {

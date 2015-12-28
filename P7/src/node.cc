@@ -1,7 +1,6 @@
 #include "node.hh"
 #include "util.hh"
 
-
 void Node::setLoc(Loc* loc) {
     this->loc->first_line   = loc->first_line;
     this->loc->first_column = loc->first_column;

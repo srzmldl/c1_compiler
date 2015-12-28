@@ -1,12 +1,14 @@
+// comment the next line to hide debug info
+//#define DEBUG
 #include <stdio.h>
 #include <string>
 #include <bits/stdc++.h>
 #include "node.hh"
 #include "tok.hh"
-// comment the next line to hide debug info
-//#define DEBUG
 #include "util.hh"
 #include "global.hh"
+
+using namespace llvm;
 
 extern FILE *yyin;      // flex uses yyin as input file's pointer
 extern int yylex();     // lexer.cc provides yylex()
@@ -15,6 +17,11 @@ extern InputNode *root; // AST's root, shared with yyparse()
 extern std::vector <std::string> wholeFile;
 extern std::vector <Node*> nodeVec;
 extern int errorFlag;
+
+void generatellvmIR() {
+    //freopen("c1.ll", "w", stdout);
+    root->Codegen();
+}
 
 int main(int argc, char** argv)
 {
@@ -29,8 +36,8 @@ int main(int argc, char** argv)
     }
     yyin = infp;        // infp is initialized in handle_opt()
     yyparse();
-    
-    //cout << root->type << endl;
+    fclose(stdin);
+     //cout << root->type << endl;
     if (!errorFlag && root != NULL) {
         dumpfp = fopen("c1.dot", "w");
         if (dumpfp != NULL) {
@@ -43,5 +50,13 @@ int main(int argc, char** argv)
 
     //cout << root->head->head << endl;
     /*root->printast(stdout, 0);*/
+
+    if (!errorFlag && root != NULL) {
+        //llvmirfp = fopen("c1.ll", "w");
+        //if (llvmirfp != NULL) {
+        generatellvmIR();
+            //}
+    } else root = NULL;
+
     return 0;
 }

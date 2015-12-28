@@ -6,7 +6,7 @@
 #ifdef DEBUG
 #define debug(format, args...) fprintf(stdout, "\033[36m" format "\033[0m", ##args)
 #else
-#define debug(format, args...) 
+#define debug(format, args...)
 #endif
 
 // error info is in red

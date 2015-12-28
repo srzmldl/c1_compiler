@@ -9,6 +9,7 @@ char *dumpfile_name = NULL; // dump file's name
 FILE *infp = NULL;          // input file's pointer, default is stdin
 FILE *outfp = NULL;         // output file's pointer, default is stdout
 FILE *dumpfp = NULL;        // dump file's pointer
+FILE *llvmirfp = NULL;
 std::vector < std::string > wholeFile;
 std::vector <Node*> nodeVec;
 int errorFlag = 0;
@@ -18,7 +19,6 @@ void clearNode() {
     //std::cout << nodeVec.size() << endl;
     for (; !nodeVec.empty(); ) {
         //if (nodeVec.back())
-        
         // std::cout << (nodeVec.back())->type << endl;
         delete nodeVec.back();
         nodeVec.back() = NULL;

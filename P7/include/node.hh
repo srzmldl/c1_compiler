@@ -1,12 +1,19 @@
 #ifndef _NODE_HH_
 #define _NODE_HH_
 
+
 #include <stdio.h>
 #include <string>
 #include <vector>
 #include <iostream>
 #include "dumpdot.hh"
-using namespace std;
+#include <llvm/IR/Module.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/PassManager.h>
+#include <llvm/Transforms/Scalar.h>
+#include <llvm/Support/raw_ostream.h>
+
+using namespace llvm;
 
 typedef enum
 {
@@ -53,6 +60,7 @@ public:
     void setLoc(Loc* loc);
     //virtual //void printast(FILE *fp, int indent) = 0;
     virtual int dumpdot(DumpDOT *dumper) = 0;
+    virtual Value *Codegen() = 0;
     virtual ~Node() {
         // head = next = NULL;
         //loc = NULL;
@@ -61,7 +69,7 @@ public:
 };
 
 class InputNode : public Node {
-    vector<Node*> comps;
+    std::vector<Node*> comps;
 public:
     InputNode() {
         type = INPUT;
@@ -71,6 +79,7 @@ public:
     //~InputNode() {};
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
+    virtual Value *Codegen();
     void append(Node *compUnit);
 };
 
@@ -87,6 +96,7 @@ public:
         }; */
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
+    virtual Value *Codegen();
 };
 
 class NumNode : public Node {
@@ -99,6 +109,7 @@ public:
     };
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
+    virtual Value *Codegen();
 };
 
 class BinaryExpNode : public Node {
@@ -112,6 +123,7 @@ public:
     };
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
+    virtual Value *Codegen();
 };
 
 class UnaryExpNode : public Node {
@@ -125,27 +137,28 @@ public:
     };
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
+    virtual Value *Codegen();
 };
 
 //=================
-    
+
 class BlockNode : public Node {
 public:
     //void printast(FILE *fp, int indent);
-    int dumpdot(DumpDOT *dumper);
     Node *blockList;
     BlockNode(Node* blockList) : blockList(blockList){
         type = BLOCK;
         next = NULL;
         head = this;
     };
+    int dumpdot(DumpDOT *dumper);
+    virtual Value *Codegen();
 };
 
 //=========
 class CondNode : public Node {
 public:
     //void printast(FILE *fp, int indent);
-    int dumpdot(DumpDOT *dumper);
     Node *lhs, *rhs;
     std::string *RelOp;
     CondNode(Node *lhs, std::string *RelOp, Node *rhs) : lhs(lhs), rhs(rhs), RelOp(RelOp) {
@@ -153,6 +166,8 @@ public:
         next = NULL;
         head = this;
     }
+    int dumpdot(DumpDOT *dumper);
+    virtual Value *Codegen();
 };
 
 class ConstDefEleNode : public Node {
@@ -166,6 +181,7 @@ public:
         head = this;
         type = CONSTDEFELE;
     };
+    virtual Value *Codegen();
 };
 
 class ConstDefArrLimNode : public Node {
@@ -180,8 +196,9 @@ public:
         next = NULL;
         head = this;
     };
+    virtual Value *Codegen();
 };
-    
+
 class ConstDefArrNoLimNode : public Node {
 public:
     //void printast(FILE *fp, int indent);
@@ -194,8 +211,9 @@ public:
         next = NULL;
         head = this;
     };
+    virtual Value *Codegen();
 };
-    
+
 class ConstDeclNode : public Node {
 public:
     Node *constDefLink;
@@ -206,6 +224,7 @@ public:
     };
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
+    virtual Value *Codegen();
 };
 
 //var -> ident
@@ -220,6 +239,7 @@ public:
         head = this;
         type = VARDEFELENOEQU;
     };
+    virtual Value *Codegen();
 };
 
 //var -> ident[exp]
@@ -229,12 +249,12 @@ public:
     int dumpdot(DumpDOT *dumper);
     IdentNode *ident;
     Node *lim;
-    
     VarDefArrLimNoEquNode(IdentNode *ident, Node *lim) : ident(ident), lim(lim) {
         type = VARDEFARRLIMNOEQU;
         next = NULL;
         head = this;
     };
+    virtual Value *Codegen();
 };
 
 //var -> ident = Exp
@@ -250,6 +270,7 @@ public:
         type = VARDEFELEEQU;
         head = this;
     };
+    virtual Value *Codegen();
 };
 
 //var -> ident[] = {1, 2,3}
@@ -265,6 +286,7 @@ public:
         next = NULL;
         head = this;
     };
+    virtual Value *Codegen();
 };
 
 //var -> ident[Exp] = {1, 2, 4}
@@ -280,8 +302,9 @@ public:
         next = NULL;
         head = this;
     };
+    virtual Value *Codegen();
 };
-    
+
 class VarDeclNode : public Node {
 public:
     Node* varDefList;
@@ -292,6 +315,7 @@ public:
         };
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
+    virtual Value *Codegen();
 };
 
 //======================
@@ -308,7 +332,7 @@ public:
         head = this;
         type = FUNCDEF;
     };
-    
+    virtual Function *Codegen();
 };
 
 
@@ -316,6 +340,7 @@ class StmtNode : public Node {
 public:
     //virtual //void printast(FILE *fp, int indent) = 0;
     virtual int dumpdot(DumpDOT *dumper) = 0;
+    virtual Value *Codegen();
 };
 
 //stmt -> LVal = exp;
@@ -330,6 +355,7 @@ public:
         next = NULL;
         head = this;
     }
+    virtual Value *Codegen();
 };
 
 //stmt -> ident();
@@ -343,6 +369,7 @@ public:
         next = NULL;
         head = this;
     }
+    virtual Value *Codegen();
 };
 //stmt -> Block
 
@@ -358,6 +385,7 @@ public:
         next = NULL;
         head = this;
     }
+    virtual Value *Codegen();
 };
 
 //stmt -> if (Cond) stmt else stmt
@@ -372,6 +400,7 @@ public:
         next = NULL;
         head = this;
     }
+    virtual Value *Codegen();
 };
 
 //stmt -> while(Cond) Stmt
@@ -386,10 +415,10 @@ public:
         next = NULL;
         head = this;
     }
+    virtual Value *Codegen();
 };
 //stmt -> ;
 class CommaStmtNode : public Node {
-    
 public:
     //void printast(FILE *fp, int indent);
     int dumpdot(DumpDOT *dumper);
@@ -398,6 +427,7 @@ public:
         next = NULL;
         head = this;
     }
+    virtual Value *Codegen();
 };
 
 //LVal --> ident [Exp]
@@ -412,7 +442,7 @@ public:
         next = NULL;
         head = this;
     }
+    virtual Value *Codegen();
 };
-    
-    
+
 #endif

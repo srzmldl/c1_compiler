@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string>
 #include <string.h>
-#define DEBUG
+//#define DEBUG
 #include "node.hh"
 #include "util.hh"
 #include "global.hh"

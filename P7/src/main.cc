@@ -19,7 +19,6 @@ extern std::vector <Node*> nodeVec;
 extern int errorFlag;
 
 void generatellvmIR() {
-    freopen("c1.ll", "w", stderr);
     root->Codegen();
 }
 
@@ -29,6 +28,7 @@ int main(int argc, char** argv)
     if (handle_opt(argc, argv) == false)
         return 0;
     freopen(argv[1], "r", stdin);
+    freopen(argv[2], "w", stderr);
     std::string tmp;
     wholeFile.clear();
     for (; std::getline(std::cin, tmp); ) {

@@ -1,13 +1,21 @@
 * Files
 | doc.org      | 回答问题,思路文档                 |
-| README.org   | 这个文档                          |
-| ../Makefile  | Makefile编译                      |
-| ../bin/*     | 可执行文件                        |
+| README.org   | 这个文档                      |
+| ../Makefile  | Makefile编译                    |
+| ../bin/*     | 可执行文件                   |
 | ../config/*  | flex,bison对应的词法规则,语法规则 |
-| ../include/* | 各种头文件                        |
-| ../src/*     | main程序以及自动生成的代码        |
-| ../test/*    | 各种测试程序                      |
+| ../include/* | 各种头文件                   |
+| ../src/*     | main程序以及自动生成的代码 |
+| ../test/*    | 各种测试程序                |
+| ../run.sh    | 检查用的脚本                |
 
+* 注意事项以及检查方法
+  - 在跟目录下 `bash run.sh`
+  - 看到精心设计的test的输出结果.
+    + testGreat.c1 测试了各种基本语句,所有语句都包含有了测试. 输出如果是100递减的一串数表明正确.
+    + factorial.c 测试了递归函数调用,全局变量和局部变量的引用
+    + 
+  - make clean 删除不必要的内容
 * 完成情况一览
 | 7.1-1 Module,IRBuilder,符号表 | DONE |
 | 7.1-2 常量时函数名是get       | DONE |
@@ -15,7 +23,7 @@
 | 7.1-4 为什么需要ThenBB=***    | DONE |
 | 7.1-5 修改循环                | DONE |
 | 7.1-6 内存分配,操作符号表     | DONE |
-| 7.2-1 增加Codegen             | DONE
+| 7.2-1 增加Codegen             | DONE |
 | 7.2-2 一维数组                | TODO |
 | 7.2-3 外部函数声明            | DONE |
 | 7.2-4 IR dump,llc             | DONE |
@@ -28,4 +36,4 @@
 | 7.3-6 支持多维数组            | TODO |
 | 7.3-6 支持float类型           | TODO |
 
-* 注意事项以及检查方法
+  

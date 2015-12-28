@@ -224,6 +224,22 @@ Value *VarDefEleNoEquNode::Codegen() {
 }
 
 Value *VarDefArrLimNoEquNode::Codegen() {
+    int val = ((NumNode *)lim)->val;
+    ArrayType *TheArrayType = ArrayType::get(IntegerType::get(TheModule->getContext(), 32), val);
+    if (nowLevel > 0) {
+        AllocaInst* Foo = Builder.CreateAlloca(TheArrayType, 0, ident->name->c_str());
+        createNewMap(*(ident->name), Foo);
+        return Foo;
+    } else {
+        GlobalVariable *Foo =
+            new GlobalVariable(*TheModule, TheArrayType, false, GlobalValue::ExternalLinkage, 0, ident->name->c_str());
+        NamedValuesGlobal[*(ident->name)] = Foo;
+        //ConstantInt* const_int32 = ConstantInt::get(TheModule->getContext(), APInt(32, StringRef("0"), 10));
+        //Foo->setInitializer(const_int32);
+        return Foo;
+    }
+
+    //Builder.CreateGEP(ptr, ident->name->c_str())
 }
 
 Value *VarDefEleEquNode::Codegen() {
@@ -261,14 +277,14 @@ Function *FuncDefNode::Codegen() {
     if ((*ident->name) == "print") {
         std::vector<Type*> func_print_args;
         FunctionType *func_print_type =
-            FunctionType::get(Type::getInt32Ty(getGlobalContext()),func_print_args, true);
+            FunctionType::get(Type::getInt32Ty(getGlobalContext()),func_print_args, false);
         Function *func_print = Function::Create(
             func_print_type, GlobalValue::ExternalLinkage, "print", TheModule);
         
-        return func_print;
         //Builder.CreateCall(func_print);
         ConstantInt *RetVal = ConstantInt::get(getGlobalContext(), APInt(32, 0));
         Builder.CreateRet(RetVal);
+        return func_print;
     }
     
     int arg_size = 0;
@@ -281,6 +297,8 @@ Function *FuncDefNode::Codegen() {
     BasicBlock *EntryBB = BasicBlock::Create(getGlobalContext(), "entry", theFunc);
     Builder.SetInsertPoint(EntryBB);
     block->Codegen();
+    
+    EntryBB = Builder.GetInsertBlock();
     ConstantInt *RetVal = ConstantInt::get(getGlobalContext(), APInt(32, 0));
     Builder.CreateRet(RetVal);
     return theFunc;
@@ -289,12 +307,39 @@ Function *FuncDefNode::Codegen() {
 Value *AssignStmtNode::Codegen() {
     Value *Val = exp->Codegen();
     if (Val == 0) return 0;
-    Value *Variable = NamedValues[*(((IdentNode *)LVal)->name)];
-    if (!Variable)
-        Variable = NamedValuesGlobal[*(((IdentNode *)LVal)->name)];
-    if (!Variable)
-        ErrorV("can not find variable");
-    Builder.CreateStore(Val, Variable);
+    if (LVal->type == IDENT) {
+        Value *Variable = NamedValues[*(((IdentNode *)LVal)->name)];
+        if (!Variable)
+            Variable = NamedValuesGlobal[*(((IdentNode *)LVal)->name)];
+        if (!Variable)
+            ErrorV("can not find variable");
+        return Builder.CreateStore(Val, Variable);
+    } else {
+        std::string name = *(((RefArrNode*)LVal)->ident->name);
+           AllocaInst *ptr = NamedValues[name];
+    //if (!ptr) ptr = NamedValuesGlobal[name];
+           Value *val = ((RefArrNode*)LVal)->exp->Codegen();
+    
+    //CastInst* int64_idxprom = new SExtInst(val, IntegerType::get(TheModule->getContext(), 64), "idxprom");
+    //ConstantInt* const_int32_7 = ConstantInt::get(TheModule->getContext(), APInt(32, StringRef("0"), 10));
+    
+    //std::vector<Value*> ptr_arrayidx_indices;
+    // ptr_arrayidx_indices.push_back(const_int32_7);
+    //ptr_arrayidx_indices.push_back(int64_idxprom);
+           std::vector<llvm::Value *> tmp_args;
+           tmp_args.push_back(Builder.getInt32(0));
+           tmp_args.push_back(val);
+    //return ptr[val];
+           Value *tmp = Builder.CreateGEP(ptr, tmp_args, "getArr");
+           Builder.CreateStore(Val, tmp);
+        /*std::vector<Value*> ptr_arrayidx_indices;
+        ConstantInt* const_int32_5 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("0"), 10));
+
+        LoadInst* int32_12 = new LoadInst(ptr_c, "", false);
+        CastInst* int64_idxprom = new SExtInst(int32_12, IntegerType::get(mod->getContext(), 64), "idxprom");
+        ptr_arrayidx_indices.push_back(const_int32_5);
+        ptr_arrayidx_indices.push_back(int64_idxprom);*/
+    }
     return Val;
 }
 
@@ -306,7 +351,8 @@ Value *CallStmtNode::Codegen() {
         return ErrorV("Unknown function referenced");
     //if (CalleeF)
     std::vector<Value*> theFuncArgs;
-    return Builder.CreateCall(CalleeF, theFuncArgs, "calltmp");
+    return Builder.CreateCall(CalleeF);
+    //return Builder.CreateCall(CalleeF, theFuncArgs, "calltmp");
     //CallInst* caller = CallInst::Create(CalleeF, "");
     //caller->setCallingConv(CallingConv::C);
     //caller->setTailCall(false);
@@ -347,6 +393,8 @@ Value *IfStmtNode::Codegen() {
     // Emit else block.
     //TheFunction->getBasicBlockList().push_back(ElseBB);
     Builder.SetInsertPoint(MergeBB);
+    
+    //Builder.CreateBr(MergeBB);
     //PHINode *PN =
     //Builder.CreatePHI(Type::getDoubleTy(getGlobalContext()), 2, "iftmp");
 
@@ -395,19 +443,22 @@ Value *IfElseStmtNode::Codegen() {
     if (ElseV == 0)
         return 0;
     
+    //ElseBB = Builder.GetInsertBlock();
     Builder.CreateBr(MergeBB);
-    ElseBB = Builder.GetInsertBlock();
     
+    //Builder.CreateBr(MergeBB);
     // Emit merge block.
     // Codegen of 'Else' can change the current block, update ElseBB for the PHI.
     //TheFunction->getBasicBlockList().push_back(MergeBB);
+    //MergeBB = Builder.GetInsertBlock();
+    ElseBB = Builder.GetInsertBlock();
     Builder.SetInsertPoint(MergeBB);
     //PHINode *PN =
     //Builder.CreatePHI(Type::getDoubleTy(getGlobalContext()), 2, "iftmp");
 
-        //PN->addIncoming(ThenV, ThenBB);
-        //PN->addIncoming(ElseV, ElseBB);
-        //return PN;
+    //PN->addIncoming(ThenV, ThenBB);
+    //PN->addIncoming(ElseV, ElseBB);
+    //return PN;
     return 0;
 }
 
@@ -433,8 +484,8 @@ Value *WhileStmtNode::Codegen() {
     if (LoopV == 0)
         return 0;
 
-    Builder.CreateBr(CondBB);
     LoopV = Builder.GetInsertBlock();
+    Builder.CreateBr(CondBB);
 
     Builder.SetInsertPoint(WhileEndBB);
     return 0;
@@ -445,4 +496,25 @@ Value *CommaStmtNode::Codegen() {
 }
 
 Value *RefArrNode::Codegen() {
+    std::string name = *(ident->name);
+    AllocaInst *ptr = NamedValues[name];
+    //if (!ptr) ptr = NamedValuesGlobal[name];
+    Value *val = exp->Codegen();
+    
+    //CastInst* int64_idxprom = new SExtInst(val, IntegerType::get(TheModule->getContext(), 64), "idxprom");
+    //ConstantInt* const_int32_7 = ConstantInt::get(TheModule->getContext(), APInt(32, StringRef("0"), 10));
+    
+    //std::vector<Value*> ptr_arrayidx_indices;
+    // ptr_arrayidx_indices.push_back(const_int32_7);
+    //ptr_arrayidx_indices.push_back(int64_idxprom);
+    std::vector<llvm::Value *> tmp_args;
+    tmp_args.push_back(Builder.getInt32(0));
+    tmp_args.push_back(val);
+    //return ptr[val];
+    Value *tmp = Builder.CreateGEP(ptr, tmp_args, "getArr");
+    //Value *tmp = Builder.CreateGEP(ptr, 1);
+//    return tmp;
+    return Builder.CreateLoad(tmp, "refArr");
+    /*Values ptr_arrayidx = GetElementPtrInst::Create(ptr, ptr_arrayidx_indices, "arrayidx");
+      return new LoadInst(ptr_arrayidx, "", false, label_entry);*/
 }

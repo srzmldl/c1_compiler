@@ -1,0 +1,47 @@
+const int a = 3, b = 10;
+int c = 15;
+int output;
+
+/*void dd() {
+    int h, cc, d, b;
+    h = cc;
+    d = d * b / (-6) + (-h);
+}*/
+
+extern void print() {} 
+
+void main() {
+    int h[5];
+    int i = 0;
+    h[1] = 1;
+    h[2] = 2;
+    while (i <= 4) {
+      output = h[i];
+      print();
+      i = i + 1;
+}
+   /* int a, b, c, d, e = d + c;
+    const int h = a + b;
+    a = b + c;
+    c = d + e;
+    if (a == a) {
+    output = 100;
+    print();
+   }
+  output = 90;
+   print();
+   if (a != a) {    
+    output = 85;
+    print();
+}
+  output = 80;
+  print();
+  a = 70;
+  while (a >= 0) {
+   output = a;
+   a = a - 10;
+   print();
+}
+    int b = 2;
+    c = b + 1; */
+}

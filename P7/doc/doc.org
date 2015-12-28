@@ -84,19 +84,31 @@
     - 每次退出block的时候,把levelNow这一层的都从varVector中pop_back出来
     - 最后levelNow--
     - 全局变量,暂时不支持求值,所以全局变量初始化只支持数字,不支持表达式.应该可以通过AST求出来再赋值的.
-*** 
+    - 每次询问的时候,先询问NamedValues,再询问NamedValuesGlobal
+*** ifelse/while/函数定义,调用
+    - ifelse几乎和toy.cpp一模一样.
+    - while 的改动
+      + 分成了while.cond,while.loop,while.end三个block
+      + 先是跳到while.cond, 然后根据判断结果有分支.true跳到while.loop,false跳到while.end
+      + while.loop后面无条件跳到while.cond
+*** 其他简述
+    - 大部分都只有很短,很简单几句话.不一一描述.
+    - 注意IdentNode只有在表达式里面调用变量才会用这个codegen,函数,左值的都是在上一层特殊处理.具体查map的方式见全局变量和局部变量小节
 ** 支持一维数组
 ** 支持外部函数声明
+   - 文法中加入extern支持
+   - 用llc写一个extern测试,然后照着写
+   - 这里为了不大改文法. 仅对于print特殊处理
 ** IR dump 到文件中,学习llc,生成.o
+   不妨拿run.sh做说明
+   - llc 指定filetype为obj.由*.ll生成目标文件*.o
+   - clang连接上一步的.o和静态库,用来输出
 ** 静态库printf,scanf等.链接成可执行文件
+   - 通过llc写测试程序观察到extern的格式,再仿写.
 * 拓展C1
 ** 支持逻辑运算，短路
 ** 支持含参数的函数
 ** 支持函数带返回值
-* 常用命令一览
-  - clang++ a.cpp -S -emit-llvm  生成cpp文件的llvm IR
-  - llc -march=cpp test.ll
-  - llvm-as < a.ll | opt -analyze -view-cfg 查看程序流图
 * 问题
 ** 全局变量初始化
    因为全局变量和局部变量产生式没有区别.所以全局变量的值在文法中也没有求出来.解决办法如下.

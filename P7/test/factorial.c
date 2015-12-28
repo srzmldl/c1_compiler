@@ -1,6 +1,9 @@
 /*#include <stdio.h>
 */
 int n, ans;
+int output;
+
+extern void print() {}
 
 void factorial()
 {
@@ -11,9 +14,13 @@ void factorial()
         factorial();
     } else
     {
+        output = ans;
+        print();
   /*      // violate c1 to print
         printf("%d\n", ans);*/
     }
+    /*output = n;
+      print(); */
 }
 
 void main()
@@ -21,5 +28,10 @@ void main()
     n = 10;
     ans = 1; /*
     printf("%d! = ", n);
-   */ factorial();
+   */
+    factorial();
+    int a = 3, b = a - 1;
+    n = a + b;
+    ans = 1;
+    factorial();
 }

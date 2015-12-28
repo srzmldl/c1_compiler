@@ -35,17 +35,25 @@ int main(int argc, char**argv) {
 Module* makeLLVMModule() {
  // Module Construction
  Module* mod = new Module("a.ll", getGlobalContext());
- mod->setDataLayout("0x3548d20");
+ mod->setDataLayout("0x3448ca0");
  mod->setTargetTriple("x86_64-unknown-linux-gnu");
  
  // Type Definitions
- PointerType* PointerTy_0 = PointerType::get(IntegerType::get(mod->getContext(), 32), 0);
- 
- std::vector<Type*>FuncTy_1_args;
- FunctionType* FuncTy_1 = FunctionType::get(
+ std::vector<Type*>FuncTy_0_args;
+ FunctionType* FuncTy_0 = FunctionType::get(
   /*Result=*/IntegerType::get(mod->getContext(), 32),
-  /*Params=*/FuncTy_1_args,
+  /*Params=*/FuncTy_0_args,
   /*isVarArg=*/false);
+ 
+ PointerType* PointerTy_1 = PointerType::get(IntegerType::get(mod->getContext(), 32), 0);
+ 
+ ArrayType* ArrayTy_3 = ArrayType::get(IntegerType::get(mod->getContext(), 32), 10);
+ 
+ PointerType* PointerTy_2 = PointerType::get(ArrayTy_3, 0);
+ 
+ ArrayType* ArrayTy_5 = ArrayType::get(IntegerType::get(mod->getContext(), 32), 4);
+ 
+ PointerType* PointerTy_4 = PointerType::get(ArrayTy_5, 0);
  
  
  // Function Declarations
@@ -53,7 +61,7 @@ Module* makeLLVMModule() {
  Function* func_main = mod->getFunction("main");
  if (!func_main) {
  func_main = Function::Create(
-  /*Type=*/FuncTy_1,
+  /*Type=*/FuncTy_0,
   /*Linkage=*/GlobalValue::ExternalLinkage,
   /*Name=*/"main", mod); 
  func_main->setCallingConv(CallingConv::C);
@@ -78,21 +86,11 @@ Module* makeLLVMModule() {
  // Global Variable Declarations
 
  
- GlobalVariable* gvar_int32_output = new GlobalVariable(/*Module=*/*mod, 
- /*Type=*/IntegerType::get(mod->getContext(), 32),
- /*isConstant=*/false,
- /*Linkage=*/GlobalValue::ExternalLinkage,
- /*Initializer=*/0, // has initializer, specified below
- /*Name=*/"output");
- gvar_int32_output->setAlignment(4);
- 
  // Constant Definitions
- ConstantInt* const_int32_2 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("0"), 10));
- ConstantInt* const_int32_3 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("1"), 10));
- ConstantInt* const_int32_4 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("10"), 10));
+ ConstantInt* const_int32_6 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("1"), 10));
+ ConstantInt* const_int32_7 = ConstantInt::get(mod->getContext(), APInt(32, StringRef("0"), 10));
  
  // Global Variable Definitions
- gvar_int32_output->setInitializer(const_int32_2);
  
  // Function Definitions
  
@@ -100,40 +98,39 @@ Module* makeLLVMModule() {
  {
   
   BasicBlock* label_entry = BasicBlock::Create(mod->getContext(), "entry",func_main,0);
-  BasicBlock* label_while_cond = BasicBlock::Create(mod->getContext(), "while.cond",func_main,0);
-  BasicBlock* label_while_body = BasicBlock::Create(mod->getContext(), "while.body",func_main,0);
-  BasicBlock* label_while_end = BasicBlock::Create(mod->getContext(), "while.end",func_main,0);
   
   // Block entry (label_entry)
   AllocaInst* ptr_retval = new AllocaInst(IntegerType::get(mod->getContext(), 32), "retval", label_entry);
   ptr_retval->setAlignment(4);
-  AllocaInst* ptr_a = new AllocaInst(IntegerType::get(mod->getContext(), 32), "a", label_entry);
-  ptr_a->setAlignment(4);
-  StoreInst* void_5 = new StoreInst(const_int32_2, ptr_retval, false, label_entry);
-  StoreInst* void_6 = new StoreInst(const_int32_3, ptr_a, false, label_entry);
-  void_6->setAlignment(4);
-  BranchInst::Create(label_while_cond, label_entry);
-  
-  // Block while.cond (label_while_cond)
-  LoadInst* int32_8 = new LoadInst(ptr_a, "", false, label_while_cond);
-  int32_8->setAlignment(4);
-  ICmpInst* int1_cmp = new ICmpInst(*label_while_cond, ICmpInst::ICMP_SLE, int32_8, const_int32_4, "cmp");
-  BranchInst::Create(label_while_body, label_while_end, int1_cmp, label_while_cond);
-  
-  // Block while.body (label_while_body)
-  LoadInst* int32_10 = new LoadInst(ptr_a, "", false, label_while_body);
+  AllocaInst* ptr_a = new AllocaInst(ArrayTy_3, "a", label_entry);
+  ptr_a->setAlignment(16);
+  AllocaInst* ptr_b = new AllocaInst(ArrayTy_5, "b", label_entry);
+  ptr_b->setAlignment(16);
+  AllocaInst* ptr_c = new AllocaInst(IntegerType::get(mod->getContext(), 32), "c", label_entry);
+  ptr_c->setAlignment(4);
+  StoreInst* void_8 = new StoreInst(const_int32_7, ptr_retval, false, label_entry);
+  StoreInst* void_9 = new StoreInst(const_int32_7, ptr_c, false, label_entry);
+  void_9->setAlignment(4);
+  LoadInst* int32_10 = new LoadInst(ptr_c, "", false, label_entry);
   int32_10->setAlignment(4);
-  StoreInst* void_11 = new StoreInst(int32_10, gvar_int32_output, false, label_while_body);
-  void_11->setAlignment(4);
-  LoadInst* int32_12 = new LoadInst(ptr_a, "", false, label_while_body);
+  BinaryOperator* int32_add = BinaryOperator::Create(Instruction::Add, int32_10, const_int32_6, "add", label_entry);
+  CastInst* int64_idxprom = new SExtInst(int32_add, IntegerType::get(mod->getContext(), 64), "idxprom", label_entry);
+  std::vector<Value*> ptr_arrayidx_indices;
+  ptr_arrayidx_indices.push_back(const_int32_7);
+  ptr_arrayidx_indices.push_back(int64_idxprom);
+  Instruction* ptr_arrayidx = GetElementPtrInst::Create(ptr_b, ptr_arrayidx_indices, "arrayidx", label_entry);
+  LoadInst* int32_11 = new LoadInst(ptr_arrayidx, "", false, label_entry);
+  int32_11->setAlignment(4);
+  LoadInst* int32_12 = new LoadInst(ptr_c, "", false, label_entry);
   int32_12->setAlignment(4);
-  BinaryOperator* int32_sub = BinaryOperator::Create(Instruction::Sub, int32_12, const_int32_3, "sub", label_while_body);
-  StoreInst* void_13 = new StoreInst(int32_sub, ptr_a, false, label_while_body);
+  CastInst* int64_idxprom1 = new SExtInst(int32_12, IntegerType::get(mod->getContext(), 64), "idxprom1", label_entry);
+  std::vector<Value*> ptr_arrayidx2_indices;
+  ptr_arrayidx2_indices.push_back(const_int32_7);
+  ptr_arrayidx2_indices.push_back(int64_idxprom1);
+  Instruction* ptr_arrayidx2 = GetElementPtrInst::Create(ptr_a, ptr_arrayidx2_indices, "arrayidx2", label_entry);
+  StoreInst* void_13 = new StoreInst(int32_11, ptr_arrayidx2, false, label_entry);
   void_13->setAlignment(4);
-  BranchInst::Create(label_while_cond, label_while_body);
-  
-  // Block while.end (label_while_end)
-  ReturnInst::Create(mod->getContext(), const_int32_2, label_while_end);
+  ReturnInst::Create(mod->getContext(), const_int32_7, label_entry);
   
  }
  

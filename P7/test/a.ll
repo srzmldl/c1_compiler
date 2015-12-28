@@ -2,31 +2,24 @@
 target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
 
-@output = global i32 0, align 4
-
 ; Function Attrs: nounwind uwtable
 define i32 @main() #0 {
 entry:
   %retval = alloca i32, align 4
-  %a = alloca i32, align 4
+  %a = alloca [10 x i32], align 16
+  %b = alloca [4 x i32], align 16
+  %c = alloca i32, align 4
   store i32 0, i32* %retval
-  store i32 1, i32* %a, align 4
-  br label %while.cond
-
-while.cond:                                       ; preds = %while.body, %entry
-  %0 = load i32* %a, align 4
-  %cmp = icmp sle i32 %0, 10
-  br i1 %cmp, label %while.body, label %while.end
-
-while.body:                                       ; preds = %while.cond
-  %1 = load i32* %a, align 4
-  store i32 %1, i32* @output, align 4
-  %2 = load i32* %a, align 4
-  %sub = sub nsw i32 %2, 1
-  store i32 %sub, i32* %a, align 4
-  br label %while.cond
-
-while.end:                                        ; preds = %while.cond
+  store i32 0, i32* %c, align 4
+  %0 = load i32* %c, align 4
+  %add = add nsw i32 %0, 1
+  %idxprom = sext i32 %add to i64
+  %arrayidx = getelementptr inbounds [4 x i32]* %b, i32 0, i64 %idxprom
+  %1 = load i32* %arrayidx, align 4
+  %2 = load i32* %c, align 4
+  %idxprom1 = sext i32 %2 to i64
+  %arrayidx2 = getelementptr inbounds [10 x i32]* %a, i32 0, i64 %idxprom1
+  store i32 %1, i32* %arrayidx2, align 4
   ret i32 0
 }
 

@@ -15,6 +15,7 @@
     + testGreat.c1 测试了各种基本语句,所有语句都包含有了测试. 输出如果是100递减的一串数表明正确.
     + factorial.c 测试了递归函数调用,全局变量和局部变量的引用
     + pickMax.c 测试数组,取最大值
+    + bubblesort.c 测试数组和复杂结构.排序
   - make clean 删除不必要的内容
 * 完成情况一览
 | 7.1-1 Module,IRBuilder,符号表 | DONE |

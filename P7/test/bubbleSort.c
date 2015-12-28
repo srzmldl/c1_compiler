@@ -1,3 +1,5 @@
+int output;
+extern void print() {}
 
 void main()
 {
@@ -40,6 +42,9 @@ void main()
     while (i <= n - 1)
     {
         /*  printf("%d ", a[i]);
-         */i = i + 1;
+         */
+        output = a[i];
+        print();
+        i = i + 1;
     }
 }

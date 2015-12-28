@@ -17,3 +17,10 @@ echo 'picMax:'
 llc -filetype=obj bin/max.ll -o bin/max.o
 clang bin/max.o bin/libmy.a -o bin/max
 ./bin/max
+
+
+echo 'bubblesort'
+./bin/c1 test/bubbleSort.c bin/bub.ll
+llc -filetype=obj bin/bub.ll -o bin/bub.o
+clang bin/bub.o bin/libmy.a -o bin/bub
+./bin/bub

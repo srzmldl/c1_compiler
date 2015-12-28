@@ -433,7 +433,7 @@ public:
 //LVal --> ident [Exp]
 class RefArrNode : public Node {
 public:
-    //void printast(FILE *fp, int indent);
+    //void printast(FILE fp, int indent);
     int dumpdot(DumpDOT *dumper);
     IdentNode *ident;
     Node *exp;

@@ -193,9 +193,67 @@ Value *ConstDefEleNode::Codegen() {
 }
 
 Value *ConstDefArrLimNode::Codegen() {
+     
+    int val = 0;
+    for (Node *p = expLink; p; p = p->next) {
+        val++;
+    }
+    ArrayType *TheArrayType = ArrayType::get(IntegerType::get(TheModule->getContext(), 32), val);
+    if (nowLevel > 0) {
+        AllocaInst* Foo = Builder.CreateAlloca(TheArrayType, 0, ident->name->c_str());
+        createNewMap(*(ident->name), Foo);
+        Node *p = expLink;
+        for (int i = 0; i < val; ++i) {
+             std::vector<llvm::Value *> tmp_args;
+             tmp_args.push_back(Builder.getInt32(0));
+             tmp_args.push_back(Builder.getInt32(i));
+             //return ptr[val];
+             Value *Val = p->Codegen();
+             p = p->next;
+             Value *Variable = Builder.CreateGEP(Foo, tmp_args, "getArr");
+             Builder.CreateStore(Val, Variable);
+        }
+        return Foo;
+    } else {
+        GlobalVariable *Foo =
+            new GlobalVariable(*TheModule, TheArrayType, false, GlobalValue::ExternalLinkage, 0, ident->name->c_str());
+        NamedValuesGlobal[*(ident->name)] = Foo;
+        //ConstantInt* const_int32 = ConstantInt::get(TheModule->getContext(), APInt(32, StringRef("0"), 10));
+        //Foo->setInitializer(const_int32);
+        return Foo;
+    }
 }
 
 Value *ConstDefArrNoLimNode::Codegen() {
+     
+    int val = 0;
+    for (Node *p = expLink; p; p = p->next) {
+        val++;
+    }
+    ArrayType *TheArrayType = ArrayType::get(IntegerType::get(TheModule->getContext(), 32), val);
+    if (nowLevel > 0) {
+        AllocaInst* Foo = Builder.CreateAlloca(TheArrayType, 0, ident->name->c_str());
+        createNewMap(*(ident->name), Foo);
+        Node *p = expLink;
+        for (int i = 0; i < val; ++i) {
+             std::vector<llvm::Value *> tmp_args;
+             tmp_args.push_back(Builder.getInt32(0));
+             tmp_args.push_back(Builder.getInt32(i));
+             //return ptr[val];
+             Value *Val = p->Codegen();
+             p = p->next;
+             Value *Variable = Builder.CreateGEP(Foo, tmp_args, "getArr");
+             Builder.CreateStore(Val, Variable);
+        }
+        return Foo;
+    } else {
+        GlobalVariable *Foo =
+            new GlobalVariable(*TheModule, TheArrayType, false, GlobalValue::ExternalLinkage, 0, ident->name->c_str());
+        NamedValuesGlobal[*(ident->name)] = Foo;
+        //ConstantInt* const_int32 = ConstantInt::get(TheModule->getContext(), APInt(32, StringRef("0"), 10));
+        //Foo->setInitializer(const_int32);
+        return Foo;
+    }
 }
 
 Value *ConstDeclNode::Codegen() {
@@ -260,9 +318,67 @@ Value *VarDefEleEquNode::Codegen() {
 }
 
 Value *VarDefArrNoLimEquNode::Codegen() {
+    
+    int val = 0;
+    for (Node *p = expList; p; p = p->next) {
+        val++;
+    }
+    ArrayType *TheArrayType = ArrayType::get(IntegerType::get(TheModule->getContext(), 32), val);
+    if (nowLevel > 0) {
+        AllocaInst* Foo = Builder.CreateAlloca(TheArrayType, 0, ident->name->c_str());
+        createNewMap(*(ident->name), Foo);
+        Node *p = expList;
+        for (int i = 0; i < val; ++i) {
+             std::vector<llvm::Value *> tmp_args;
+             tmp_args.push_back(Builder.getInt32(0));
+             tmp_args.push_back(Builder.getInt32(i));
+             //return ptr[val];
+             Value *Val = p->Codegen();
+             p = p->next;
+             Value *Variable = Builder.CreateGEP(Foo, tmp_args, "getArr");
+             Builder.CreateStore(Val, Variable);
+        }
+        return Foo;
+    } else {
+        GlobalVariable *Foo =
+            new GlobalVariable(*TheModule, TheArrayType, false, GlobalValue::ExternalLinkage, 0, ident->name->c_str());
+        NamedValuesGlobal[*(ident->name)] = Foo;
+        //ConstantInt* const_int32 = ConstantInt::get(TheModule->getContext(), APInt(32, StringRef("0"), 10));
+        //Foo->setInitializer(const_int32);
+        return Foo;
+    }
 }
 
 Value *VarDefArrLimEquNode::Codegen() {
+    
+    int val = 0;
+    for (Node *p = expList; p; p = p->next) {
+        val++;
+    }
+    ArrayType *TheArrayType = ArrayType::get(IntegerType::get(TheModule->getContext(), 32), val);
+    if (nowLevel > 0) {
+        AllocaInst* Foo = Builder.CreateAlloca(TheArrayType, 0, ident->name->c_str());
+        createNewMap(*(ident->name), Foo);
+        Node *p = expList;
+        for (int i = 0; i < val; ++i) {
+             std::vector<llvm::Value *> tmp_args;
+             tmp_args.push_back(Builder.getInt32(0));
+             tmp_args.push_back(Builder.getInt32(i));
+             //return ptr[val];
+             Value *Val = p->Codegen();
+             p = p->next;
+             Value *Variable = Builder.CreateGEP(Foo, tmp_args, "getArr");
+             Builder.CreateStore(Val, Variable);
+        }
+        return Foo;
+    } else {
+        GlobalVariable *Foo =
+            new GlobalVariable(*TheModule, TheArrayType, false, GlobalValue::ExternalLinkage, 0, ident->name->c_str());
+        NamedValuesGlobal[*(ident->name)] = Foo;
+        //ConstantInt* const_int32 = ConstantInt::get(TheModule->getContext(), APInt(32, StringRef("0"), 10));
+        //Foo->setInitializer(const_int32);
+        return Foo;
+    }
 }
 
 Value *VarDeclNode::Codegen() {

@@ -316,22 +316,20 @@ Value *CallStmtNode::Codegen() {
 }
 
 Value *IfStmtNode::Codegen() {
-    
-    /* Value *CondV = cond->Codegen();
+    Value *CondV = cond->Codegen();
     if (CondV == 0)
         return 0;
 
     // Convert condition to a bool by comparing equal to 0.0.
-    CondV = Builder.CreateICmp(
-        CondV, ConstantFP::get(getGlobalContext(), APFloat(true)), "ifcond");
+    //CondV = Builder.CreateFCmpONE(
+    //  CondV, ConstantFP::get(getGlobalContext(), APInt(0)), "ifcond");
 
     Function *TheFunction = Builder.GetInsertBlock()->getParent();
-
     // Create blocks for the then and else cases.  Insert the 'then' block at the
   // end of the function.
     BasicBlock *ThenBB =
-        BasicBlock::Create(getGlobalContext(), "then", TheFunction);
-    BasicBlock *MergeBB = BasicBlock::Create(getGlobalContext(), "ifcont");
+        BasicBlock::Create(getGlobalContext(), "if.then", TheFunction);
+    BasicBlock *MergeBB = BasicBlock::Create(getGlobalContext(), "if.end", TheFunction);
 
     Builder.CreateCondBr(CondV, ThenBB, MergeBB);
 
@@ -341,19 +339,21 @@ Value *IfStmtNode::Codegen() {
     Value *ThenV = stmt->Codegen();
     if (ThenV == 0)
         return 0;
-    
+
     Builder.CreateBr(MergeBB);
     // Codegen of 'Then' can change the current block, update ThenBB for the PHI.
     ThenBB = Builder.GetInsertBlock();
-    
-    TheFunction->getBasicBlockList().push_back(MergeBB);
-    Builder.SetInsertPoint(MergeBB);
-    PHINode *PN =
-        Builder.CreatePHI(Type::getDoubleTy(getGlobalContext()), 2, "iftmp");
 
-    PN->addIncoming(ThenV, ThenBB);
-    //PN->addIncoming(ElseV, ElseBB);
-    return PN; */
+    // Emit else block.
+    //TheFunction->getBasicBlockList().push_back(ElseBB);
+    Builder.SetInsertPoint(MergeBB);
+    //PHINode *PN =
+    //Builder.CreatePHI(Type::getDoubleTy(getGlobalContext()), 2, "iftmp");
+
+        //PN->addIncoming(ThenV, ThenBB);
+        //PN->addIncoming(ElseV, ElseBB);
+        //return PN;
+    return 0;
 }
 
 Value *IfElseStmtNode::Codegen() {
@@ -388,7 +388,7 @@ Value *IfElseStmtNode::Codegen() {
     ThenBB = Builder.GetInsertBlock();
     
     // Emit else block.
-    TheFunction->getBasicBlockList().push_back(ElseBB);
+    //TheFunction->getBasicBlockList().push_back(ElseBB);
     Builder.SetInsertPoint(ElseBB);
     
     Value *ElseV = elseStmt->Codegen();
@@ -400,18 +400,44 @@ Value *IfElseStmtNode::Codegen() {
     
     // Emit merge block.
     // Codegen of 'Else' can change the current block, update ElseBB for the PHI.
-    TheFunction->getBasicBlockList().push_back(MergeBB);
+    //TheFunction->getBasicBlockList().push_back(MergeBB);
     Builder.SetInsertPoint(MergeBB);
-    PHINode *PN =
-        Builder.CreatePHI(Type::getDoubleTy(getGlobalContext()), 2, "iftmp");
+    //PHINode *PN =
+    //Builder.CreatePHI(Type::getDoubleTy(getGlobalContext()), 2, "iftmp");
 
-    PN->addIncoming(ThenV, ThenBB);
-    PN->addIncoming(ElseV, ElseBB);
-    return PN;
+        //PN->addIncoming(ThenV, ThenBB);
+        //PN->addIncoming(ElseV, ElseBB);
+        //return PN;
+    return 0;
 }
 
 Value *WhileStmtNode::Codegen() {
+    Function *TheFunction = Builder.GetInsertBlock()->getParent();
     
+    BasicBlock *CondBB =
+        BasicBlock::Create(getGlobalContext(), "while.cond", TheFunction);
+    BasicBlock *LoopBB =
+        BasicBlock::Create(getGlobalContext(), "while.loop", TheFunction);
+    BasicBlock *WhileEndBB =
+        BasicBlock::Create(getGlobalContext(), "while.end", TheFunction);
+    
+    Builder.CreateBr(CondBB);
+    Builder.SetInsertPoint(CondBB);
+    Value *CondV = cond->Codegen();
+    Builder.CreateCondBr(CondV, LoopBB, WhileEndBB);
+
+    // Emit then value.
+    Builder.SetInsertPoint(LoopBB);
+
+    Value *LoopV = stmt->Codegen();
+    if (LoopV == 0)
+        return 0;
+
+    Builder.CreateBr(CondBB);
+    LoopV = Builder.GetInsertBlock();
+
+    Builder.SetInsertPoint(WhileEndBB);
+    return 0;
 }
 
 Value *CommaStmtNode::Codegen() {

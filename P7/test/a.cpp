@@ -1,7 +1,12 @@
-int x;
+int output;
 
 int main() {
-    x = 1;
+    int a = 1;
+    while (a <= 10) {
+        output = a;
+        a = a - 1;
+    }
+
     return 0;
     //a = a + 1;
 }

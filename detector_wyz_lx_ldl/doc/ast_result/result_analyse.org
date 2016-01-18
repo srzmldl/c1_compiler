@@ -1,0 +1,22 @@
+* 评测方法
+  - 第三方测试程序 http://www.ida.liu.se/~erini02/detect/bench/
+  - 三十对程序(存在交叉抄袭),与moss,jplag的比较见bigDiff.txt
+  - 三种方法任意两种相差小于等于10,并且至少有一个答案大于等于30%则输出
+  
+* 结果展示
+  - 30*30比较中,有53对出现了上述差异
+  - 其中17对结构改变,底层枝叶小改动出现了差异
+    + AST 100%检测
+    + MOSS全部都在50%左右的相似度,结构变化无法处理
+    + JPLAG 11组测出100%,3组90%以上(就是我忽略小枝叶的部分),其余50%左右
+  - 7对AST和MOSS/JPLAG中的一个检测除了相似,另一个被打败
+  - 18对,AST is the only Winner!!!
+  - 6对,AST和JPLAG是0,MOSS 34%. 加了很多if else
+  - 1对,AST和MOSS 0, JPLAG 41%, 加了while.if,else换了顺序
+  - 2对,AST is the only loser
+    + 表达式加入了很多无用的0
+    + 加入了巨大的无用子树
+    + 考虑自顶向下做模糊匹配(暂时没有想到算法)
+    + 加入了无用的大函数
+  - 2对,MOSS only winner
+    + 巨大的if else,换顺序

@@ -435,10 +435,10 @@ Value *AssignStmtNode::Codegen() {
            AllocaInst *ptr = NamedValues[name];
     //if (!ptr) ptr = NamedValuesGlobal[name];
            Value *val = ((RefArrNode*)LVal)->exp->Codegen();
-    
+
     //CastInst* int64_idxprom = new SExtInst(val, IntegerType::get(TheModule->getContext(), 64), "idxprom");
     //ConstantInt* const_int32_7 = ConstantInt::get(TheModule->getContext(), APInt(32, StringRef("0"), 10));
-    
+
     //std::vector<Value*> ptr_arrayidx_indices;
     // ptr_arrayidx_indices.push_back(const_int32_7);
     //ptr_arrayidx_indices.push_back(int64_idxprom);

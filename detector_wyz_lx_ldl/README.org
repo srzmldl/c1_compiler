@@ -1,0 +1,28 @@
+* Files
+| readme.org  | thisfile           |
+| doc/        | document           |
+| src/cpp     | cpp codes          |
+| src/py      | python codes       |
+| bin/        | executable program |
+| lib/        | generated lib      |
+| samples/ast | ast samples        |
+| samples/cfg | cfg samples        |
+
+* how to use
+  - please read doc/readme
+  - samples/ast/run.sh for AST Plagiarism Detector
+  - samples/cfg/run.sh for CFG code clone detector
+
+* Members
+  - Yanzhao Wu : CFG/PDG
+  - Luo Xiao: CFG/PDG
+  - Dinglong Li: AST
+* Function
+  - Copy-pasted codes detecting
+    In software engineering, it is typical for programmer to copy a portion of codes to implement a similar function to another place. However, this situation tends to result in potential bugs, such as forgetting to rename a variable, which might lead to an illegal reference. Additionally, this behaviour may as well increase the difficulty of maintaining a project. Since the copied codes may contain bugs, it gets harder to correcting all of them.
+  - Plagiarism in codes detecting
+    Detecting this plagiarism is also required to find similar codes. Moreover people who plagiarize may change some variable names or the structure
+* Idea
+  - Moss and JPlag are the most popular systems for detecting software plagiarism. But they are limited on the lexical analysis level. Moss does string analyze using /local document fingerprinting algorithms/ with /winnowing/ to optimize it, while JPlag does token analyze by finding LCS over and over again.
+  - There are many papers about plagiarism detecting based on lexical analysis or syntactic analysis seperately. We want to bring them together. It means, we will implement some AST (abstract syntax tree) similarity algorithm and make good use of Moss/JPlag API to help the detecting process. Finally, we will do some experiment to trade off the weight of syntactic part and lexical part.
+  - In a short term, we will implement semantic analysis using CFG/PDG for code clone detecting independently. Actually, it's not reasonably enough to use semantic analysis in plagiarism detector of student course code. But it is still possible that the experiments in the future will proof the haughty assertion is ridiculous.

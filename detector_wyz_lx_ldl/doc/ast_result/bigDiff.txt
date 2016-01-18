@@ -1,0 +1,61 @@
+AST/Moss/JPlag:
+orig1.cpp vs. plag1.cpp : 100/55/57
+orig2.cpp vs. plag2.cpp : 100/57/53
+orig3.cpp vs. plag3.cpp : 100/40/94
+orig3.cpp vs. plag4.cpp : 100/54/100
+orig3.cpp vs. plag10.cpp : 100/68/100
+orig4.cpp vs. plag3.cpp : 100/40/94
+orig4.cpp vs. plag4.cpp : 100/54/100
+orig4.cpp vs. plag10.cpp : 100/68/100
+orig10.cpp vs. plag3.cpp : 100/40/94
+orig10.cpp vs. plag4.cpp : 100/54/100
+orig10.cpp vs. plag10.cpp : 100/68/100
+orig13.cpp vs. plag1.cpp : 100/55/57
+orig14.cpp vs. plag14.cpp : 100/52/100
+orig29.cpp vs. plag29.cpp : 100/35/100
+orig29.cpp vs. plag30.cpp : 100/48/100
+orig30.cpp vs. plag29.cpp : 100/35/100
+orig30.cpp vs. plag30.cpp : 100/48/100
+
+orig18.cpp vs. plag23.cpp : 65/21/49
+orig19.cpp vs. plag23.cpp : 65/21/49
+orig20.cpp vs. plag23.cpp : 65/21/49
+orig21.cpp vs. plag23.cpp : 65/21/49
+orig23.cpp vs. plag23.cpp : 65/21/49
+orig25.cpp vs. plag14.cpp : 96/42/93
+orig26.cpp vs. plag23.cpp : 65/21/49
+
+orig19.cpp vs. plag18.cpp : 56/14/36
+orig19.cpp vs. plag19.cpp : 65/15/24
+orig18.cpp vs. plag18.cpp : 56/14/36
+orig18.cpp vs. plag19.cpp : 65/15/24
+orig20.cpp vs. plag18.cpp : 56/14/36
+orig20.cpp vs. plag19.cpp : 65/15/24
+orig19.cpp vs. plag26.cpp : 46/14/32
+orig18.cpp vs. plag26.cpp : 46/14/32
+orig21.cpp vs. plag18.cpp : 56/14/36
+orig21.cpp vs. plag19.cpp : 65/15/24
+orig20.cpp vs. plag26.cpp : 46/14/32
+orig21.cpp vs. plag26.cpp : 46/14/32
+orig23.cpp vs. plag18.cpp : 56/14/36
+orig23.cpp vs. plag19.cpp : 65/15/24
+orig26.cpp vs. plag18.cpp : 56/14/36
+orig26.cpp vs. plag19.cpp : 65/15/24
+orig26.cpp vs. plag26.cpp : 46/14/32
+orig23.cpp vs. plag26.cpp : 46/14/32
+
+orig16.cpp vs. plag16.cpp : 0/0/41
+orig18.cpp vs. plag20.cpp : 0/34/0
+orig19.cpp vs. plag20.cpp : 0/34/0
+orig20.cpp vs. plag20.cpp : 0/34/0
+orig21.cpp vs. plag20.cpp : 0/34/0
+orig26.cpp vs. plag20.cpp : 0/34/0
+orig23.cpp vs. plag20.cpp : 0/34/0
+
+
+orig14.cpp vs. plag25.cpp : 18/42/25
+orig25.cpp vs. plag25.cpp : 17/55/23
+
+orig22.cpp vs. plag22.cpp : 19/47/100
+orig24.cpp vs. plag13.cpp : 0/53/47
+

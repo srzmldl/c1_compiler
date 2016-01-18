@@ -1,0 +1,51 @@
+-------------------------------AST------------------------------------------------
+AST:
+* how to use
+  - 代码写在同一个文件里了,读者们受累了
+  - cd到 detector/samples/ast
+  - bash run.sh 即可得到输出结果，运行了ast两次
+    + 对比orig23.cpp和plag23.cpp
+    + 对比所有文件对,输出到bigDiff.txt(大差异结果)和result.txt(全部结果)
+  - 如果想单独比较两个文件,则  
+    + cd 到bin
+    + ./ast nocom <file1> <file2>
+    + 输出两文件相似度(小数,完全一样为1)
+
+* 算法
+  - 忽略底层节点,忽略小改动
+  - 树的dfs序最小表示,解决顺序调换问题
+  - 5个hash,只有均相等算子树相等.再冲突就可以买彩票了
+  - 然后设计函数计算相似度:子树匹配最大相似度,hash完全相等的给权重是,相似意义下匹配子树的两倍
+  - 任意两组 <parent,son> 间最多一次.最坏O(N^2), 此时两个星状图
+
+* 结果分析
+  - 见 ast/result_analyse.org
+  - 详细结果列表见ast/result/
+    + bigDiff.txt 为差异较大的文件对
+    + result.txt为所有比较结果
+
+--------------------------------CFG-----------------------------------------------
+CFG
+Files:
+	dir: detector/src/py/ 
+	     detector/src/cpp/PrintCFG_BFS.cpp
+	     (LLVM Building files are required for PrintCFG_BFS.so)
+	
+Install Dependence:
+	1. Change LLVM_HOME to LLVM building Path in /detector/src/cpp/Makefile
+
+	2. Install by Pip
+		$ pip install numpy
+		$ pip install matplotlib
+
+	3. Install on Ubuntu
+		$ sudo apt-get install python-numpy
+		$ sudo apt-get install python-matplotlib
+
+User configuration:
+	User can set parameter for finding similar common sequence in config.py.
+	distance : methods to calculate the similarity between two basic block
+	threshhold : the minimun similarity between two similar basic blocks
+	min_seq_length : minmum number of similar basic block to cnostruct a commen sequence
+	max_gap_length : how many BB can be skip once in a commen sequence
+

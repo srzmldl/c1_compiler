@@ -1,5 +1,5 @@
 for file in ../src/*.c
-do 
+do
     name=${file%.*}
     gcc -o $name $file
     echo $name
